@@ -1,5 +1,8 @@
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 526c77a5c9011086213b8495555c993a6dd336ab
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -17,6 +20,7 @@ import type { PortfolioData, Skill, Project, ProjectService } from './types';
 import { DEFAULT_PORTFOLIO_DATA } from './constants';
 import { supabase } from './lib/supabaseClient';
 
+<<<<<<< HEAD
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
     return savedServices
         .filter(s => s && typeof s === 'object' && 'name' in s)
@@ -77,19 +81,80 @@ const mergeContentData = (saved: any, defaults: PortfolioData): PortfolioData =>
         merged.projectsData = s.projectsData
             .filter((item: any) => item && typeof item === 'object' && 'title' in item)
             .map((savedProject: any, index: number) => {
+=======
+const mergeContentData = (saved: any, defaults: PortfolioData): PortfolioData => {
+    // Start with defaults, spread saved on top for top-level properties
+    const merged = { ...defaults, ...saved };
+
+    // Deep merge nested objects to prevent them from being wiped out if not in saved data
+    merged.contactInfo = { ...defaults.contactInfo, ...(saved.contactInfo || {}) };
+    merged.socialLinks = { ...defaults.socialLinks, ...(saved.socialLinks || {}) };
+
+    // Handle simple arrays, ensuring they are arrays of strings.
+    merged.heroRoles = (Array.isArray(saved.heroRoles) && saved.heroRoles.every((r: any) => typeof r === 'string'))
+        ? saved.heroRoles
+        : defaults.heroRoles;
+
+    // Robustly merge arrays of objects, filtering invalid items and restoring non-serializable data (icons)
+    if (Array.isArray(saved.expertiseAreas)) {
+        merged.expertiseAreas = saved.expertiseAreas
+            .filter(item => item && typeof item === 'object' && 'name' in item) // Ensure item is a valid object
+            .map((savedArea) => {
+                const defaultArea = defaults.expertiseAreas[0] || { name: '', description: '' };
+                return { ...defaultArea, ...savedArea };
+            });
+    } else {
+        merged.expertiseAreas = defaults.expertiseAreas;
+    }
+
+    if (Array.isArray(saved.skillsData)) {
+        merged.skillsData = saved.skillsData
+            .filter(item => item && typeof item === 'object' && 'name' in item)
+            .map((savedSkill, index) => {
+                const defaultSkill = defaults.skillsData[index] || defaults.skillsData[0];
+                if (!defaultSkill) return null;
+                return { ...defaultSkill, ...savedSkill, icon: defaultSkill.icon };
+            }).filter((s): s is Skill => s !== null); // Filter out any nulls
+    } else {
+        merged.skillsData = defaults.skillsData;
+    }
+
+    if (Array.isArray(saved.projectsData)) {
+        merged.projectsData = saved.projectsData
+            .filter(item => item && typeof item === 'object' && 'title' in item)
+            .map((savedProject, index) => {
+>>>>>>> 526c77a5c9011086213b8495555c993a6dd336ab
                 const defaultProject = defaults.projectsData[index] || defaults.projectsData[0];
                 if (!defaultProject) return null;
 
                 let mergedServices = defaultProject.services || [];
                 if (Array.isArray(savedProject.services)) {
+<<<<<<< HEAD
                     mergedServices = mergeProjectServices(savedProject.services, defaultProject.services || []);
+=======
+                    mergedServices = savedProject.services
+                        .filter(s => s && typeof s === 'object' && 'name' in s)
+                        .map((savedService, serviceIndex) => {
+                            const defaultService = (defaultProject.services || [])[serviceIndex] || (defaultProject.services || [])[0];
+                            if (!defaultService) return null;
+                            return { ...defaultService, ...savedService, icon: defaultService.icon };
+                        }).filter((s): s is ProjectService => s !== null);
+>>>>>>> 526c77a5c9011086213b8495555c993a6dd336ab
                 }
 
                 return { ...defaultProject, ...savedProject, services: mergedServices };
             }).filter((p): p is Project => p !== null);
+<<<<<<< HEAD
     }
     
     return merged;
+=======
+    } else {
+        merged.projectsData = defaults.projectsData;
+    }
+    
+    return merged as PortfolioData;
+>>>>>>> 526c77a5c9011086213b8495555c993a6dd336ab
 };
 
 
@@ -254,4 +319,8 @@ const App: React.FC = () => {
     );
 };
 
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> 526c77a5c9011086213b8495555c993a6dd336ab
