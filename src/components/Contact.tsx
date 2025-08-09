@@ -43,8 +43,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
         setStatus('loading');
 
         try {
-            // To make this work, create a table in Supabase called 'messages' with columns:
-            // id (PK), created_at, name, email, subject, message
+            // This saves the form data to your 'messages' table in Supabase.
             const { error } = await supabase
                 .from('messages')
                 .insert([formData]);
@@ -114,7 +113,10 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                             </div>
                             <div>
                                 <button type="submit" disabled={status === 'loading'} className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                                    {status === 'loading' ? 'Sending...' : 'Send Message'}
+                                    {status === 'loading' && 'Sending...'}
+                                    {status === 'idle' && 'Send Message'}
+                                    {status === 'success' && 'Message Sent!'}
+                                    {status === 'error' && 'Retry Sending'}
                                 </button>
                             </div>
                             {status === 'success' && (
