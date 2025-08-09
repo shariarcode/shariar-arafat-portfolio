@@ -1,6 +1,8 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
 import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon } from './Icons';
+import { supabase } from '../lib/supabaseClient';
 
 interface ContactProps {
     content: PortfolioData;
@@ -27,6 +29,39 @@ const SocialProfile: React.FC<{ icon: React.ReactNode; name: string; href: strin
 
 const Contact: React.FC<ContactProps> = ({ content }) => {
     const { contactInfo, socialLinks } = content;
+    const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (status === 'loading') return;
+        setStatus('loading');
+
+        try {
+            // To make this work, create a table in Supabase called 'messages' with columns:
+            // id (PK), created_at, name, email, subject, message
+            const { error } = await supabase
+                .from('messages')
+                .insert([formData]);
+
+            if (error) {
+                throw error;
+            }
+
+            setStatus('success');
+            setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
+            setTimeout(() => setStatus('idle'), 5000); // Reset status after 5 seconds
+        } catch (error) {
+            console.error('Error submitting message:', error);
+            setStatus('error');
+            setTimeout(() => setStatus('idle'), 5000); // Reset status after 5 seconds
+        }
+    };
 
     return (
         <section id="contact" className="py-20 scroll-mt-20">
@@ -58,30 +93,36 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                         </div>
                     </div>
                     <div className="lg:w-2/3">
-                        <form className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-6">
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                                    <input type="text" id="name" name="name" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your name"/>
+                                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your name"/>
                                 </div>
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                                    <input type="email" id="email" name="email" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your email"/>
+                                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your email"/>
                                 </div>
                             </div>
                             <div>
                                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
-                                <input type="text" id="subject" name="subject" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Subject of your message"/>
+                                <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Subject of your message"/>
                             </div>
                              <div>
                                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
-                                <textarea id="message" name="message" rows={5} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your message"></textarea>
+                                <textarea id="message" name="message" rows={5} value={formData.message} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your message"></textarea>
                             </div>
                             <div>
-                                <button type="submit" className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-colors duration-300">
-                                    Send Message
+                                <button type="submit" disabled={status === 'loading'} className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                    {status === 'loading' ? 'Sending...' : 'Send Message'}
                                 </button>
                             </div>
+                            {status === 'success' && (
+                                <p className="mt-4 text-center text-green-500 dark:text-green-400">Message sent successfully! Thank you for reaching out.</p>
+                            )}
+                            {status === 'error' && (
+                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">Sorry, something went wrong. Please try again later.</p>
+                            )}
                         </form>
                     </div>
                 </div>
