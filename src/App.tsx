@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -76,7 +77,7 @@ const mergeContentData = (saved: any, defaults: PortfolioData): PortfolioData =>
     if (Array.isArray(s.projectsData)) {
         merged.projectsData = s.projectsData
             .filter((item: any) => item && typeof item === 'object' && 'title' in item)
-            .map((savedProject: any, index: number) => {
+            .map((savedProject: any, index: number): Project | null => {
                 const defaultProject = defaults.projectsData[index] || defaults.projectsData[0];
                 if (!defaultProject) return null;
 
