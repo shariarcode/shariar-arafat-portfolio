@@ -33,16 +33,12 @@ const mergeContentData = (saved: any, defaults: PortfolioData): PortfolioData =>
     const merged = { ...defaults };
 
     // Override simple properties if they exist and are valid
-    const simpleKeys: (keyof PortfolioData)[] = [
-        "userName", "userEmail", "userLocation", "heroImage",
-        "heroSubheading", "careerObjective"
-    ];
-
-    simpleKeys.forEach(key => {
-        if (s[key] && typeof s[key] === typeof defaults[key]) {
-            (merged as any)[key] = s[key];
-        }
-    });
+    if (s.userName && typeof s.userName === 'string') merged.userName = s.userName;
+    if (s.userEmail && typeof s.userEmail === 'string') merged.userEmail = s.userEmail;
+    if (s.userLocation && typeof s.userLocation === 'string') merged.userLocation = s.userLocation;
+    if (s.heroImage && typeof s.heroImage === 'string') merged.heroImage = s.heroImage;
+    if (s.heroSubheading && typeof s.heroSubheading === 'string') merged.heroSubheading = s.heroSubheading;
+    if (s.careerObjective && typeof s.careerObjective === 'string') merged.careerObjective = s.careerObjective;
     
     // Deep merge nested objects
     if (s.contactInfo) {
