@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -19,76 +17,84 @@ import { DEFAULT_PORTFOLIO_DATA } from './constants';
 import { supabase } from './lib/supabaseClient';
 
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
+    const dServices = defaultServices || [];
     return savedServices
         .filter(s => s && typeof s === 'object' && 'name' in s)
         .map((savedService, serviceIndex) => {
-            const defaultService = (defaultServices || [])[serviceIndex] || (defaultServices || [])[0];
+            const defaultService = dServices.find(ds => ds.name === savedService.name) || dServices[serviceIndex] || dServices[0];
             if (!defaultService) return null;
-            return { ...defaultService, ...savedService, icon: defaultService.icon };
+            return { 
+                name: savedService.name || defaultService.name, 
+                icon: defaultService.icon 
+            };
         }).filter((s): s is ProjectService => s !== null);
 }
 
-const mergeContentData = (saved: any, defaults: PortfolioData): PortfolioData => {
+const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData): PortfolioData => {
     const s = saved || {};
 
-    const merged = { ...defaults };
+    const merged: PortfolioData = {
+        // Merge simple string properties with fallbacks to defaults
+        userName: s.userName || defaults.userName,
+        userEmail: s.userEmail || defaults.userEmail,
+        userLocation: s.userLocation || defaults.userLocation,
+        heroImage: s.heroImage || defaults.heroImage,
+        heroSubheading: s.heroSubheading || defaults.heroSubheading,
+        careerObjective: s.careerObjective || defaults.careerObjective,
 
-    // Override simple properties if they exist and are valid
-    if (s.userName && typeof s.userName === 'string') merged.userName = s.userName;
-    if (s.userEmail && typeof s.userEmail === 'string') merged.userEmail = s.userEmail;
-    if (s.userLocation && typeof s.userLocation === 'string') merged.userLocation = s.userLocation;
-    if (s.heroImage && typeof s.heroImage === 'string') merged.heroImage = s.heroImage;
-    if (s.heroSubheading && typeof s.heroSubheading === 'string') merged.heroSubheading = s.heroSubheading;
-    if (s.careerObjective && typeof s.careerObjective === 'string') merged.careerObjective = s.careerObjective;
-    
-    // Deep merge nested objects
-    if (s.contactInfo) {
-        merged.contactInfo = { ...defaults.contactInfo, ...s.contactInfo };
-    }
-    if (s.socialLinks) {
-        merged.socialLinks = { ...defaults.socialLinks, ...s.socialLinks };
-    }
+        // Merge nested objects safely
+        contactInfo: { ...defaults.contactInfo, ...(s.contactInfo || {}) },
+        socialLinks: { ...defaults.socialLinks, ...(s.socialLinks || {}) },
 
-    // Handle simple arrays, ensuring they are arrays of strings.
-    if (Array.isArray(s.heroRoles) && s.heroRoles.every((r: any) => typeof r === 'string')) {
-        merged.heroRoles = s.heroRoles;
-    }
+        // Merge arrays, ensuring they are valid
+        heroRoles: Array.isArray(s.heroRoles) && s.heroRoles.every(r => typeof r === 'string') 
+            ? s.heroRoles 
+            : defaults.heroRoles,
 
-    // Robustly merge arrays of objects, filtering invalid items and restoring non-serializable data (icons)
-    if (Array.isArray(s.expertiseAreas)) {
-        merged.expertiseAreas = s.expertiseAreas
-            .filter((item: any) => item && typeof item === 'object' && 'name' in item) // Ensure item is a valid object
-            .map((savedArea: any) => {
-                const defaultArea = defaults.expertiseAreas[0] || { name: '', description: '' };
-                return { ...defaultArea, ...savedArea };
-            });
-    }
+        expertiseAreas: Array.isArray(s.expertiseAreas)
+            ? s.expertiseAreas
+                .filter(area => area && typeof area === 'object' && area.name)
+                .map(area => ({
+                    name: area.name,
+                    description: area.description || ''
+                }))
+            : defaults.expertiseAreas,
 
-    if (Array.isArray(s.skillsData)) {
-        merged.skillsData = s.skillsData
-            .filter((item: any) => item && typeof item === 'object' && 'name' in item)
-            .map((savedSkill: any, index: number) => {
-                const defaultSkill = defaults.skillsData[index] || defaults.skillsData[0];
-                if (!defaultSkill) return null;
-                return { ...defaultSkill, ...savedSkill, icon: defaultSkill.icon };
-            }).filter((skill): skill is Skill => skill !== null); // Filter out any nulls
-    }
+        skillsData: Array.isArray(s.skillsData)
+            ? s.skillsData
+                .filter(skill => skill && typeof skill === 'object' && skill.name)
+                .map((savedSkill, index) => {
+                    const defaultSkill = defaults.skillsData.find(ds => ds.name === savedSkill.name) || defaults.skillsData[index] || defaults.skillsData[0];
+                    if (!defaultSkill) return null;
+                    return {
+                        name: savedSkill.name || defaultSkill.name,
+                        icon: defaultSkill.icon,
+                        description: savedSkill.description || defaultSkill.description,
+                        technologies: savedSkill.technologies || defaultSkill.technologies,
+                    };
+                }).filter((skill): skill is Skill => skill !== null)
+            : defaults.skillsData,
 
-    if (Array.isArray(s.projectsData)) {
-        merged.projectsData = s.projectsData
-            .filter((item: any) => item && typeof item === 'object' && 'title' in item)
-            .map((savedProject: any, index: number): Project | null => {
-                const defaultProject = defaults.projectsData[index] || defaults.projectsData[0];
-                if (!defaultProject) return null;
-
-                let mergedServices = defaultProject.services || [];
-                if (Array.isArray(savedProject.services)) {
-                    mergedServices = mergeProjectServices(savedProject.services, defaultProject.services || []);
-                }
-
-                return { ...defaultProject, ...savedProject, services: mergedServices };
-            }).filter((p): p is Project => p !== null);
-    }
+        projectsData: Array.isArray(s.projectsData)
+            ? s.projectsData
+                .filter(project => project && typeof project === 'object' && project.title)
+                .map((savedProject, index) => {
+                    const defaultProject = defaults.projectsData.find(dp => dp.title === savedProject.title) || defaults.projectsData[index] || defaults.projectsData[0];
+                    if (!defaultProject) return null;
+                    
+                    const mergedServices = Array.isArray(savedProject.services)
+                        ? mergeProjectServices(savedProject.services, defaultProject.services)
+                        : defaultProject.services;
+                        
+                    return {
+                        title: savedProject.title || defaultProject.title,
+                        category: savedProject.category || defaultProject.category,
+                        description: savedProject.description || defaultProject.description,
+                        services: mergedServices
+                    };
+                }).filter((p): p is Project => p !== null)
+            : defaults.projectsData,
+    };
     
     return merged;
 };
@@ -123,7 +129,7 @@ const App: React.FC = () => {
                 }
 
                 if (data && data.data) {
-                    const savedContent = data.data;
+                    const savedContent = data.data as Partial<PortfolioData>;
                     setContent(mergeContentData(savedContent, DEFAULT_PORTFOLIO_DATA));
                 } else {
                      console.warn("No portfolio data found in Supabase. Using default content. Save in the editor to create the first record.");
