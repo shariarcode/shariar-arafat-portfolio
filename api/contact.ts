@@ -23,6 +23,14 @@ export default async function handler(req: Request) {
     });
   }
 
+  if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set.');
+      return new Response(JSON.stringify({ error: 'Server configuration error: Email API key is missing.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+  }
+
   try {
     const { name, email, subject, message } = await req.json();
 
@@ -37,7 +45,7 @@ export default async function handler(req: Request) {
       from: FROM_EMAIL,
       to: [TO_EMAIL],
       subject: `New Portfolio Message: ${subject}`,
-      replyTo: email,
+      reply_to: email,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2>New Message from Your Portfolio</h2>
