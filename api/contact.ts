@@ -23,9 +23,9 @@ export default async function handler(req: Request) {
     });
   }
 
-  if (!process.env.RESEND_API_KEY) {
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.trim() === '') {
       console.error('RESEND_API_KEY is not set.');
-      return new Response(JSON.stringify({ error: 'Server configuration error: Email API key is missing.' }), {
+      return new Response(JSON.stringify({ error: 'Server configuration error: The email service API key is missing.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -35,7 +35,7 @@ export default async function handler(req: Request) {
     const { name, email, subject, message } = await req.json();
 
     if (!name || !email || !subject || !message) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+      return new Response(JSON.stringify({ error: 'Missing required fields. Please fill out the entire form.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -45,7 +45,7 @@ export default async function handler(req: Request) {
       from: FROM_EMAIL,
       to: [TO_EMAIL],
       subject: `New Portfolio Message: ${subject}`,
-      reply_to: email,
+      replyTo: email, // CORRECT: The official Resend SDK uses camelCase for this property.
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2>New Message from Your Portfolio</h2>
@@ -64,7 +64,8 @@ export default async function handler(req: Request) {
 
     if (error) {
       console.error('Resend API error:', error);
-      return new Response(JSON.stringify({ error: 'Failed to send email. The server might be misconfigured.' }), {
+      // The error object from Resend might contain sensitive details, so we return a generic but informative message.
+      return new Response(JSON.stringify({ error: `Failed to send email. The mail server responded with an error. Please ensure the RESEND_API_KEY is correct.` }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -77,7 +78,7 @@ export default async function handler(req: Request) {
 
   } catch (err: any) {
     console.error('Error in contact API:', err);
-    return new Response(JSON.stringify({ error: 'An internal server error occurred.' }), {
+    return new Response(JSON.stringify({ error: 'An internal server error occurred while processing the request.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

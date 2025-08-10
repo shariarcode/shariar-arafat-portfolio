@@ -30,6 +30,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
     const { contactInfo, socialLinks } = content;
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [submissionError, setSubmissionError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -39,7 +40,9 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (status === 'loading') return;
+        
         setStatus('loading');
+        setSubmissionError(null);
 
         try {
             const response = await fetch('/api/contact', {
@@ -49,17 +52,17 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
             });
 
             if (!response.ok) {
-                 const errorData = await response.json().catch(() => ({ error: 'Failed to send message.' }));
-                throw new Error(errorData.error || 'Failed to send message.');
+                const errorData = await response.json().catch(() => ({ error: 'An unknown server error occurred.' }));
+                throw new Error(errorData.error || 'Failed to send message. The server responded with an error.');
             }
 
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
-            setTimeout(() => setStatus('idle'), 5000); // Reset status after 5 seconds
-        } catch (error) {
+            setTimeout(() => setStatus('idle'), 5000); 
+        } catch (error: any) {
             console.error('Error submitting message:', error);
+            setSubmissionError(error.message);
             setStatus('error');
-            setTimeout(() => setStatus('idle'), 5000); // Reset status after 5 seconds
         }
     };
 
@@ -123,8 +126,8 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                             {status === 'success' && (
                                 <p className="mt-4 text-center text-green-500 dark:text-green-400">Message sent successfully! Thank you for reaching out.</p>
                             )}
-                            {status === 'error' && (
-                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">Sorry, something went wrong. Please try again.</p>
+                            {status === 'error' && submissionError && (
+                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">{submissionError}</p>
                             )}
                         </form>
                     </div>
