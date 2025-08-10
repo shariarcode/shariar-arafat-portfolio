@@ -1,10 +1,14 @@
+
 import { Resend } from 'resend';
 
-// NOTE: This assumes a RESEND_API_KEY environment variable is set in your deployment environment.
-// The `from` address uses 'onboarding@resend.dev' which is suitable for development and testing.
-// For production, you would need a verified domain with Resend.
+// This API route handles sending contact form submissions via email using Resend.
+// IMPORTANT: You must set the RESEND_API_KEY as an environment variable in your deployment environment (e.g., Vercel).
 const resend = new Resend(process.env.RESEND_API_KEY);
-const TO_EMAIL = 'shariararafar123@gmail.com'; // Your email address
+
+// The email address where you want to receive messages.
+const TO_EMAIL = 'shariararafar123@gmail.com'; 
+// The "from" address for Resend. For development, 'onboarding@resend.dev' works.
+// For production, you must use a verified domain.
 const FROM_EMAIL = 'Portfolio Contact <onboarding@resend.dev>';
 
 export const config = {
@@ -33,23 +37,26 @@ export default async function handler(req: Request) {
       from: FROM_EMAIL,
       to: [TO_EMAIL],
       subject: `New Portfolio Message: ${subject}`,
-      reply_to: email,
+      replyTo: email,
       html: `
-        <div style="font-family: sans-serif; font-size: 16px; color: #333;">
-          <h2>New Message from your Portfolio Contact Form</h2>
-          <p><strong>Name:</strong> ${name}</p>
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2>New Message from Your Portfolio</h2>
+          <p>You have received a new message from your portfolio's contact form.</p>
+          <hr style="border: 0; border-top: 1px solid #eee;">
+          <p><strong>From:</strong> ${name}</p>
           <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
           <p><strong>Subject:</strong> ${subject}</p>
-          <hr>
           <h3>Message:</h3>
-          <p>${message.replace(/\n/g, '<br>')}</p>
+          <div style="padding: 12px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; white-space: pre-wrap; font-size: 14px;">${message}</div>
+          <hr style="border: 0; border-top: 1px solid #eee;">
+          <p style="font-size: 12px; color: #999;">This email was sent from your portfolio website.</p>
         </div>
       `,
     });
 
     if (error) {
       console.error('Resend API error:', error);
-      return new Response(JSON.stringify({ error: 'Failed to send email.' }), {
+      return new Response(JSON.stringify({ error: 'Failed to send email. The server might be misconfigured.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -60,8 +67,8 @@ export default async function handler(req: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
 
-  } catch (error: any) {
-    console.error('Error in contact API:', error);
+  } catch (err: any) {
+    console.error('Error in contact API:', err);
     return new Response(JSON.stringify({ error: 'An internal server error occurred.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

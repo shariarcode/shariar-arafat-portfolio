@@ -124,7 +124,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                                 <p className="mt-4 text-center text-green-500 dark:text-green-400">Message sent successfully! Thank you for reaching out.</p>
                             )}
                             {status === 'error' && (
-                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">Sorry, something went wrong. Please try again later.</p>
+                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">Sorry, something went wrong. Please try again.</p>
                             )}
                         </form>
                     </div>
