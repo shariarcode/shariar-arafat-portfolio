@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
 import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon } from './Icons';
-import { supabase } from '../lib/supabaseClient';
 
 interface ContactProps {
     content: PortfolioData;
@@ -43,13 +42,15 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
         setStatus('loading');
 
         try {
-            // This saves the form data to your 'messages' table in Supabase.
-            const { error } = await supabase
-                .from('messages')
-                .insert([formData]);
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
 
-            if (error) {
-                throw error;
+            if (!response.ok) {
+                 const errorData = await response.json().catch(() => ({ error: 'Failed to send message.' }));
+                throw new Error(errorData.error || 'Failed to send message.');
             }
 
             setStatus('success');
