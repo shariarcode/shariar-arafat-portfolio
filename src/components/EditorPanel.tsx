@@ -1,9 +1,7 @@
+
 import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
 import { CloseIcon } from './Icons';
-import { storage } from '../../lib/firebase';
-// Standard Firebase v9+ storage modular imports
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface EditorPanelProps {
     data: PortfolioData;
@@ -11,7 +9,7 @@ interface EditorPanelProps {
     onClose: () => void;
 }
 
-const FormInput: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ label, name, value, onChange }) => (
+const FormInput: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string }> = ({ label, name, value, onChange, placeholder }) => (
     <div>
         <label htmlFor={name} className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
         <input 
@@ -20,7 +18,8 @@ const FormInput: React.FC<{ label: string, name: string, value: string, onChange
             name={name} 
             value={value} 
             onChange={onChange}
-            className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary"
+            placeholder={placeholder}
+            className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all"
         />
     </div>
 );
@@ -34,7 +33,7 @@ const FormTextarea: React.FC<{ label: string, name: string, value: string, onCha
             value={value} 
             onChange={onChange}
             rows={3}
-            className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary"
+            className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all"
         />
     </div>
 );
@@ -44,7 +43,6 @@ const TrashIcon: React.FC = () => (
 );
 
 const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
-    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState(() => {
         const serializableData = JSON.parse(JSON.stringify(data));
         serializableData.heroRoles = Array.isArray(data.heroRoles) ? data.heroRoles.join(', ') : '';
@@ -54,28 +52,6 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return;
-
-        const file = e.target.files[0];
-        const fileName = `${Date.now()}-${file.name}`;
-        // Using modular ref from firebase/storage
-        const storageRef = ref(storage, `portfolio-images/${fileName}`);
-        
-        setIsUploading(true);
-        try {
-            // Using modular uploadBytes and getDownloadURL
-            const snapshot = await uploadBytes(storageRef, file);
-            const publicUrl = await getDownloadURL(snapshot.ref);
-            setFormData(prev => ({ ...prev, heroImage: publicUrl }));
-        } catch (error: any) {
-            console.error('Error uploading image to Firebase:', error);
-            alert(`Error uploading image: ${error.message}`);
-        } finally {
-            setIsUploading(false);
-        }
     };
 
     const handleArrayChange = (arrayName: 'projectsData' | 'expertiseAreas', index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -107,58 +83,59 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[99]">
-            <div className="fixed top-0 right-0 h-full w-full max-w-md bg-dark-card shadow-2xl z-[100] transform transition-transform translate-x-0">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99]">
+            <div className="fixed top-0 right-0 h-full w-full max-w-md bg-dark-card shadow-2xl z-[100] transform transition-transform translate-x-0 border-l border-gray-700">
                 <div className="h-full flex flex-col">
                     <div className="p-6 flex justify-between items-center border-b border-gray-700 bg-gray-900">
                         <h2 className="text-2xl font-bold text-white">Content Editor</h2>
-                        <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700"><CloseIcon /></button>
+                        <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700 transition-colors"><CloseIcon /></button>
                     </div>
-                    <div className="flex-grow p-6 overflow-y-auto space-y-6 text-white">
-                        <fieldset className="space-y-4 border-2 border-gray-700 p-4 rounded-lg">
-                            <legend className="text-xl font-semibold text-primary px-2">Hero Section</legend>
-                            <FormInput label="Name" name="userName" value={formData.userName} onChange={handleChange} />
-                             <div>
-                                <label htmlFor="heroImage" className="block text-sm font-medium text-gray-400 mb-1">Hero Image</label>
-                                <div className="mt-2 flex items-center gap-4">
-                                    <img src={formData.heroImage} alt="Preview" className="w-16 h-16 rounded-full object-cover bg-gray-700" />
-                                    <input type="file" id="heroImage" name="heroImage" onChange={handleImageChange} accept="image/*" disabled={isUploading} className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark cursor-pointer disabled:opacity-50"/>
+                    <div className="flex-grow p-6 overflow-y-auto space-y-8 text-white">
+                        <fieldset className="space-y-4 border-2 border-gray-700 p-5 rounded-xl bg-gray-900/50">
+                            <legend className="text-xl font-bold text-primary px-3 text-primary-light">Hero Section</legend>
+                            <FormInput label="Full Name" name="userName" value={formData.userName} onChange={handleChange} />
+                            
+                             <div className="space-y-4">
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Profile Image</label>
+                                <div className="flex items-center gap-6 bg-gray-800/80 p-4 rounded-xl border border-gray-600">
+                                    <div className="shrink-0 relative">
+                                        <img src={formData.heroImage} alt="Preview" className="w-24 h-24 rounded-full object-cover border-4 border-primary/50 shadow-lg" />
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <p className="text-xs text-gray-400">Preview Updates Instantly</p>
+                                        <FormInput 
+                                            label="Direct Link" 
+                                            name="heroImage" 
+                                            value={formData.heroImage} 
+                                            onChange={handleChange} 
+                                            placeholder="Paste URL (Imgur, PostImages, etc)"
+                                        />
+                                    </div>
                                 </div>
-                                {isUploading && <p className="text-sm text-primary-light mt-2">Uploading...</p>}
                             </div>
+
                             <FormInput label="Roles (comma separated)" name="heroRoles" value={formData.heroRoles} onChange={handleChange} />
                             <FormTextarea label="Subheading" name="heroSubheading" value={formData.heroSubheading} onChange={handleChange} />
                         </fieldset>
-                        <fieldset className="space-y-4 border-2 border-gray-700 p-4 rounded-lg">
-                            <legend className="text-xl font-semibold text-primary px-2">About / Expertise</legend>
+
+                        <fieldset className="space-y-4 border-2 border-gray-700 p-5 rounded-xl bg-gray-900/50">
+                            <legend className="text-xl font-bold text-primary px-3 text-primary-light">About Me</legend>
                             <FormTextarea label="Career Objective" name="careerObjective" value={formData.careerObjective} onChange={handleChange} />
-                            <div className="space-y-3">
+                            <div className="space-y-4 pt-2">
                                 <label className="block text-sm font-medium text-gray-300">Expertise Areas</label>
                                 {formData.expertiseAreas.map((area, index) => (
-                                    <div key={index} className="space-y-2 border border-gray-600 p-3 rounded-md relative">
+                                    <div key={index} className="space-y-3 border border-gray-600 p-4 rounded-xl relative group bg-dark-bg/40">
                                         <FormInput label="Area Name" name="name" value={area.name} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />
                                         <FormTextarea label="Area Description" name="description" value={area.description || ''} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />
-                                        <button onClick={() => handleDeleteItem('expertiseAreas', index)} className="absolute top-2 right-2 text-red-500 hover:text-red-400 p-1 bg-gray-700 rounded-full"><TrashIcon/></button>
+                                        <button onClick={() => handleDeleteItem('expertiseAreas', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-1.5 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                     </div>
                                 ))}
-                                <button onClick={() => handleAddItem('expertiseAreas')} className="w-full mt-2 px-4 py-2 border-2 border-dashed border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-colors">+ Add Area</button>
+                                <button onClick={() => handleAddItem('expertiseAreas')} className="w-full mt-2 px-4 py-3 border-2 border-dashed border-gray-600 text-gray-400 rounded-xl hover:bg-gray-800 hover:text-white transition-all font-medium">+ Add New Expertise</button>
                             </div>
                         </fieldset>
-                        <fieldset className="space-y-4 border-2 border-gray-700 p-4 rounded-lg">
-                            <legend className="text-xl font-semibold text-primary px-2">Projects</legend>
-                            {formData.projectsData.map((project, index) => (
-                                <div key={index} className="space-y-3 border border-gray-600 p-3 rounded-md relative">
-                                    <h4 className="font-semibold text-gray-300">Project {index + 1}</h4>
-                                    <FormInput label="Project Title" name="title" value={project.title} onChange={(e) => handleArrayChange('projectsData', index, e)} />
-                                    <FormTextarea label="Project Description" name="description" value={project.description} onChange={(e) => handleArrayChange('projectsData', index, e)} />
-                                    <button onClick={() => handleDeleteItem('projectsData', index)} className="absolute top-2 right-2 text-red-500 hover:text-red-400 p-1 bg-gray-700 rounded-full"><TrashIcon/></button>
-                                </div>
-                            ))}
-                            <button onClick={() => handleAddItem('projectsData')} className="w-full mt-2 px-4 py-2 border-2 border-dashed border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-colors">+ Add Project</button>
-                        </fieldset>
                     </div>
-                    <div className="p-6 border-t border-gray-700 bg-gray-900">
-                        <button onClick={handleSave} className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-colors duration-300">Save Changes</button>
+                    <div className="p-6 border-t border-gray-700 bg-gray-900 sticky bottom-0">
+                        <button onClick={handleSave} className="w-full px-6 py-4 bg-primary text-white font-bold rounded-xl shadow-2xl hover:bg-primary-dark transition-all transform hover:scale-[1.02] active:scale-95">Save All Changes</button>
                     </div>
                 </div>
             </div>

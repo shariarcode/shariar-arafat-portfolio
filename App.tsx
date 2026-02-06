@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -108,7 +109,7 @@ const App: React.FC = () => {
                     const savedContent = docSnap.data().content as Partial<PortfolioData>;
                     setContent(mergeContentData(savedContent, DEFAULT_PORTFOLIO_DATA));
                 } else {
-                     console.warn("No portfolio data found in Firestore. Using defaults.");
+                     console.warn("No portfolio data found in Firebase. Using defaults.");
                 }
             } catch (err) {
                 console.error("An unexpected error occurred while fetching content:", err);
@@ -166,9 +167,9 @@ const App: React.FC = () => {
 
             const fullContent = mergeContentData(serializableContent, DEFAULT_PORTFOLIO_DATA);
             setContent(fullContent);
-            alert('Changes saved to Firebase successfully!');
+            alert('Changes saved successfully!');
         } catch (error: any) {
-            console.error("Failed to save changes to Firebase:", error);
+            console.error("Failed to save changes:", error);
             alert(`Failed to save changes: ${error.message}`);
         } finally {
             setShowEditor(false);
@@ -181,7 +182,7 @@ const App: React.FC = () => {
             <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-dark-bg text-gray-900 dark:text-white">
                 <div className="flex items-center space-x-2">
                     <svg className="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span>Loading Portfolio...</span>
+                    <span>Loading...</span>
                 </div>
             </div>
         );
@@ -189,9 +190,6 @@ const App: React.FC = () => {
 
     return (
         <div className="bg-slate-50 dark:bg-dark-bg transition-colors duration-300 font-sans relative overflow-x-hidden">
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] opacity-50 dark:opacity-100"></div>
-            <div className="absolute inset-0 -z-10 h-full w-full bg-slate-50 dark:bg-dark-bg bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
-
             <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} userName={content.userName} />
             <main className="relative z-10">
                 <Hero content={content} />

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { PortfolioData } from './types';
 import { CodeIcon, DesignIcon, DevOpsIcon, AutomationIcon } from './components/Icons';
@@ -5,7 +6,8 @@ import { CodeIcon, DesignIcon, DevOpsIcon, AutomationIcon } from './components/I
 const USER_NAME = "Shariar Arafat";
 const USER_EMAIL = "shariararafar123@gmail.com";
 const USER_LOCATION = "Sonapur, Noakhali, Bangladesh";
-const DEFAULT_HERO_IMAGE = `https://i.pravatar.cc/400?u=${USER_EMAIL}`;
+// Default professional placeholder
+const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=800&q=80";
 
 export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     userName: USER_NAME,

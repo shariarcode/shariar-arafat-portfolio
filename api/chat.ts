@@ -34,17 +34,9 @@ export default async function handler(req: Request) {
 
   try {
     const { history, portfolioData } = await req.json() as { history: ChatMessage[], portfolioData: PortfolioData };
-    const API_KEY = process.env.API_KEY;
 
-    if (!API_KEY) {
-        return new Response(JSON.stringify({ error: 'API key is not configured on the server.' }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        });
-    }
-
-    // Initialize the Google GenAI client with a named parameter
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
+    // CRITICAL: Initialize Google GenAI with the API key directly from process.env.API_KEY
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     // Create a more concise summary of the portfolio data to keep the prompt efficient.
     const expertiseText = portfolioData.expertiseAreas.map(a => a.name).join(', ');
@@ -96,7 +88,7 @@ If a question cannot be answered from this context, say you don't have informati
     const stream = new ReadableStream({
       async start(controller) {
         for await (const chunk of result) {
-          // Access the text property directly from the chunk (chunk is a GenerateContentResponse)
+          // CRITICAL: Access the text property directly on the chunk (GenerateContentResponse)
           const chunkText = chunk.text;
           if (chunkText) {
              controller.enqueue(new TextEncoder().encode(chunkText));
