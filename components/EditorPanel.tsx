@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
 import { CloseIcon } from './Icons';
 import { storage } from '../lib/firebase';
+// Standard Firebase v9+ storage modular imports
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface EditorPanelProps {
@@ -60,10 +61,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
         const file = e.target.files[0];
         const fileName = `${Date.now()}-${file.name}`;
+        // Using ref from firebase/storage
         const storageRef = ref(storage, `portfolio-images/${fileName}`);
         
         setIsUploading(true);
         try {
+            // Using modular uploadBytes and getDownloadURL
             await uploadBytes(storageRef, file);
             const publicUrl = await getDownloadURL(storageRef);
             setFormData(prev => ({ ...prev, heroImage: publicUrl }));

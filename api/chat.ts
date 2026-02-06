@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, type Content } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 
 export const config = {
   runtime: 'edge',
@@ -43,6 +43,7 @@ export default async function handler(req: Request) {
         });
     }
 
+    // Initialize the Google GenAI client with a named parameter
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     
     // Create a more concise summary of the portfolio data to keep the prompt efficient.
@@ -64,7 +65,7 @@ CONTEXT ABOUT SHARIAR ARAFAT:
 
 If a question cannot be answered from this context, say you don't have information on that topic. Be polite and conversational.`;
 
-    const contents: Content[] = history.map(msg => ({
+    const contents = history.map(msg => ({
       role: msg.role,
       parts: [{ text: msg.text }],
     }));
@@ -85,8 +86,9 @@ If a question cannot be answered from this context, say you don't have informati
         });
     }
 
+    // Using the recommended gemini-3-flash-preview model for basic text tasks
     const result = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: validContents,
         config: { systemInstruction }
     });
@@ -94,6 +96,7 @@ If a question cannot be answered from this context, say you don't have informati
     const stream = new ReadableStream({
       async start(controller) {
         for await (const chunk of result) {
+          // Access the text property directly from the chunk (chunk is a GenerateContentResponse)
           const chunkText = chunk.text;
           if (chunkText) {
              controller.enqueue(new TextEncoder().encode(chunkText));

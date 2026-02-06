@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -14,7 +13,8 @@ import Chatbot from './components/Chatbot';
 import { ArrowUpIcon } from './components/Icons';
 import type { PortfolioData, Skill, Project, ProjectService } from './types';
 import { DEFAULT_PORTFOLIO_DATA } from './constants';
-import { supabase } from './lib/supabaseClient';
+import { db } from '../lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
     const dServices = defaultServices || [];
@@ -32,25 +32,18 @@ const mergeProjectServices = (savedServices: any[], defaultServices: ProjectServ
 
 const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData): PortfolioData => {
     const s = saved || {};
-
     const merged: PortfolioData = {
-        // Merge simple string properties with fallbacks to defaults
         userName: s.userName || defaults.userName,
         userEmail: s.userEmail || defaults.userEmail,
         userLocation: s.userLocation || defaults.userLocation,
         heroImage: s.heroImage || defaults.heroImage,
         heroSubheading: s.heroSubheading || defaults.heroSubheading,
         careerObjective: s.careerObjective || defaults.careerObjective,
-
-        // Merge nested objects safely
         contactInfo: { ...defaults.contactInfo, ...(s.contactInfo || {}) },
         socialLinks: { ...defaults.socialLinks, ...(s.socialLinks || {}) },
-
-        // Merge arrays, ensuring they are valid
         heroRoles: Array.isArray(s.heroRoles) && s.heroRoles.every(r => typeof r === 'string') 
             ? s.heroRoles 
             : defaults.heroRoles,
-
         expertiseAreas: Array.isArray(s.expertiseAreas)
             ? s.expertiseAreas
                 .filter(area => area && typeof area === 'object' && area.name)
@@ -59,7 +52,6 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     description: area.description || ''
                 }))
             : defaults.expertiseAreas,
-
         skillsData: Array.isArray(s.skillsData)
             ? s.skillsData
                 .filter(skill => skill && typeof skill === 'object' && skill.name)
@@ -74,18 +66,15 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     };
                 }).filter((skill): skill is Skill => skill !== null)
             : defaults.skillsData,
-
         projectsData: Array.isArray(s.projectsData)
             ? s.projectsData
                 .filter(project => project && typeof project === 'object' && project.title)
                 .map((savedProject, index) => {
                     const defaultProject = defaults.projectsData.find(dp => dp.title === savedProject.title) || defaults.projectsData[index] || defaults.projectsData[0];
                     if (!defaultProject) return null;
-                    
                     const mergedServices = Array.isArray(savedProject.services)
                         ? mergeProjectServices(savedProject.services, defaultProject.services)
                         : defaultProject.services;
-                        
                     return {
                         title: savedProject.title || defaultProject.title,
                         category: savedProject.category || defaultProject.category,
@@ -95,44 +84,31 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                 }).filter((p): p is Project => p !== null)
             : defaults.projectsData,
     };
-    
     return merged;
 };
-
 
 const App: React.FC = () => {
     const [darkMode, setDarkMode] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [loading, setLoading] = useState(true);
-    
     const [content, setContent] = useState<PortfolioData>(DEFAULT_PORTFOLIO_DATA);
-
     const [isAdmin, setIsAdmin] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
-    
     const [isChatOpen, setIsChatOpen] = useState(false);
 
     useEffect(() => {
         const fetchContent = async () => {
             setLoading(true);
             try {
-                // Assuming content is stored in a table 'portfolio' with a single row where id=1
-                const { data, error } = await supabase
-                    .from('portfolio')
-                    .select('data')
-                    .eq('id', 1)
-                    .single();
+                const docRef = doc(db, "settings", "portfolio");
+                const docSnap = await getDoc(docRef);
 
-                if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found, which is ok on first run
-                    console.error('Error fetching content:', error.message);
-                }
-
-                if (data && data.data) {
-                    const savedContent = data.data as Partial<PortfolioData>;
+                if (docSnap.exists()) {
+                    const savedContent = docSnap.data().content as Partial<PortfolioData>;
                     setContent(mergeContentData(savedContent, DEFAULT_PORTFOLIO_DATA));
                 } else {
-                     console.warn("No portfolio data found in Supabase. Using default content. Save in the editor to create the first record.");
+                     console.warn("No portfolio data found in Firebase. Using default content.");
                 }
             } catch (err) {
                 console.error("An unexpected error occurred while fetching content:", err);
@@ -140,10 +116,8 @@ const App: React.FC = () => {
                 setLoading(false);
             }
         };
-
         fetchContent();
     }, []);
-
 
     useEffect(() => {
         if (darkMode) {
@@ -161,28 +135,16 @@ const App: React.FC = () => {
                 setShowScrollTop(false);
             }
         };
-
         window.addEventListener('scroll', checkScrollTop);
         return () => window.removeEventListener('scroll', checkScrollTop);
     }, [showScrollTop]);
 
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-    };
-    
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    };
+    const toggleDarkMode = () => setDarkMode(!darkMode);
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const handleAdminClick = () => {
-        if (isAdmin) {
-            setShowEditor(true);
-        } else {
-            setShowLogin(true);
-        }
+        if (isAdmin) setShowEditor(true);
+        else setShowLogin(true);
     };
 
     const handleLogin = (password: string) => {
@@ -199,20 +161,14 @@ const App: React.FC = () => {
         setLoading(true);
         try {
             const serializableContent = JSON.parse(JSON.stringify(savedData));
-            
-            const { error } = await supabase
-                .from('portfolio')
-                .upsert({ id: 1, data: serializableContent } as any);
-
-            if (error) {
-                throw error;
-            }
+            const docRef = doc(db, "settings", "portfolio");
+            await setDoc(docRef, { content: serializableContent });
 
             const fullContent = mergeContentData(serializableContent, DEFAULT_PORTFOLIO_DATA);
             setContent(fullContent);
-            alert('Changes saved successfully!');
+            alert('Changes saved successfully to Firebase!');
         } catch (error: any) {
-            console.error("Failed to save changes to Supabase:", error);
+            console.error("Failed to save changes to Firebase:", error);
             alert(`Failed to save changes: ${error.message}`);
         } finally {
             setShowEditor(false);
