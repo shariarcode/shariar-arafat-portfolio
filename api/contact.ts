@@ -1,4 +1,3 @@
-
 import { Resend } from 'resend';
 
 // This API route handles sending contact form submissions via email using Resend.
@@ -45,7 +44,8 @@ export default async function handler(req: Request) {
       from: FROM_EMAIL,
       to: [TO_EMAIL],
       subject: `New Portfolio Message: ${subject}`,
-      replyTo: email, // CORRECT: The official Resend SDK uses camelCase for this property.
+      // The 'replyTo' property sets the Reply-To email header, allowing direct replies to the sender.
+      replyTo: email,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2>New Message from Your Portfolio</h2>
@@ -65,7 +65,7 @@ export default async function handler(req: Request) {
     if (error) {
       console.error('Resend API error:', error);
       // The error object from Resend might contain sensitive details, so we return a generic but informative message.
-      return new Response(JSON.stringify({ error: `Failed to send email. The mail server responded with an error. Please ensure the RESEND_API_KEY is correct.` }), {
+      return new Response(JSON.stringify({ error: `Failed to send email. The mail server responded with: ${error.message}` }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });

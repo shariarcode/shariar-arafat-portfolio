@@ -39,6 +39,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
         if (status === 'loading') return;
         
         setStatus('loading');
@@ -58,7 +59,6 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
 
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
-            setTimeout(() => setStatus('idle'), 5000); 
         } catch (error: any) {
             console.error('Error submitting message:', error);
             setSubmissionError(error.message);
@@ -124,10 +124,10 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                                 </button>
                             </div>
                             {status === 'success' && (
-                                <p className="mt-4 text-center text-green-500 dark:text-green-400">Message sent successfully! Thank you for reaching out.</p>
+                                <p className="mt-4 text-center text-green-500 dark:text-green-400">Message sent successfully! I will get back to you shortly.</p>
                             )}
                             {status === 'error' && submissionError && (
-                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">{submissionError}</p>
+                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">Error: {submissionError}</p>
                             )}
                         </form>
                     </div>
