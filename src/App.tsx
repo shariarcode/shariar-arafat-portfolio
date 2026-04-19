@@ -149,7 +149,7 @@ const App: React.FC = () => {
     };
 
     const handleLogin = (password: string) => {
-        if (password === '@shariararafatportfoliowebsite2006') {
+        if (password === (import.meta as any).env.VITE_ADMIN_PASSWORD) {
             setIsAdmin(true);
             setShowLogin(false);
             setShowEditor(true);

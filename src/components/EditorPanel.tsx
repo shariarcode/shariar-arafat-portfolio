@@ -51,12 +51,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev: any) => ({ ...prev, [name]: value }));
     };
 
     const handleArrayChange = (arrayName: 'projectsData' | 'expertiseAreas', index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => {
+        setFormData((prev: any) => {
             const newArray = [...(prev as any)[arrayName]];
             newArray[index] = { ...newArray[index], [name]: value };
             return { ...prev, [arrayName]: newArray };
@@ -67,11 +67,11 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         const newItem = arrayName === 'projectsData'
             ? { category: "New Category", title: "New Project", description: "A new project description.", services: [] }
             : { name: "New Expertise", description: "A new expertise description." };
-        setFormData(prev => ({ ...prev, [arrayName]: [...(prev as any)[arrayName], newItem] }));
+        setFormData((prev: any) => ({ ...prev, [arrayName]: [...(prev as any)[arrayName], newItem] }));
     };
 
     const handleDeleteItem = (arrayName: 'projectsData' | 'expertiseAreas', index: number) => {
-        setFormData(prev => ({ ...prev, [arrayName]: (prev as any)[arrayName].filter((_: any, i: number) => i !== index) }));
+        setFormData((prev: any) => ({ ...prev, [arrayName]: (prev as any)[arrayName].filter((_: any, i: number) => i !== index) }));
     };
 
     const handleSave = () => {
@@ -123,7 +123,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                             <FormTextarea label="Career Objective" name="careerObjective" value={formData.careerObjective} onChange={handleChange} />
                             <div className="space-y-4 pt-2">
                                 <label className="block text-sm font-medium text-gray-300">Expertise Areas</label>
-                                {formData.expertiseAreas.map((area, index) => (
+                                {formData.expertiseAreas.map((area: any, index: number) => (
                                     <div key={index} className="space-y-3 border border-gray-600 p-4 rounded-xl relative group bg-dark-bg/40">
                                         <FormInput label="Area Name" name="name" value={area.name} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />
                                         <FormTextarea label="Area Description" name="description" value={area.description || ''} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />

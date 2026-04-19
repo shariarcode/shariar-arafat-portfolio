@@ -1,0 +1,9 @@
+﻿api/contact.ts(43,13): error TS6133: 'data' is declared but its value is never read.
+api/contact.ts(48,7): error TS2561: Object literal may only specify known properties, but 'replyTo' does not exist in type 'CreateEmailOptions'. Did you mean to write 'reply_to'?
+src/App.tsx(152,38): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/components/EditorPanel.tsx(54,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/EditorPanel.tsx(59,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/EditorPanel.tsx(70,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/EditorPanel.tsx(74,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/EditorPanel.tsx(126,63): error TS7006: Parameter 'area' implicitly has an 'any' type.
+src/components/EditorPanel.tsx(126,69): error TS7006: Parameter 'index' implicitly has an 'any' type.

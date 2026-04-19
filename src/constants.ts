@@ -6,8 +6,8 @@ import { CodeIcon, DesignIcon, DevOpsIcon, AutomationIcon } from './components/I
 const USER_NAME = "Shariar Arafat";
 const USER_EMAIL = "shariararafar123@gmail.com";
 const USER_LOCATION = "Sonapur, Noakhali, Bangladesh";
-// Default professional placeholder
-const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=800&q=80";
+// Local profile image
+const DEFAULT_HERO_IMAGE = "/profile.png";
 
 export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     userName: USER_NAME,

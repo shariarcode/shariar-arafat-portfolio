@@ -73,11 +73,11 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
                     </div>
                 </div>
                 <div className="lg:w-1/2 flex justify-center">
-                    <div className="relative w-80 h-80 md:w-96 md:h-96">
+                    <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-secondary opacity-20 blur-2xl"></div>
                         <div className="absolute inset-0 rounded-full p-1 bg-gradient-to-br from-primary to-secondary">
                             <div className="bg-white dark:bg-dark-bg rounded-full h-full w-full p-2">
-                                <img src={heroImage} alt={userName} className="rounded-full object-cover w-full h-full" />
+                                <img src={heroImage} alt={userName} className="rounded-full object-cover object-top w-full h-full" />
                             </div>
                         </div>
                     </div>

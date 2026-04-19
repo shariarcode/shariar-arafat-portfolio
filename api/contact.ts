@@ -40,12 +40,12 @@ export default async function handler(req: Request) {
       });
     }
 
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [TO_EMAIL],
       subject: `New Portfolio Message: ${subject}`,
       // The 'replyTo' property sets the Reply-To email header, allowing direct replies to the sender.
-      replyTo: email,
+      reply_to: email,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2>New Message from Your Portfolio</h2>

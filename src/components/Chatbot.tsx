@@ -36,38 +36,96 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
         setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
         try {
-            const response = await fetch('/api/chat', {
+            const OPENROUTER_API_KEY = (import.meta as any).env.VITE_OPENROUTER_API_KEY || (import.meta as any).env.VITE_API_KEY;
+            
+            if (!OPENROUTER_API_KEY) {
+                throw new Error("Missing OpenRouter API Key");
+            }
+
+            const expertiseText = portfolioData.expertiseAreas.map(a => a.name).join(', ');
+            const skillsText = [...new Set(portfolioData.skillsData.flatMap(s => s.technologies))].join(', ');
+            const projectsText = portfolioData.projectsData.map(p => p.title).join(', ');
+
+            const systemInstruction = `You are a friendly, helpful AI assistant for Shariar Arafat. Answer questions about him using the provided context. You can also have a general conversation.
+
+CONTEXT ABOUT SHARIAR ARAFAT:
+- Name: ${portfolioData.userName}
+- Summary: ${portfolioData.heroSubheading}
+- Roles: ${portfolioData.heroRoles.join(', ')}
+- Goal: ${portfolioData.careerObjective}
+- Expertise: ${expertiseText}
+- Skills: ${skillsText}
+- Key Projects: ${projectsText}
+- Contact: ${portfolioData.userEmail}, located in ${portfolioData.userLocation}
+
+If a question cannot be answered from this context, say you don't have information on that topic. Be polite and conversational.`;
+
+            let validContents = newHistory;
+            if (validContents.length > 0 && validContents[0].role === 'model') {
+                validContents = validContents.slice(1);
+            }
+
+            const messages = [
+                { role: 'system', content: systemInstruction },
+                ...validContents.map(msg => ({
+                    role: msg.role === 'model' ? 'assistant' : 'user',
+                    content: msg.text
+                }))
+            ];
+
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.origin,
+                    'X-Title': 'Portfolio AI Assistant', 
+                },
                 body: JSON.stringify({
-                    history: newHistory, // Send history including the latest user message
-                    portfolioData,
-                }),
+                    model: 'nvidia/nemotron-3-super-120b-a12b:free', 
+                    messages,
+                    stream: true
+                })
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'The server returned an error.' }));
-                throw new Error(errorData.error);
+                throw new Error(`OpenRouter Error: ${response.status}`);
             }
 
             const reader = response.body?.getReader();
-            if (!reader) {
-                throw new Error('Failed to read response stream.');
-            }
+            if (!reader) throw new Error('Failed to read response stream.');
 
-            const decoder = new TextDecoder();
+            const decoder = new TextDecoder("utf-8");
+            let buffer = '';
             let currentModelMessage = '';
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                currentModelMessage += decoder.decode(value, { stream: true });
-                setMessages(prev => {
-                    const latestMessages = [...prev];
-                    latestMessages[latestMessages.length - 1] = { role: 'model', text: currentModelMessage };
-                    return latestMessages;
-                });
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                
+                buffer = lines.pop() || '';
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            const content = data.choices[0]?.delta?.content || "";
+                            if (content) {
+                                currentModelMessage += content;
+                                setMessages(prev => {
+                                    const latestMessages = [...prev];
+                                    latestMessages[latestMessages.length - 1] = { role: 'model', text: currentModelMessage };
+                                    return latestMessages;
+                                });
+                            }
+                        } catch (e) {
+                            // Ignored: incomplete JSON chunk string
+                        }
+                    }
+                }
             }
 
         } catch (err: any) {
@@ -120,8 +178,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="flex-shrink-0 p-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl sm:rounded-b-lg">
+            <div className="flex-shrink-0 p-4 pb-8 sm:pb-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl sm:rounded-b-lg">
                 {error && <p className="text-red-500 text-xs text-center mb-2">{error}</p>}
                 <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                     <input
@@ -130,7 +187,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
                         onChange={(e) => setUserInput(e.target.value)}
                         placeholder="Ask about my skills..."
                         disabled={isLoading}
-                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50"
+                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-base sm:text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-50"
                     />
                     <button type="submit" disabled={isLoading || !userInput.trim()} className="p-3 bg-primary text-white rounded-full hover:bg-primary-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
                         <SendIcon className="h-5 w-5" />

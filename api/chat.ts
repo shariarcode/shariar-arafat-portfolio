@@ -1,6 +1,3 @@
-
-import { GoogleGenAI } from '@google/genai';
-
 export const config = {
   runtime: 'edge',
 };
@@ -35,10 +32,13 @@ export default async function handler(req: Request) {
   try {
     const { history, portfolioData } = await req.json() as { history: ChatMessage[], portfolioData: PortfolioData };
 
-    // CRITICAL: Initialize Google GenAI with the API key directly from process.env.API_KEY
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Get your OpenRouter key from .env (fallback to VITE_API_KEY if you just renamed the old one)
+    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_API_KEY;
     
-    // Create a more concise summary of the portfolio data to keep the prompt efficient.
+    if (!OPENROUTER_API_KEY) {
+        throw new Error("Missing OpenRouter API Key");
+    }
+
     const expertiseText = portfolioData.expertiseAreas.map(a => a.name).join(', ');
     const skillsText = [...new Set(portfolioData.skillsData.flatMap(s => s.technologies))].join(', ');
     const projectsText = portfolioData.projectsData.map(p => p.title).join(', ');
@@ -57,20 +57,11 @@ CONTEXT ABOUT SHARIAR ARAFAT:
 
 If a question cannot be answered from this context, say you don't have information on that topic. Be polite and conversational.`;
 
-    const contents = history.map(msg => ({
-      role: msg.role,
-      parts: [{ text: msg.text }],
-    }));
-
-    // CRITICAL FIX: The Gemini API's 'generateContent' endpoint requires the conversation history
-    // to start with a 'user' role. The frontend sends a history that begins with the model's
-    // initial greeting. We must slice this off to create a valid request.
-    let validContents = contents;
+    let validContents = history;
     if (validContents.length > 0 && validContents[0].role === 'model') {
-        validContents = validContents.slice(1);
+        validContents = validContents.slice(1); // skip initial greeting
     }
 
-    // Ensure there's still something to process after slicing.
     if (validContents.length === 0) {
         return new Response(JSON.stringify({ error: 'No user message to process.' }), {
             status: 400,
@@ -78,24 +69,80 @@ If a question cannot be answered from this context, say you don't have informati
         });
     }
 
-    // Using the recommended gemini-3-flash-preview model for basic text tasks
-    const result = await ai.models.generateContentStream({
-        model: 'gemini-3-flash-preview',
-        contents: validContents,
-        config: { systemInstruction }
+    // Format matches OpenRouter/OpenAI standards
+    const messages = [
+        { role: 'system', content: systemInstruction },
+        ...validContents.map(msg => ({
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            content: msg.text
+        }))
+    ];
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'http://localhost:3000', // OpenRouter appreciates a referer
+            'X-Title': 'Portfolio AI Assistant', 
+        },
+        body: JSON.stringify({
+            // Choose any openrouter model here! 
+            // e.g. "google/gemini-2.5-flash-preview", "openai/gpt-4o-mini", "anthropic/claude-3-haiku"
+            model: 'nvidia/nemotron-3-super-120b-a12b:free', 
+            messages,
+            stream: true
+        })
     });
 
+    if (!response.ok) {
+        const errText = await response.text();
+        console.error("OpenRouter Auth/Network Error:", errText);
+        throw new Error(`OpenRouter Error: ${response.status}`);
+    }
+
+    // Parse the Server-Sent Events (SSE) stream from OpenRouter
     const stream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of result) {
-          // CRITICAL: Access the text property directly on the chunk (GenerateContentResponse)
-          const chunkText = chunk.text;
-          if (chunkText) {
-             controller.enqueue(new TextEncoder().encode(chunkText));
-          }
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = '';
+
+        if (!reader) {
+            controller.close();
+            return;
         }
-        controller.close();
-      },
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                
+                // Keep the last incomplete line in the buffer
+                buffer = lines.pop() || '';
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            const content = data.choices[0]?.delta?.content || "";
+                            if (content) {
+                                controller.enqueue(new TextEncoder().encode(content));
+                            }
+                        } catch (e) {
+                            // Ignored: incomplete JSON chunk string
+                        }
+                    }
+                }
+            }
+        } finally {
+            reader.releaseLock();
+            controller.close();
+        }
+      }
     });
 
     return new Response(stream, {
