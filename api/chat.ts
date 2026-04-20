@@ -47,13 +47,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ({ history, portfolioData } = JSON.parse(rawBody));
         }
 
-        let OPENROUTER_API_KEY =
-            process.env.OPENROUTER_API_KEY ||
-            process.env.VITE_OPENROUTER_API_KEY ||
-            process.env.VITE_API_KEY;
+        let OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
 
         if (OPENROUTER_API_KEY) {
-            OPENROUTER_API_KEY = OPENROUTER_API_KEY.replace(/^"|"$/g, '').trim();
+            OPENROUTER_API_KEY = OPENROUTER_API_KEY.replace(/^"|"$/g, '').replace(/\\n/g, '').trim();
+            console.log("Found API key starting with:", OPENROUTER_API_KEY.substring(0, 10), "Length:", OPENROUTER_API_KEY.length);
+        } else {
+             console.error("API KEY IS MISSING from environment variables!");
         }
 
         if (!OPENROUTER_API_KEY) {
