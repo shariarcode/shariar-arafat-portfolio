@@ -26,6 +26,8 @@ const SocialProfile: React.FC<{ icon: React.ReactNode; name: string; href: strin
 );
 
 
+const WEB3FORMS_ACCESS_KEY = 'e3aeb435-16aa-49cd-a295-db833c402398';
+
 const Contact: React.FC<ContactProps> = ({ content }) => {
     const { contactInfo, socialLinks } = content;
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -39,26 +41,32 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (status === 'loading') return;
-        
+
         setStatus('loading');
         setSubmissionError(null);
 
         try {
-            const response = await fetch('/api/contact', {
+            const payload = {
+                access_key: WEB3FORMS_ACCESS_KEY,
+                ...formData,
+            };
+
+            const response = await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify(payload),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'An unknown server error occurred.' }));
-                throw new Error(errorData.error || 'Failed to send message. The server responded with an error.');
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to send message. Please try again.');
             }
 
             setStatus('success');
-            setFormData({ name: '', email: '', subject: '', message: '' }); // Clear form
+            setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (error: any) {
             console.error('Error submitting message:', error);
             setSubmissionError(error.message);
