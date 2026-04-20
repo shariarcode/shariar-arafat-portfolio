@@ -26,7 +26,8 @@ const mergeProjectServices = (savedServices: any[], defaultServices: ProjectServ
             if (!defaultService) return null;
             return { 
                 name: savedService.name || defaultService.name, 
-                icon: defaultService.icon 
+                icon: defaultService.icon,
+                iconName: savedService.iconName || defaultService.iconName
             };
         }).filter((s): s is ProjectService => s !== null);
 }
@@ -39,6 +40,10 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
         userLocation: s.userLocation || defaults.userLocation,
         heroImage: s.heroImage || defaults.heroImage,
         heroSubheading: s.heroSubheading || defaults.heroSubheading,
+        heroAvailableText: s.heroAvailableText !== undefined ? s.heroAvailableText : defaults.heroAvailableText,
+        resumeUrl: s.resumeUrl !== undefined ? s.resumeUrl : defaults.resumeUrl,
+        sectionTitles: { ...defaults.sectionTitles, ...(s.sectionTitles || {}) },
+        navLinks: { ...defaults.navLinks, ...(s.navLinks || {}) },
         careerObjective: s.careerObjective || defaults.careerObjective,
         contactInfo: { ...defaults.contactInfo, ...(s.contactInfo || {}) },
         socialLinks: { ...defaults.socialLinks, ...(s.socialLinks || {}) },
@@ -62,6 +67,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     return {
                         name: savedSkill.name || defaultSkill.name,
                         icon: defaultSkill.icon,
+                        iconName: savedSkill.iconName || defaultSkill.iconName,
                         description: savedSkill.description || defaultSkill.description,
                         technologies: savedSkill.technologies || defaultSkill.technologies,
                     };
@@ -80,7 +86,9 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                         title: savedProject.title || defaultProject.title,
                         category: savedProject.category || defaultProject.category,
                         description: savedProject.description || defaultProject.description,
-                        services: mergedServices
+                        services: mergedServices,
+                        imageUrl: savedProject.imageUrl !== undefined ? savedProject.imageUrl : defaultProject.imageUrl,
+                        liveUrl: savedProject.liveUrl !== undefined ? savedProject.liveUrl : defaultProject.liveUrl
                     };
                 }).filter((p): p is Project => p !== null)
             : defaults.projectsData,
@@ -190,7 +198,7 @@ const App: React.FC = () => {
 
     return (
         <div className="bg-slate-50 dark:bg-dark-bg transition-colors duration-300 font-sans relative overflow-x-hidden">
-            <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} userName={content.userName} />
+            <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} content={content} />
             <main className="relative z-10">
                 <Hero content={content} />
                 <Expertise content={content} />

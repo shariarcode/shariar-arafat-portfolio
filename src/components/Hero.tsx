@@ -7,7 +7,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ content }) => {
-    const { userName, heroImage, heroRoles, heroSubheading, socialLinks } = content;
+    const { userName, heroImage, heroRoles, heroSubheading, socialLinks, heroAvailableText, resumeUrl } = content;
     const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
     const [displayedRole, setDisplayedRole] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
@@ -37,7 +37,7 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
         <section id="home" className="min-h-[100dvh] flex items-center pt-28 sm:pt-24 pb-12">
             <div className="container mx-auto px-6 flex flex-col-reverse lg:flex-row items-center justify-between">
                 <div className="lg:w-1/2 text-center lg:text-left mt-12 lg:mt-0">
-                    <span className="text-sm font-medium text-primary">Available for hire</span>
+                    <span className="text-sm font-medium text-primary">{heroAvailableText || "Available for hire"}</span>
                     <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mt-2">
                         Hello, I'm <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">{userName}</span>
@@ -53,22 +53,24 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
                         <a href="#contact" className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-transform transform hover:scale-105 duration-300">
                             Get in Touch <ArrowRightIcon />
                         </a>
-                        <a href="#resume" className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-transform transform hover:scale-105 duration-300">
+                        <a href={resumeUrl || "#resume"} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-transform transform hover:scale-105 duration-300">
                             <DownloadIcon /> Download Resume
                         </a>
                     </div>
                     <div className="mt-10 flex justify-center lg:justify-start space-x-6 text-gray-500 dark:text-gray-400">
                         {[
-                            { href: socialLinks.website, icon: <LinkIcon /> },
-                            { href: socialLinks.linkedin, icon: <LinkedInIcon /> },
-                            { href: socialLinks.github, icon: <GithubIcon /> },
-                            { href: socialLinks.behance, icon: <BehanceIcon /> },
-                            { href: socialLinks.dribbble, icon: <DribbbleIcon /> },
-                            { href: socialLinks.instagram, icon: <InstagramIcon /> },
+                            { href: socialLinks?.website, icon: <LinkIcon /> },
+                            { href: socialLinks?.linkedin, icon: <LinkedInIcon /> },
+                            { href: socialLinks?.github, icon: <GithubIcon /> },
+                            { href: socialLinks?.behance, icon: <BehanceIcon /> },
+                            { href: socialLinks?.dribbble, icon: <DribbbleIcon /> },
+                            { href: socialLinks?.instagram, icon: <InstagramIcon /> },
                         ].map((social, index) => (
-                            <a key={index} href={social.href} className="hover:text-primary dark:hover:text-primary-light transition-colors duration-300" target="_blank" rel="noopener noreferrer">
-                                {social.icon}
-                            </a>
+                            social.href && social.href !== '#' && social.href !== '' ? (
+                                <a key={index} href={social.href} className="hover:text-primary dark:hover:text-primary-light transition-colors duration-300" target="_blank" rel="noopener noreferrer">
+                                    {social.icon}
+                                </a>
+                            ) : null
                         ))}
                     </div>
                 </div>

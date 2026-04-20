@@ -7,12 +7,12 @@ interface ExpertiseProps {
 }
 
 const Expertise: React.FC<ExpertiseProps> = ({ content }) => {
-    const { careerObjective, expertiseAreas } = content;
+    const { careerObjective, expertiseAreas, sectionTitles } = content;
     return (
         <section id="about" className="py-20 bg-white dark:bg-dark-card scroll-mt-20">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">My Expertise</h2>
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{sectionTitles?.about || "My Expertise"}</h2>
                     <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
                         With a diverse skill set across multiple disciplines, I bring a unique perspective to every project.
                     </p>

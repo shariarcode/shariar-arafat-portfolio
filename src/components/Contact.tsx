@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
-import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon } from './Icons';
+import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon, LinkIcon, DribbbleIcon, InstagramIcon } from './Icons';
 
 interface ContactProps {
     content: PortfolioData;
@@ -29,7 +28,7 @@ const SocialProfile: React.FC<{ icon: React.ReactNode; name: string; href: strin
 const WEB3FORMS_ACCESS_KEY = 'e3aeb435-16aa-49cd-a295-db833c402398';
 
 const Contact: React.FC<ContactProps> = ({ content }) => {
-    const { contactInfo, socialLinks } = content;
+    const { contactInfo, socialLinks, sectionTitles } = content;
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -78,7 +77,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
         <section id="contact" className="py-20 scroll-mt-20">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">Get In Touch</h2>
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{sectionTitles?.contact || "Get In Touch"}</h2>
                     <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                         Have a project in mind or want to discuss potential opportunities? I'd love to hear from you.
                     </p>
@@ -97,9 +96,12 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                              <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">Professional Profiles</h4>
                              <div className="space-y-4">
-                                <SocialProfile icon={<LinkedInIcon />} name="LinkedIn" href={socialLinks.linkedin} />
-                                <SocialProfile icon={<GithubIcon />} name="GitHub" href={socialLinks.github} />
-                                <SocialProfile icon={<BehanceIcon />} name="Behance" href={socialLinks.behance} />
+                                {socialLinks.linkedin && socialLinks.linkedin !== '#' && socialLinks.linkedin !== '' && <SocialProfile icon={<LinkedInIcon />} name="LinkedIn" href={socialLinks.linkedin} />}
+                                {socialLinks.github && socialLinks.github !== '#' && socialLinks.github !== '' && <SocialProfile icon={<GithubIcon />} name="GitHub" href={socialLinks.github} />}
+                                {socialLinks.behance && socialLinks.behance !== '#' && socialLinks.behance !== '' && <SocialProfile icon={<BehanceIcon />} name="Behance" href={socialLinks.behance} />}
+                                {socialLinks.website && socialLinks.website !== '#' && socialLinks.website !== '' && <SocialProfile icon={<LinkIcon />} name="Website" href={socialLinks.website} />}
+                                {socialLinks.dribbble && socialLinks.dribbble !== '#' && socialLinks.dribbble !== '' && <SocialProfile icon={<DribbbleIcon />} name="Dribbble" href={socialLinks.dribbble} />}
+                                {socialLinks.instagram && socialLinks.instagram !== '#' && socialLinks.instagram !== '' && <SocialProfile icon={<InstagramIcon />} name="Instagram" href={socialLinks.instagram} />}
                              </div>
                         </div>
                     </div>

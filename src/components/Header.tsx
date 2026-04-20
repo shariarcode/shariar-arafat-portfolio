@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { SunIcon, MoonIcon, MenuIcon, CloseIcon } from './Icons';
+import type { PortfolioData } from '../types';
 
 interface HeaderProps {
     darkMode: boolean;
     toggleDarkMode: () => void;
-    userName: string;
+    content: PortfolioData;
 }
 
 const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () => void; className?: string }> = ({ href, children, onClick, className = '' }) => (
@@ -13,11 +14,18 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
     </a>
 );
 
-const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, userName }) => {
+const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, content }) => {
+    const { userName, navLinks, resumeUrl } = content;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
-    const navLinks = ["Home", "About", "Skills", "Work", "Contact"];
+    const visibleNavLinks = [
+        { id: "home", label: "Home", visible: true },
+        { id: "about", label: "About", visible: navLinks?.about !== false },
+        { id: "skills", label: "Skills", visible: navLinks?.skills !== false },
+        { id: "work", label: "Work", visible: navLinks?.work !== false },
+        { id: "contact", label: "Contact", visible: navLinks?.contact !== false }
+    ].filter(item => item.visible);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -52,13 +60,13 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, userName }) =
                         </a>
                         
                         <div className="hidden md:flex items-center space-x-8">
-                            {navLinks.map(link => (
-                                <NavLink key={link} href={`#${link.toLowerCase()}`}>{link}</NavLink>
+                            {visibleNavLinks.map(link => (
+                                <NavLink key={link.id} href={`#${link.id}`}>{link.label}</NavLink>
                             ))}
                         </div>
 
                         <div className="flex items-center space-x-4">
-                            <a href="#resume" className="hidden sm:inline-block px-4 py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors duration-300">
+                            <a href={resumeUrl || "#resume"} target="_blank" rel="noopener noreferrer" className="hidden sm:inline-block px-4 py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors duration-300">
                                 Resume
                             </a>
                             <button onClick={toggleDarkMode} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -87,12 +95,12 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, userName }) =
                     </button>
                 </div>
                 <div className="flex flex-col p-6 space-y-6">
-                    {navLinks.map(link => (
-                        <NavLink key={link} href={`#${link.toLowerCase()}`} onClick={closeMenu} className="text-lg font-medium">
-                            {link}
+                    {visibleNavLinks.map(link => (
+                        <NavLink key={link.id} href={`#${link.id}`} onClick={closeMenu} className="text-lg font-medium">
+                            {link.label}
                         </NavLink>
                     ))}
-                    <a href="#resume" onClick={closeMenu} className="w-full mt-4 text-center px-4 py-3 border border-primary text-primary rounded-md font-medium hover:bg-primary hover:text-white transition-colors duration-300">
+                    <a href={resumeUrl || "#resume"} target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="w-full mt-4 text-center px-4 py-3 border border-primary text-primary rounded-md font-medium hover:bg-primary hover:text-white transition-colors duration-300">
                         Resume
                     </a>
                 </div>
