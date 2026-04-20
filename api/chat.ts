@@ -83,13 +83,11 @@ If a question cannot be answered from this context, say you don't have informati
         headers: {
             'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
-            'HTTP-Referer': 'http://localhost:3000', // OpenRouter appreciates a referer
+            'HTTP-Referer': 'https://shariar-arafat-portfolio.vercel.app',
             'X-Title': 'Portfolio AI Assistant', 
         },
         body: JSON.stringify({
-            // Choose any openrouter model here! 
-            // e.g. "google/gemini-2.5-flash-preview", "openai/gpt-4o-mini", "anthropic/claude-3-haiku"
-            model: 'nvidia/nemotron-3-super-120b-a12b:free', 
+            model: 'google/gemma-3-27b-it:free',
             messages,
             stream: true
         })
@@ -97,8 +95,11 @@ If a question cannot be answered from this context, say you don't have informati
 
     if (!response.ok) {
         const errText = await response.text();
-        console.error("OpenRouter Auth/Network Error:", errText);
-        throw new Error(`OpenRouter Error: ${response.status}`);
+        console.error("OpenRouter Error Response:", response.status, errText);
+        return new Response(
+            JSON.stringify({ error: `OpenRouter Error ${response.status}: ${errText.slice(0, 200)}` }),
+            { status: 502, headers: { 'Content-Type': 'application/json' } }
+        );
     }
 
     // Parse the Server-Sent Events (SSE) stream from OpenRouter
