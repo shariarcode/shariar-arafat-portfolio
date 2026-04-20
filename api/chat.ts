@@ -85,7 +85,7 @@ If asked something outside this context, politely say you don't have that inform
             'X-Title': 'Portfolio AI Assistant',
         },
         body: JSON.stringify({
-            model: 'mistralai/mistral-7b-instruct:free',
+            model: 'nvidia/nemotron-3-super-120b-a12b:free',
             messages,
             stream: false,
             max_tokens: 500,
