@@ -50,7 +50,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", work: "My Projects", contact: "Get In Touch" };
         if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, work: true, contact: true };
         if (!serializableData.heroAvailableText) serializableData.heroAvailableText = "Available for hire";
-        if (!serializableData.resumeUrl) serializableData.resumeUrl = "#resume";
+        if (!serializableData.resumeUrl) serializableData.resumeUrl = "";
         
         // Transform skills technologies for editing
         serializableData.skillsData = (serializableData.skillsData || []).map((skill: any) => ({
@@ -188,7 +188,21 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         <FormInput label="Full Name" name="userName" value={formData.userName} onChange={handleChange} />
                                         <FormInput label="Roles (comma separated)" name="heroRoles" value={formData.heroRoles} onChange={handleChange} />
                                         <FormInput label="'Available for hire' Text" name="heroAvailableText" value={formData.heroAvailableText} onChange={handleChange} />
-                                        <FormInput label="Resume URL" name="resumeUrl" value={formData.resumeUrl} onChange={handleChange} />
+                                        <div>
+                                            <FormInput label="Resume / CV PDF URL" name="resumeUrl" value={formData.resumeUrl} onChange={handleChange} placeholder="Paste a direct PDF link here..." />
+                                            <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+                                                <p className="text-xs text-blue-300 font-semibold mb-1">📄 How to get your PDF link:</p>
+                                                <ol className="text-xs text-blue-400 space-y-1 list-decimal list-inside">
+                                                    <li>Upload your CV PDF to <strong>Google Drive</strong></li>
+                                                    <li>Right-click → <strong>Share</strong> → <strong>Anyone with the link</strong></li>
+                                                    <li>Copy the link, then change <code className="bg-blue-900 px-1 rounded">/view</code> to <code className="bg-blue-900 px-1 rounded">/preview</code></li>
+                                                </ol>
+                                                <p className="text-xs text-blue-400 mt-2">Or use any direct <code className="bg-blue-900 px-1 rounded">.pdf</code> URL from any file hosting service.</p>
+                                            </div>
+                                            {!formData.resumeUrl && (
+                                                <p className="text-xs text-yellow-400 mt-1">⚠️ No resume URL set — buttons will not work until you add one.</p>
+                                            )}
+                                        </div>
                                         <FormTextarea label="Subheading" name="heroSubheading" value={formData.heroSubheading} onChange={handleChange} />
                                     </div>
                                     <div className="space-y-4">

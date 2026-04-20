@@ -66,9 +66,11 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, content }) =>
                         </div>
 
                         <div className="flex items-center space-x-4">
-                            <a href={resumeUrl || "#resume"} target="_blank" rel="noopener noreferrer" className="hidden sm:inline-block px-4 py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors duration-300">
-                                Resume
-                            </a>
+                            {resumeUrl ? (
+                                <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hidden sm:inline-block px-4 py-2 border border-primary text-primary rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors duration-300">
+                                    Resume
+                                </a>
+                            ) : null}
                             <button onClick={toggleDarkMode} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                 {darkMode ? <SunIcon className="h-5 w-5"/> : <MoonIcon className="h-5 w-5"/>}
                             </button>
@@ -100,9 +102,11 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, content }) =>
                             {link.label}
                         </NavLink>
                     ))}
-                    <a href={resumeUrl || "#resume"} target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="w-full mt-4 text-center px-4 py-3 border border-primary text-primary rounded-md font-medium hover:bg-primary hover:text-white transition-colors duration-300">
-                        Resume
-                    </a>
+                    {resumeUrl && (
+                        <a href={resumeUrl} target="_blank" rel="noopener noreferrer" onClick={closeMenu} className="w-full mt-4 text-center px-4 py-3 border border-primary text-primary rounded-md font-medium hover:bg-primary hover:text-white transition-colors duration-300">
+                            Resume
+                        </a>
+                    )}
                 </div>
             </div>
         </>

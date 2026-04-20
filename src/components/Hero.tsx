@@ -53,7 +53,7 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
                         <a href="#contact" className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-transform transform hover:scale-105 duration-300">
                             Get in Touch <ArrowRightIcon />
                         </a>
-                        <a href={resumeUrl || "#resume"} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-transform transform hover:scale-105 duration-300">
+                        <a href={resumeUrl || undefined} target="_blank" rel="noopener noreferrer" className={`w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-transform transform hover:scale-105 duration-300 ${!resumeUrl ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
                             <DownloadIcon /> Download Resume
                         </a>
                     </div>
