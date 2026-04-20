@@ -16,7 +16,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100]">
-            <div className="bg-white dark:bg-dark-card p-8 rounded-lg shadow-xl relative w-full max-w-sm m-4">
+            <div className="bg-white dark:bg-dark-card p-6 sm:p-8 rounded-lg shadow-xl relative w-full max-w-sm m-4">
                 <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <CloseIcon className="h-5 w-5" />
                 </button>

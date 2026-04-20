@@ -9,7 +9,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ onOpen }) => {
     return (
         <button
             onClick={onOpen}
-            className="fixed bottom-8 left-8 bg-primary hover:bg-primary-dark text-white p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-bounce"
+            className="fixed bottom-[max(2rem,env(safe-area-inset-bottom))] left-8 bg-primary hover:bg-primary-dark text-white p-4 rounded-full shadow-lg transition-all duration-300 z-50 animate-bounce min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Open AI Chat"
         >
             <ChatIcon className="h-7 w-7" />

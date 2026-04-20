@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, userName }) =
                             {darkMode ? <SunIcon className="h-5 w-5"/> : <MoonIcon className="h-5 w-5"/>}
                         </button>
                         <button onClick={handleMenuToggle} className="md:hidden p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            <MenuIcon />
+                            {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
                         </button>
                     </div>
                 </nav>

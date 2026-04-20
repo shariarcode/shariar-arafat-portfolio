@@ -201,7 +201,7 @@ const App: React.FC = () => {
             <Footer content={content} onAdminClick={handleAdminClick} />
             
             {showScrollTop && !isChatOpen && (
-                 <button onClick={scrollToTop} className="fixed bottom-8 right-8 bg-primary hover:bg-primary-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50">
+                 <button onClick={scrollToTop} className="fixed bottom-[max(2rem,env(safe-area-inset-bottom))] right-8 bg-primary hover:bg-primary-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50 min-w-[44px] min-h-[44px] flex items-center justify-center">
                     <ArrowUpIcon />
                 </button>
             )}

@@ -21,7 +21,7 @@ const Work: React.FC<WorkProps> = ({ content }) => {
                     </p>
                 </div>
 
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-4xl mx-auto space-y-8">
                     {content.projectsData.map((project, index) => (
                         <div key={index} className="bg-dark-card bg-opacity-70 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-gray-700">
                              <h3 className="text-2xl font-bold text-white mb-2">{project.title}</h3>

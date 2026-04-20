@@ -75,7 +75,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                         Have a project in mind or want to discuss potential opportunities? I'd love to hear from you.
                     </p>
                 </div>
-                <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-12 bg-white dark:bg-dark-card p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
+                <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-12 bg-white dark:bg-dark-card p-4 sm:p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
                     <div className="lg:w-1/3 space-y-8">
                         <div>
                            <InfoCard icon={<MailIcon />} title="Email" value={contactInfo.email} />

@@ -34,7 +34,7 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
     }, [displayedRole, isDeleting, currentRoleIndex, heroRoles]);
 
     return (
-        <section id="home" className="min-h-screen flex items-center pt-24 pb-12">
+        <section id="home" className="min-h-[100dvh] flex items-center pt-28 sm:pt-24 pb-12">
             <div className="container mx-auto px-6 flex flex-col-reverse lg:flex-row items-center justify-between">
                 <div className="lg:w-1/2 text-center lg:text-left mt-12 lg:mt-0">
                     <span className="text-sm font-medium text-primary">Available for hire</span>
@@ -73,7 +73,7 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
                     </div>
                 </div>
                 <div className="lg:w-1/2 flex justify-center">
-                    <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96">
+                    <div className="relative w-56 h-56 sm:w-80 sm:h-80 md:w-96 md:h-96">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-secondary opacity-20 blur-2xl"></div>
                         <div className="absolute inset-0 rounded-full p-1 bg-gradient-to-br from-primary to-secondary">
                             <div className="bg-white dark:bg-dark-bg rounded-full h-full w-full p-2">

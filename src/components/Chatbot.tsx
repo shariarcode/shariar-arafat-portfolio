@@ -36,95 +36,40 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
         setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
         try {
-            const OPENROUTER_API_KEY = (import.meta as any).env.VITE_OPENROUTER_API_KEY || (import.meta as any).env.VITE_API_KEY;
-            
-            if (!OPENROUTER_API_KEY) {
-                throw new Error("Missing OpenRouter API Key");
-            }
-
-            const expertiseText = portfolioData.expertiseAreas.map(a => a.name).join(', ');
-            const skillsText = [...new Set(portfolioData.skillsData.flatMap(s => s.technologies))].join(', ');
-            const projectsText = portfolioData.projectsData.map(p => p.title).join(', ');
-
-            const systemInstruction = `You are a friendly, helpful AI assistant for Shariar Arafat. Answer questions about him using the provided context. You can also have a general conversation.
-
-CONTEXT ABOUT SHARIAR ARAFAT:
-- Name: ${portfolioData.userName}
-- Summary: ${portfolioData.heroSubheading}
-- Roles: ${portfolioData.heroRoles.join(', ')}
-- Goal: ${portfolioData.careerObjective}
-- Expertise: ${expertiseText}
-- Skills: ${skillsText}
-- Key Projects: ${projectsText}
-- Contact: ${portfolioData.userEmail}, located in ${portfolioData.userLocation}
-
-If a question cannot be answered from this context, say you don't have information on that topic. Be polite and conversational.`;
-
-            let validContents = newHistory;
-            if (validContents.length > 0 && validContents[0].role === 'model') {
-                validContents = validContents.slice(1);
-            }
-
-            const messages = [
-                { role: 'system', content: systemInstruction },
-                ...validContents.map(msg => ({
-                    role: msg.role === 'model' ? 'assistant' : 'user',
-                    content: msg.text
-                }))
-            ];
-
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                     'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Portfolio AI Assistant', 
                 },
                 body: JSON.stringify({
-                    model: 'nvidia/nemotron-3-super-120b-a12b:free', 
-                    messages,
-                    stream: true
+                    history: newHistory,
+                    portfolioData: portfolioData
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`OpenRouter Error: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server Error: ${response.status}`);
             }
 
             const reader = response.body?.getReader();
             if (!reader) throw new Error('Failed to read response stream.');
 
             const decoder = new TextDecoder("utf-8");
-            let buffer = '';
             let currentModelMessage = '';
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                
-                buffer = lines.pop() || '';
-                
-                for (const line of lines) {
-                    if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
-                        try {
-                            const data = JSON.parse(line.substring(6));
-                            const content = data.choices[0]?.delta?.content || "";
-                            if (content) {
-                                currentModelMessage += content;
-                                setMessages(prev => {
-                                    const latestMessages = [...prev];
-                                    latestMessages[latestMessages.length - 1] = { role: 'model', text: currentModelMessage };
-                                    return latestMessages;
-                                });
-                            }
-                        } catch (e) {
-                            // Ignored: incomplete JSON chunk string
-                        }
-                    }
+                const textChunk = decoder.decode(value, { stream: true });
+                if (textChunk) {
+                    currentModelMessage += textChunk;
+                    setMessages(prev => {
+                        const latestMessages = [...prev];
+                        latestMessages[latestMessages.length - 1] = { role: 'model', text: currentModelMessage };
+                        return latestMessages;
+                    });
                 }
             }
 
@@ -143,7 +88,7 @@ If a question cannot be answered from this context, say you don't have informati
     };
     
     return (
-        <div className="fixed bottom-0 right-0 sm:bottom-8 sm:right-8 w-full h-full sm:w-[400px] sm:h-[600px] bg-white dark:bg-dark-card shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col z-[100] animate-slide-up">
+        <div className="fixed bottom-0 right-0 sm:bottom-8 sm:right-8 w-full h-[100dvh] sm:h-[600px] bg-white dark:bg-dark-card shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col z-[100] animate-slide-up">
             {/* Header */}
             <div className="flex-shrink-0 flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-900 rounded-t-2xl sm:rounded-t-lg border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-2">
@@ -178,7 +123,7 @@ If a question cannot be answered from this context, say you don't have informati
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="flex-shrink-0 p-4 pb-8 sm:pb-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl sm:rounded-b-lg">
+            <div className="flex-shrink-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl sm:rounded-b-lg">
                 {error && <p className="text-red-500 text-xs text-center mb-2">{error}</p>}
                 <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                     <input

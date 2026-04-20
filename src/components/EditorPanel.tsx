@@ -84,7 +84,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99]">
-            <div className="fixed top-0 right-0 h-full w-full max-w-md bg-dark-card shadow-2xl z-[100] transform transition-transform translate-x-0 border-l border-gray-700">
+            <div className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-dark-card shadow-2xl z-[100] transform transition-transform translate-x-0 border-l border-gray-700">
                 <div className="h-full flex flex-col">
                     <div className="p-6 flex justify-between items-center border-b border-gray-700 bg-gray-900">
                         <h2 className="text-2xl font-bold text-white">Content Editor</h2>
