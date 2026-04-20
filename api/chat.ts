@@ -47,10 +47,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ({ history, portfolioData } = JSON.parse(rawBody));
         }
 
-        const OPENROUTER_API_KEY =
+        let OPENROUTER_API_KEY =
             process.env.OPENROUTER_API_KEY ||
             process.env.VITE_OPENROUTER_API_KEY ||
             process.env.VITE_API_KEY;
+
+        if (OPENROUTER_API_KEY) {
+            OPENROUTER_API_KEY = OPENROUTER_API_KEY.replace(/^"|"$/g, '').trim();
+        }
 
         if (!OPENROUTER_API_KEY) {
             return res.status(500).json({
