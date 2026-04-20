@@ -38,48 +38,33 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     history: newHistory,
                     portfolioData: portfolioData
                 })
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `Server Error: ${response.status}`);
+                throw new Error(data.error || `Server Error: ${response.status}`);
             }
 
-            const reader = response.body?.getReader();
-            if (!reader) throw new Error('Failed to read response stream.');
-
-            const decoder = new TextDecoder("utf-8");
-            let currentModelMessage = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const textChunk = decoder.decode(value, { stream: true });
-                if (textChunk) {
-                    currentModelMessage += textChunk;
-                    setMessages(prev => {
-                        const latestMessages = [...prev];
-                        latestMessages[latestMessages.length - 1] = { role: 'model', text: currentModelMessage };
-                        return latestMessages;
-                    });
-                }
-            }
+            const replyText = data.reply || 'No response received.';
+            setMessages(prev => {
+                const latestMessages = [...prev];
+                latestMessages[latestMessages.length - 1] = { role: 'model', text: replyText };
+                return latestMessages;
+            });
 
         } catch (err: any) {
             console.error("AI chat error:", err);
-            const errorMessage = "Sorry, I couldn't get a response. Please try again later.";
+            const errorMessage = err.message || "Sorry, I couldn't get a response. Please try again later.";
             setError(errorMessage);
             setMessages(prev => {
                 const latestMessages = [...prev];
-                latestMessages[latestMessages.length - 1] = { role: 'model', text: errorMessage };
+                latestMessages[latestMessages.length - 1] = { role: 'model', text: "Sorry, I couldn't get a response. Please try again later." };
                 return latestMessages;
             });
         } finally {
@@ -88,7 +73,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
     };
     
     return (
-        <div className="fixed bottom-0 right-0 sm:bottom-8 sm:right-8 w-full h-[100dvh] sm:h-[600px] bg-white dark:bg-dark-card shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col z-[100] animate-slide-up">
+        <div className="fixed bottom-0 right-0 sm:bottom-8 sm:right-8 w-full sm:w-[400px] h-[100dvh] sm:h-[600px] bg-white dark:bg-dark-card shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col z-[150] animate-slide-up">
             {/* Header */}
             <div className="flex-shrink-0 flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-900 rounded-t-2xl sm:rounded-t-lg border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-2">

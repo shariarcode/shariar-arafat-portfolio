@@ -1,7 +1,3 @@
-export const config = {
-  runtime: 'edge',
-};
-
 interface PortfolioData {
     userName: string;
     userEmail: string;
@@ -32,18 +28,20 @@ export default async function handler(req: Request) {
   try {
     const { history, portfolioData } = await req.json() as { history: ChatMessage[], portfolioData: PortfolioData };
 
-    // Get your OpenRouter key from .env (fallback to VITE_API_KEY if you just renamed the old one)
-    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_API_KEY;
-    
+    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY || process.env.VITE_API_KEY;
+
     if (!OPENROUTER_API_KEY) {
-        throw new Error("Missing OpenRouter API Key");
+        return new Response(JSON.stringify({ error: 'Server configuration error: Missing API key. Please set OPENROUTER_API_KEY in Vercel environment variables.' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
     }
 
     const expertiseText = portfolioData.expertiseAreas.map(a => a.name).join(', ');
     const skillsText = [...new Set(portfolioData.skillsData.flatMap(s => s.technologies))].join(', ');
     const projectsText = portfolioData.projectsData.map(p => p.title).join(', ');
 
-    const systemInstruction = `You are a friendly, helpful AI assistant for Shariar Arafat. Answer questions about him using the provided context. You can also have a general conversation.
+    const systemInstruction = `You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational.
 
 CONTEXT ABOUT SHARIAR ARAFAT:
 - Name: ${portfolioData.userName}
@@ -51,11 +49,11 @@ CONTEXT ABOUT SHARIAR ARAFAT:
 - Roles: ${portfolioData.heroRoles.join(', ')}
 - Goal: ${portfolioData.careerObjective}
 - Expertise: ${expertiseText}
-- Skills: ${skillsText}
+- Skills & Technologies: ${skillsText}
 - Key Projects: ${projectsText}
 - Contact: ${portfolioData.userEmail}, located in ${portfolioData.userLocation}
 
-If a question cannot be answered from this context, say you don't have information on that topic. Be polite and conversational.`;
+If asked something outside this context, politely say you don't have that information. Always be helpful and professional.`;
 
     let validContents = history;
     if (validContents.length > 0 && validContents[0].role === 'model') {
@@ -69,7 +67,6 @@ If a question cannot be answered from this context, say you don't have informati
         });
     }
 
-    // Format matches OpenRouter/OpenAI standards
     const messages = [
         { role: 'system', content: systemInstruction },
         ...validContents.map(msg => ({
@@ -78,76 +75,46 @@ If a question cannot be answered from this context, say you don't have informati
         }))
     ];
 
+    // Using non-streaming for maximum reliability across all hosting runtimes
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://shariar-arafat-portfolio.vercel.app',
-            'X-Title': 'Portfolio AI Assistant', 
+            'X-Title': 'Portfolio AI Assistant',
         },
         body: JSON.stringify({
-            model: 'google/gemma-3-27b-it:free',
+            model: 'mistralai/mistral-7b-instruct:free',
             messages,
-            stream: true
+            stream: false,
+            max_tokens: 500,
         })
     });
 
     if (!response.ok) {
         const errText = await response.text();
-        console.error("OpenRouter Error Response:", response.status, errText);
+        console.error('OpenRouter Error:', response.status, errText);
         return new Response(
-            JSON.stringify({ error: `OpenRouter Error ${response.status}: ${errText.slice(0, 200)}` }),
+            JSON.stringify({ error: `AI service error (${response.status}). Please try again.` }),
             { status: 502, headers: { 'Content-Type': 'application/json' } }
         );
     }
 
-    // Parse the Server-Sent Events (SSE) stream from OpenRouter
-    const stream = new ReadableStream({
-      async start(controller) {
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = '';
+    const data = await response.json();
+    const replyText = data.choices?.[0]?.message?.content;
 
-        if (!reader) {
-            controller.close();
-            return;
-        }
+    if (!replyText) {
+        console.error('Unexpected OpenRouter response shape:', JSON.stringify(data));
+        return new Response(JSON.stringify({ error: 'Received an empty response from the AI.' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
 
-        try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                
-                // Keep the last incomplete line in the buffer
-                buffer = lines.pop() || '';
-                
-                for (const line of lines) {
-                    if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
-                        try {
-                            const data = JSON.parse(line.substring(6));
-                            const content = data.choices[0]?.delta?.content || "";
-                            if (content) {
-                                controller.enqueue(new TextEncoder().encode(content));
-                            }
-                        } catch (e) {
-                            // Ignored: incomplete JSON chunk string
-                        }
-                    }
-                }
-            }
-        } finally {
-            reader.releaseLock();
-            controller.close();
-        }
-      }
-    });
-
-    return new Response(stream, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    return new Response(JSON.stringify({ reply: replyText }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
