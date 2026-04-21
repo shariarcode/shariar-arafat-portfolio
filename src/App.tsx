@@ -7,14 +7,23 @@ import Skills from './components/Skills';
 import Work from './components/Work';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import Blog from './components/Blog';
+import BlogPostPage from './components/BlogPostPage';
+import NotFound from './components/NotFound';
 import AdminLogin from './components/AdminLogin';
 import EditorPanel from './components/EditorPanel';
 import ChatBubble from './components/ChatBubble';
 import Chatbot from './components/Chatbot';
+import Stats from './components/Stats';
+import Testimonials from './components/Testimonials';
+import GithubActivity from './components/GithubActivity';
+import CustomCursor from './components/CustomCursor';
 import { ArrowUpIcon } from './components/Icons';
-import type { PortfolioData, Skill, Project, ProjectService } from './types';
+import { motion } from 'framer-motion';
+import type { PortfolioData, Skill, Project, ProjectService, Testimonial, TimelineEvent } from './types';
 import { DEFAULT_PORTFOLIO_DATA } from './constants';
 import { supabase } from './lib/supabaseClient';
+import { removeJsonLd, setSeoMeta } from './lib/seo';
 
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
     const dServices = defaultServices || [];
@@ -46,6 +55,10 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
         careerObjective: s.careerObjective || defaults.careerObjective,
         contactInfo: { ...defaults.contactInfo, ...(s.contactInfo || {}) },
         socialLinks: { ...defaults.socialLinks, ...(s.socialLinks || {}) },
+        footerContent: {
+            description: s.footerContent?.description || defaults.footerContent?.description,
+            services: Array.isArray(s.footerContent?.services) ? s.footerContent?.services : defaults.footerContent?.services
+        },
         heroRoles: Array.isArray(s.heroRoles) && s.heroRoles.every(r => typeof r === 'string') 
             ? s.heroRoles 
             : defaults.heroRoles,
@@ -69,6 +82,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                         iconName: savedSkill.iconName || defaultSkill.iconName,
                         description: savedSkill.description || defaultSkill.description,
                         technologies: savedSkill.technologies || defaultSkill.technologies,
+                        proficiency: savedSkill.proficiency !== undefined ? savedSkill.proficiency : defaultSkill.proficiency || 85,
                     };
                 }).filter((skill): skill is Skill => skill !== null)
             : defaults.skillsData,
@@ -91,6 +105,49 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     };
                 }).filter((p): p is Project => p !== null)
             : defaults.projectsData,
+        testimonials: Array.isArray(s.testimonials)
+            ? s.testimonials
+                .filter(testimonial => testimonial && typeof testimonial === 'object')
+                .map((savedTestimonial, index) => {
+                    const defaultTestimonial = defaults.testimonials?.[index] || defaults.testimonials?.[0];
+                    return {
+                        name: savedTestimonial.name || defaultTestimonial?.name || 'Client Name',
+                        role: savedTestimonial.role || defaultTestimonial?.role || 'Role',
+                        company: savedTestimonial.company || defaultTestimonial?.company || 'Company',
+                        image: savedTestimonial.image || defaultTestimonial?.image || 'https://i.pravatar.cc/150?img=1',
+                        content: savedTestimonial.content || defaultTestimonial?.content || '',
+                        rating: Math.min(5, Math.max(1, Number(savedTestimonial.rating || defaultTestimonial?.rating || 5))),
+                    };
+                }).filter((testimonial): testimonial is Testimonial => Boolean(testimonial.content))
+            : defaults.testimonials,
+        timeline: Array.isArray(s.timeline)
+            ? s.timeline
+                .filter(event => event && typeof event === 'object')
+                .map((savedEvent, index) => {
+                    const defaultEvent = defaults.timeline?.[index] || defaults.timeline?.[0];
+                    return {
+                        year: savedEvent.year || defaultEvent?.year || 'Year',
+                        title: savedEvent.title || defaultEvent?.title || 'Milestone',
+                        description: savedEvent.description || defaultEvent?.description || '',
+                    };
+                }).filter((event): event is TimelineEvent => Boolean(event.description))
+            : defaults.timeline,
+        blogPosts: Array.isArray(s.blogPosts)
+            ? s.blogPosts
+                .filter(post => post && typeof post === 'object')
+                .map((savedPost, index) => {
+                    const defaultPost = defaults.blogPosts?.[index] || defaults.blogPosts?.[0];
+                    return {
+                        slug: savedPost.slug || defaultPost?.slug || 'post-slug',
+                        title: savedPost.title || defaultPost?.title || 'Blog Title',
+                        excerpt: savedPost.excerpt || defaultPost?.excerpt || '',
+                        content: Array.isArray(savedPost.content) ? savedPost.content : (defaultPost?.content || []),
+                        date: savedPost.date || defaultPost?.date || new Date().toISOString().slice(0, 10),
+                        readTime: savedPost.readTime || defaultPost?.readTime || '5 min read',
+                        url: savedPost.url !== undefined ? savedPost.url : (defaultPost?.url || `/blog/${savedPost.slug || defaultPost?.slug || 'post-slug'}`)
+                    };
+                }).filter(post => Boolean(post.title && post.excerpt))
+            : defaults.blogPosts,
     };
     return merged;
 };
@@ -104,6 +161,9 @@ const App: React.FC = () => {
     const [showLogin, setShowLogin] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const currentPath = window.location.pathname;
+    const isBlogRoute = currentPath.startsWith('/blog/');
+    const routeSlug = isBlogRoute ? currentPath.replace('/blog/', '').replace(/\/+$/, '') : '';
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -139,6 +199,26 @@ const App: React.FC = () => {
             document.documentElement.classList.remove('dark');
         }
     }, [darkMode]);
+
+    useEffect(() => {
+        const canonicalUrl = `${window.location.origin}${currentPath}`;
+        if (currentPath === '/') {
+            setSeoMeta({
+                title: `${content.userName} | Portfolio`,
+                description: content.heroSubheading,
+                canonicalUrl,
+                imageUrl: `${window.location.origin}/og-image.jpg`,
+            });
+            removeJsonLd('blog-post');
+        } else if (!isBlogRoute) {
+            setSeoMeta({
+                title: `404 | ${content.userName}`,
+                description: 'The page you requested does not exist.',
+                canonicalUrl,
+            });
+            removeJsonLd('blog-post');
+        }
+    }, [content.heroSubheading, content.userName, currentPath, isBlogRoute]);
 
     useEffect(() => {
         const checkScrollTop = () => {
@@ -195,23 +275,51 @@ const App: React.FC = () => {
     
     if (loading && !showEditor) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-dark-bg text-gray-900 dark:text-white">
-                <div className="flex items-center space-x-2">
-                    <svg className="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span>Loading...</span>
-                </div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-50 dark:bg-dark-bg text-gray-900 dark:text-white">
+                <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+                    className="flex flex-col items-center space-y-4"
+                >
+                    <div className="relative w-16 h-16">
+                        <div className="absolute inset-0 rounded-full border-4 border-gray-200 dark:border-gray-800"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+                    </div>
+                    <motion.span 
+                        animate={{ opacity: [0.5, 1, 0.5] }} 
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary"
+                    >
+                        Loading Experience...
+                    </motion.span>
+                </motion.div>
             </div>
         );
     }
 
+    if (isBlogRoute) {
+        const post = (content.blogPosts || []).find(p => p.slug === routeSlug);
+        return post ? <BlogPostPage post={post} /> : <NotFound />;
+    }
+
+    if (currentPath !== '/') {
+        return <NotFound />;
+    }
+
     return (
         <div className="bg-slate-50 dark:bg-dark-bg transition-colors duration-300 font-sans relative overflow-x-hidden">
+            <CustomCursor />
             <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} content={content} />
             <main className="relative z-10">
                 <Hero content={content} />
+                <Stats />
                 <Expertise content={content} />
                 <Skills content={content} />
+                <GithubActivity content={content} />
                 <Work content={content} />
+                <Blog content={content} />
+                <Testimonials content={content} />
                 <Contact content={content} />
             </main>
             <Footer content={content} onAdminClick={handleAdminClick} />

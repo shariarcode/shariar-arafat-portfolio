@@ -71,6 +71,54 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
             setIsLoading(false);
         }
     };
+
+    const handleQuickReply = (text: string) => {
+        setUserInput(text);
+        // We need to wait for state update or just pass text to a synthetic event
+        // Hack: trigger form submit equivalent directly
+    };
+    
+    // Quick reply function
+    const sendQuickReply = async (text: string) => {
+        if (isLoading) return;
+
+        const userMessage: ChatMessage = { role: 'user', text };
+        const newHistory = [...messages, userMessage];
+        
+        setMessages(newHistory);
+        setIsLoading(true);
+        setError(null);
+        setMessages(prev => [...prev, { role: 'model', text: '' }]);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ history: newHistory, portfolioData })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.error || `Server Error: ${response.status}`);
+
+            const replyText = data.reply || 'No response received.';
+            setMessages(prev => {
+                const latestMessages = [...prev];
+                latestMessages[latestMessages.length - 1] = { role: 'model', text: replyText };
+                return latestMessages;
+            });
+        } catch (err: any) {
+            console.error("AI chat error:", err);
+            setError(err.message || "Sorry, I couldn't get a response. Please try again later.");
+            setMessages(prev => {
+                const latestMessages = [...prev];
+                latestMessages[latestMessages.length - 1] = { role: 'model', text: "Sorry, I couldn't get a response. Please try again later." };
+                return latestMessages;
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
     
     return (
         <div className="fixed bottom-0 right-0 sm:bottom-8 sm:right-8 w-full sm:w-[400px] h-[100dvh] sm:h-[600px] bg-white dark:bg-dark-card shadow-2xl rounded-t-2xl sm:rounded-2xl flex flex-col z-[150] animate-slide-up">
@@ -105,6 +153,22 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
                         </div>
                     </div>
                 )}
+
+                {/* Suggested Questions */}
+                {messages.length === 1 && !isLoading && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        {["What are your top skills?", "Are you available for freelance?", "What projects have you built?"].map((q, idx) => (
+                            <button 
+                                key={idx} 
+                                onClick={() => sendQuickReply(q)}
+                                className="text-xs px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary hover:text-primary transition-colors rounded-full"
+                            >
+                                {q}
+                            </button>
+                        ))}
+                    </div>
+                )}
+                
                 <div ref={messagesEndRef} />
             </div>
 

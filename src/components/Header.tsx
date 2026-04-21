@@ -24,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, content }) =>
         { id: "about", label: "About", visible: navLinks?.about !== false },
         { id: "skills", label: "Skills", visible: navLinks?.skills !== false },
         { id: "work", label: "Work", visible: navLinks?.work !== false },
+        { id: "blog", label: "Blog", visible: navLinks?.blog !== false },
         { id: "contact", label: "Contact", visible: navLinks?.contact !== false }
     ].filter(item => item.visible);
 
@@ -113,4 +114,4 @@ const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, content }) =>
     );
 };
 
-export default Header;
+export default Header;

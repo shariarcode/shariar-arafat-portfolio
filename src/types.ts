@@ -6,6 +6,7 @@ export interface Skill {
     iconName?: string;
     description: string;
     technologies: string[];
+    proficiency?: number;
 }
 
 export interface ProjectService {
@@ -28,6 +29,31 @@ export interface ChatMessage {
     text: string;
 }
 
+export interface Testimonial {
+    name: string;
+    role: string;
+    company: string;
+    image: string;
+    content: string;
+    rating: number;
+}
+
+export interface TimelineEvent {
+    year: string;
+    title: string;
+    description: string;
+}
+
+export interface BlogPost {
+    slug: string;
+    title: string;
+    excerpt: string;
+    content: string[];
+    date: string;
+    readTime: string;
+    url?: string;
+}
+
 export interface PortfolioData {
     userName: string;
     userEmail: string;
@@ -41,6 +67,13 @@ export interface PortfolioData {
     expertiseAreas: { name: string; description: string }[];
     skillsData: Skill[];
     projectsData: Project[];
+    testimonials?: Testimonial[];
+    timeline?: TimelineEvent[];
+    blogPosts?: BlogPost[];
+    footerContent?: {
+        description?: string;
+        services?: string[];
+    };
     contactInfo: {
         email: string;
         phone: string;
@@ -64,6 +97,7 @@ export interface PortfolioData {
         about?: boolean;
         skills?: boolean;
         work?: boolean;
+        blog?: boolean;
         contact?: boolean;
     };
 }

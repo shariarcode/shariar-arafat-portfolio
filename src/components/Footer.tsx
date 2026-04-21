@@ -8,7 +8,9 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ content, onAdminClick }) => {
-    const { userName, contactInfo, socialLinks } = content;
+    const { userName, contactInfo, socialLinks, footerContent } = content;
+    const footerDescription = footerContent?.description || "A multidisciplinary professional specializing in Web Development and Design.";
+    const services = footerContent?.services?.length ? footerContent.services : ["Web Development", "Graphic Design", "Consulting"];
     return (
         <footer className="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-gray-700 relative py-12">
              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(120,119,198,0.15),rgba(255,255,255,0))] opacity-50 dark:opacity-100"></div>
@@ -19,7 +21,7 @@ const Footer: React.FC<FooterProps> = ({ content, onAdminClick }) => {
                     <div className="lg:col-span-1">
                         <h3 className="text-xl font-bold text-primary mb-4">{userName}'s Portfolio</h3>
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            A multidisciplinary professional specializing in Web Development and Design.
+                            {footerDescription}
                         </p>
                     </div>
 
@@ -27,7 +29,7 @@ const Footer: React.FC<FooterProps> = ({ content, onAdminClick }) => {
                     <div>
                         <h4 className="font-semibold text-gray-800 dark:text-white mb-4">Quick Links</h4>
                         <ul className="space-y-2">
-                            {["Home", "About", "Skills", "Work", "Contact"].map(link => (
+                            {["Home", "About", "Skills", "Work", "Blog", "Contact"].map(link => (
                                 <li key={link}><a href={`#${link.toLowerCase()}`} className="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light transition-colors">{link}</a></li>
                             ))}
                         </ul>
@@ -37,9 +39,9 @@ const Footer: React.FC<FooterProps> = ({ content, onAdminClick }) => {
                     <div>
                         <h4 className="font-semibold text-gray-800 dark:text-white mb-4">Services</h4>
                         <ul className="space-y-2">
-                            <li><span className="text-gray-500 dark:text-gray-400">Web Development</span></li>
-                            <li><span className="text-gray-500 dark:text-gray-400">Graphic Design</span></li>
-                            <li><span className="text-gray-500 dark:text-gray-400">Consulting</span></li>
+                            {services.map((service, index) => (
+                                <li key={index}><span className="text-gray-500 dark:text-gray-400">{service}</span></li>
+                            ))}
                         </ul>
                     </div>
 

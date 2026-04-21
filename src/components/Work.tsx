@@ -1,30 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { PortfolioData } from '../types';
 import { ArrowRightIcon, CodeIcon } from './Icons';
 import { ICON_OPTIONS } from '../constants';
+import FadeIn from './FadeIn';
 
 interface WorkProps {
     content: PortfolioData;
 }
 
 const Work: React.FC<WorkProps> = ({ content }) => {
+    const [activeFilter, setActiveFilter] = useState('All');
+    
+    // Get unique categories
+    const categories = ['All', ...Array.from(new Set(content.projectsData.map(p => p.category)))];
+    
+    // Filter projects
+    const filteredProjects = activeFilter === 'All' 
+        ? content.projectsData 
+        : content.projectsData.filter(p => p.category === activeFilter);
+
     return (
         <section id="work" className="py-20 bg-gray-900 text-white relative scroll-mt-20">
             <div className="absolute inset-0 bg-black bg-opacity-50"></div>
             <div className="absolute inset-0 -z-10 h-full w-full bg-dark-bg bg-[radial-gradient(#444_1px,transparent_1px)] [background-size:16px_16px]"></div>
             
             <div className="container mx-auto px-6 relative z-10">
-                <div className="text-center mb-12">
-                    <span className="text-primary font-semibold">My Projects</span>
-                    <h2 className="text-4xl font-bold mt-2">{content.sectionTitles?.work || "Bringing Ideas to Life"}</h2>
-                    <p className="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">
-                        I create digital experiences that combine creativity with functionality. Here's a look at my work.
-                    </p>
-                </div>
+                <FadeIn direction="up">
+                    <div className="text-center mb-12">
+                        <span className="text-primary font-semibold">My Projects</span>
+                        <h2 className="text-4xl font-bold mt-2">{content.sectionTitles?.work || "Bringing Ideas to Life"}</h2>
+                        <p className="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">
+                            I create digital experiences that combine creativity with functionality. Here's a look at my work.
+                        </p>
+                    </div>
+                </FadeIn>
 
-                <div className="max-w-4xl mx-auto space-y-8">
-                    {content.projectsData.map((project, index) => (
-                        <div key={index} className="bg-dark-card bg-opacity-70 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-gray-700 flex flex-col md:flex-row">
+                {/* Filter Tabs */}
+                <FadeIn direction="up" delay={0.2}>
+                    <div className="flex flex-wrap justify-center gap-3 mb-10">
+                        {categories.map((category, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setActiveFilter(category)}
+                                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    activeFilter === category 
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/30' 
+                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                                }`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                </FadeIn>
+
+                <motion.div layout className="max-w-4xl mx-auto space-y-8">
+                    <AnimatePresence>
+                    {filteredProjects.map((project, index) => (
+                        <motion.div
+                            layout
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
+                            key={project.title} 
+                            className="bg-dark-card bg-opacity-70 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-gray-700 flex flex-col md:flex-row"
+                        >
                             {project.imageUrl && (
                                 <div className="md:w-1/3 h-48 md:h-auto shrink-0 relative overflow-hidden bg-gray-800">
                                     <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover" />
@@ -55,15 +97,18 @@ const Work: React.FC<WorkProps> = ({ content }) => {
                                     })}
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                    </AnimatePresence>
+                </motion.div>
 
-                <div className="text-center mt-12">
-                    <a href="#contact" className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-primary-dark transition-transform transform hover:scale-105 duration-300">
-                        Discuss Your Project <ArrowRightIcon />
-                    </a>
-                </div>
+                <FadeIn direction="up" delay={0.4}>
+                    <div className="text-center mt-12">
+                        <a href="#contact" className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-primary-dark transition-transform transform hover:scale-105 duration-300">
+                            Discuss Your Project <ArrowRightIcon />
+                        </a>
+                    </div>
+                </FadeIn>
             </div>
         </section>
     );

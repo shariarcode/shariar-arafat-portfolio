@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
 import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon, LinkIcon, DribbbleIcon, InstagramIcon } from './Icons';
+import FadeIn from './FadeIn';
+import { supabase } from '../lib/supabaseClient';
 
 interface ContactProps {
     content: PortfolioData;
@@ -61,7 +63,21 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
             const data = await response.json();
 
             if (!data.success) {
-                throw new Error(data.message || 'Failed to send message. Please try again.');
+                throw new Error(data.message || 'Failed to send message via email. Please try again.');
+            }
+
+            // Also store in Supabase for Admin Inbox
+            try {
+                await supabase.from('contact_submissions').insert([{
+                    name: formData.name,
+                    email: formData.email,
+                    subject: formData.subject,
+                    message: formData.message,
+                    created_at: new Date().toISOString()
+                }]);
+            } catch (dbError) {
+                console.error("Failed to save to Supabase inbox:", dbError);
+                // We don't throw here because the email was already sent successfully
             }
 
             setStatus('success');
@@ -76,14 +92,16 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
     return (
         <section id="contact" className="py-20 scroll-mt-20">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{sectionTitles?.contact || "Get In Touch"}</h2>
-                    <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Have a project in mind or want to discuss potential opportunities? I'd love to hear from you.
-                    </p>
-                </div>
+                <FadeIn direction="up">
+                    <div className="text-center mb-12">
+                        <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{sectionTitles?.contact || "Get In Touch"}</h2>
+                        <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            Have a project in mind or want to discuss potential opportunities? I'd love to hear from you.
+                        </p>
+                    </div>
+                </FadeIn>
                 <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-12 bg-white dark:bg-dark-card p-4 sm:p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
-                    <div className="lg:w-1/3 space-y-8">
+                    <FadeIn direction="left" className="lg:w-1/3 space-y-8">
                         <div>
                            <InfoCard icon={<MailIcon />} title="Email" value={contactInfo.email} />
                         </div>
@@ -104,8 +122,8 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                                 {socialLinks.instagram && socialLinks.instagram !== '#' && socialLinks.instagram !== '' && <SocialProfile icon={<InstagramIcon />} name="Instagram" href={socialLinks.instagram} />}
                              </div>
                         </div>
-                    </div>
-                    <div className="lg:w-2/3">
+                    </FadeIn>
+                    <FadeIn direction="right" className="lg:w-2/3">
                         <form onSubmit={handleSubmit} className="space-y-6">
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
@@ -140,7 +158,7 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                                  <p className="mt-4 text-center text-red-500 dark:text-red-400">Error: {submissionError}</p>
                             )}
                         </form>
-                    </div>
+                    </FadeIn>
                 </div>
             </div>
         </section>

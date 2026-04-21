@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
 import { CloseIcon } from './Icons';
 import { ICON_OPTIONS } from '../constants';
+import { supabase } from '../lib/supabaseClient';
 
 interface EditorPanelProps {
     data: PortfolioData;
@@ -48,9 +49,10 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         
         // Ensure new objects exist
         if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", work: "My Projects", contact: "Get In Touch" };
-        if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, work: true, contact: true };
+        if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, work: true, blog: true, contact: true };
         if (!serializableData.heroAvailableText) serializableData.heroAvailableText = "Available for hire";
         if (!serializableData.resumeUrl) serializableData.resumeUrl = "";
+        if (!serializableData.footerContent) serializableData.footerContent = { description: "", services: [] };
         
         // Transform skills technologies for editing
         serializableData.skillsData = (serializableData.skillsData || []).map((skill: any) => ({
@@ -58,17 +60,47 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
             technologies: Array.isArray(skill.technologies) ? skill.technologies.join(', ') : ''
         }));
         
+        if (!Array.isArray(serializableData.timeline)) serializableData.timeline = [];
+        if (!Array.isArray(serializableData.testimonials)) serializableData.testimonials = [];
+        if (!Array.isArray(serializableData.blogPosts)) serializableData.blogPosts = [];
+        serializableData.blogPosts = serializableData.blogPosts.map((post: any) => ({
+            ...post,
+            content: Array.isArray(post.content) ? post.content.join('\n\n') : ''
+        }));
+        serializableData.footerContent.services = Array.isArray(serializableData.footerContent.services) ? serializableData.footerContent.services.join(', ') : '';
+
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'work' | 'contact' | 'settings'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox'>('home');
+    const [inboxMessages, setInboxMessages] = useState<any[]>([]);
+    const [loadingInbox, setLoadingInbox] = useState(false);
+
+    React.useEffect(() => {
+        if (activeTab === 'inbox') {
+            fetchInbox();
+        }
+    }, [activeTab]);
+
+    const fetchInbox = async () => {
+        setLoadingInbox(true);
+        try {
+            const { data, error } = await supabase.from('contact_submissions').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setInboxMessages(data || []);
+        } catch (err) {
+            console.error("Failed to load inbox:", err);
+        } finally {
+            setLoadingInbox(false);
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev: any) => ({ ...prev, [name]: value }));
     };
 
-    const handleNestedChange = (parent: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNestedChange = (parent: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev: any) => ({
             ...prev,
@@ -139,6 +171,22 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                 technologies: typeof skill.technologies === 'string' 
                     ? skill.technologies.split(',').map((s: string) => s.trim()).filter(Boolean)
                     : skill.technologies
+            })),
+            footerContent: {
+                ...formData.footerContent,
+                services: typeof formData.footerContent?.services === 'string'
+                    ? formData.footerContent.services.split(',').map((s: string) => s.trim()).filter(Boolean)
+                    : formData.footerContent?.services
+            },
+            blogPosts: (formData.blogPosts || []).map((post: any) => ({
+                ...post,
+                content: typeof post.content === 'string'
+                    ? post.content.split('\n').map((line: string) => line.trim()).filter(Boolean)
+                    : post.content
+            })),
+            testimonials: (formData.testimonials || []).map((testimonial: any) => ({
+                ...testimonial,
+                rating: Math.min(5, Math.max(1, Number(testimonial.rating || 5)))
             }))
         };
         onSave(processedData as unknown as PortfolioData);
@@ -149,7 +197,10 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         { id: 'about', label: '👤 About' },
         { id: 'skills', label: '🛠️ Skills' },
         { id: 'work', label: '💼 Work' },
+        { id: 'blog', label: '📝 Blog' },
+        { id: 'testimonials', label: '💬 Testimonials' },
         { id: 'contact', label: '📬 Contact' },
+        { id: 'inbox', label: '📥 Inbox' },
         { id: 'settings', label: '⚙️ Settings' }
     ] as const;
 
@@ -248,6 +299,25 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         ))}
                                     </div>
                                 </div>
+                                <div className="space-y-4 pt-4 border-t border-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="text-xl font-bold text-gray-200">Career Timeline</h4>
+                                        <button onClick={() => handleAddItem('timeline', { year: "2026", title: "New Milestone", description: "" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Timeline Event</button>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {(formData.timeline || []).map((event: any, index: number) => (
+                                            <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                    <FormInput label="Year" name="year" value={event.year || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
+                                                    <FormInput label="Milestone Title" name="title" value={event.title || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
+                                                </div>
+                                                <FormTextarea label="Milestone Description" name="description" value={event.description || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
+                                                <button onClick={() => handleDeleteItem('timeline', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -338,6 +408,61 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                             </div>
                         )}
 
+                        {/* BLOG TAB */}
+                        {activeTab === 'blog' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Blog Section</h3>
+                                    <button onClick={() => handleAddItem('blogPosts', { slug: "new-blog-post", title: "New Blog Post", excerpt: "", content: "", date: new Date().toISOString().slice(0, 10), readTime: "5 min read", url: "/blog/new-blog-post" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Blog Post</button>
+                                </div>
+                                <div className="space-y-6">
+                                    {(formData.blogPosts || []).map((post: any, index: number) => (
+                                        <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                <FormInput label="Post Slug" name="slug" value={post.slug || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                                <FormInput label="Post Title" name="title" value={post.title || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                                <FormInput label="Published Date (YYYY-MM-DD)" name="date" value={post.date || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                                <FormInput label="Read Time" name="readTime" value={post.readTime || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                                <FormInput label="Article URL" name="url" value={post.url || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                            </div>
+                                            <FormTextarea label="Excerpt" name="excerpt" value={post.excerpt || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                            <FormTextarea label="Post Content (one paragraph per line)" name="content" value={post.content || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                            <button onClick={() => handleDeleteItem('blogPosts', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TESTIMONIALS TAB */}
+                        {activeTab === 'testimonials' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Testimonials Carousel Content</h3>
+                                    <button onClick={() => handleAddItem('testimonials', { name: "Client Name", role: "Role", company: "Company", image: "https://i.pravatar.cc/150?img=12", content: "", rating: 5 })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Testimonial</button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {(formData.testimonials || []).map((testimonial: any, index: number) => (
+                                        <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                <FormInput label="Client Name" name="name" value={testimonial.name || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                                <FormInput label="Client Role" name="role" value={testimonial.role || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                                <FormInput label="Company" name="company" value={testimonial.company || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                                <FormInput label="Profile Image URL" name="image" value={testimonial.image || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-400 mb-1">Rating (1-5)</label>
+                                                    <input type="number" min={1} max={5} name="rating" value={testimonial.rating || 5} onChange={(e) => handleArrayChange('testimonials', index, e)} className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all" />
+                                                </div>
+                                            </div>
+                                            <FormTextarea label="Testimonial Content" name="content" value={testimonial.content || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                            <button onClick={() => handleDeleteItem('testimonials', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* CONTACT TAB */}
                         {activeTab === 'contact' && (
                             <div className="space-y-8 animate-fade-in">
@@ -378,7 +503,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Navigation Links Visibility</h4>
-                                        {['about', 'skills', 'work', 'contact'].map((navItem) => (
+                                        {['about', 'skills', 'work', 'blog', 'contact'].map((navItem) => (
                                             <div key={navItem} className="flex items-center gap-3">
                                                 <input 
                                                     type="checkbox" 
@@ -395,7 +520,45 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             Toggle these checks to hide or show specific links in the header navigation menu. Note that the section will still exist on the page, but the link will be hidden.
                                         </p>
                                     </div>
+                                    <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
+                                        <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Footer Content</h4>
+                                        <FormTextarea label="Footer Description" name="description" value={formData.footerContent?.description || ''} onChange={(e) => handleNestedChange('footerContent', e)} />
+                                        <FormInput label="Footer Services (comma separated)" name="services" value={formData.footerContent?.services || ''} onChange={(e) => handleNestedChange('footerContent', e)} />
+                                    </div>
                                 </div>
+                            </div>
+                        )}
+                        
+                        {/* INBOX TAB */}
+                        {activeTab === 'inbox' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Contact Submissions</h3>
+                                    <button onClick={fetchInbox} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">Refresh</button>
+                                </div>
+                                {loadingInbox ? (
+                                    <div className="text-gray-400 text-center py-10">Loading messages...</div>
+                                ) : inboxMessages.length === 0 ? (
+                                    <div className="text-gray-500 text-center py-10 bg-gray-900 rounded-xl border border-gray-700">No messages yet.</div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {inboxMessages.map((msg, i) => (
+                                            <div key={i} className="bg-gray-900 border border-gray-700 p-5 rounded-xl">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-200">{msg.name}</h4>
+                                                        <a href={`mailto:${msg.email}`} className="text-sm text-primary hover:underline">{msg.email}</a>
+                                                    </div>
+                                                    <span className="text-xs text-gray-500">{new Date(msg.created_at).toLocaleString()}</span>
+                                                </div>
+                                                <div className="mt-4 pt-4 border-t border-gray-800">
+                                                    <p className="text-sm font-semibold text-gray-400 mb-1">Subject: {msg.subject}</p>
+                                                    <p className="text-gray-300 whitespace-pre-wrap">{msg.message}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
                         

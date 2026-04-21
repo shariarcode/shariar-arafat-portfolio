@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { PortfolioData } from '../types';
 import { ArrowRightIcon, DownloadIcon, LinkIcon, LinkedInIcon, BehanceIcon, DribbbleIcon, InstagramIcon, GithubIcon } from './Icons';
+import FadeIn from './FadeIn';
 
 interface HeroProps {
     content: PortfolioData;
@@ -36,7 +37,7 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
     return (
         <section id="home" className="min-h-[100dvh] flex items-center pt-28 sm:pt-24 pb-12">
             <div className="container mx-auto px-6 flex flex-col-reverse lg:flex-row items-center justify-between">
-                <div className="lg:w-1/2 text-center lg:text-left mt-12 lg:mt-0">
+                <FadeIn direction="left" className="lg:w-1/2 text-center lg:text-left mt-12 lg:mt-0">
                     <span className="text-sm font-medium text-primary">{heroAvailableText || "Available for hire"}</span>
                     <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mt-2">
                         Hello, I'm <br />
@@ -73,8 +74,8 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
                             ) : null
                         ))}
                     </div>
-                </div>
-                <div className="lg:w-1/2 flex justify-center">
+                </FadeIn>
+                <FadeIn direction="right" className="lg:w-1/2 flex justify-center">
                     <div className="relative w-56 h-56 sm:w-80 sm:h-80 md:w-96 md:h-96">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-secondary opacity-20 blur-2xl"></div>
                         <div className="absolute inset-0 rounded-full p-1 bg-gradient-to-br from-primary to-secondary">
@@ -83,7 +84,7 @@ const Hero: React.FC<HeroProps> = ({ content }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </FadeIn>
             </div>
         </section>
     );

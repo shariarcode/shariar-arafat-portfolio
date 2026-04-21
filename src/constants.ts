@@ -59,6 +59,94 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
             liveUrl: "#"
         }
     ],
+    testimonials: [
+        {
+            name: "Sarah Jenkins",
+            role: "Product Manager",
+            company: "TechNova",
+            image: "https://i.pravatar.cc/150?img=47",
+            content: "Shariar delivered exceptional quality on our project. Not only did he write clean, maintainable code, but he also provided great design insights that completely transformed our user experience.",
+            rating: 5
+        },
+        {
+            name: "David Chen",
+            role: "Startup Founder",
+            company: "Innovate Labs",
+            image: "https://i.pravatar.cc/150?img=11",
+            content: "Working with Shariar was seamless. He communicates clearly, hits deadlines, and balances clean engineering with polished UI decisions.",
+            rating: 5
+        },
+        {
+            name: "Emily Rodriguez",
+            role: "Creative Director",
+            company: "Studio Eight",
+            image: "https://i.pravatar.cc/150?img=5",
+            content: "He translated rough wireframes into a polished, responsive application with excellent performance and attention to detail.",
+            rating: 5
+        }
+    ],
+    timeline: [
+        {
+            year: "2020",
+            title: "The Beginning",
+            description: "Discovered a passion for programming and started learning foundational web technologies."
+        },
+        {
+            year: "2022",
+            title: "Freelance Growth",
+            description: "Delivered client projects in design and front-end development while sharpening communication and delivery."
+        },
+        {
+            year: "2024",
+            title: "Full-Stack Expansion",
+            description: "Focused on modern frameworks, TypeScript, and scalable backend architecture for production-ready apps."
+        }
+    ],
+    blogPosts: [
+        {
+            slug: "build-fast-accessible-portfolio-websites",
+            title: "How I Build Fast, Accessible Portfolio Websites",
+            excerpt: "My practical checklist for balancing performance, accessibility, and visual polish in client-facing web projects.",
+            content: [
+                "I begin by setting clear performance budgets before writing UI code. This keeps bundle growth intentional and helps me decide when to split components or defer non-critical features.",
+                "Accessibility is not a final audit step for me. I add semantic structure, keyboard navigation checks, and sufficient color contrast while building each section so quality compounds over time.",
+                "For visual polish, I prioritize meaningful motion and spacing consistency over excessive effects. Small interactions that reinforce hierarchy usually improve perception more than heavy animation."
+            ],
+            date: "2026-03-10",
+            readTime: "5 min read",
+            url: "/blog/build-fast-accessible-portfolio-websites"
+        },
+        {
+            slug: "design-to-code-workflow-that-saves-hours",
+            title: "Design-to-Code Workflow That Saves Me Hours",
+            excerpt: "A repeatable process for turning rough UI ideas into reusable components without sacrificing iteration speed.",
+            content: [
+                "I translate each design into tokens first: typography, spacing, color, and interaction states. This gives me a stable base and reduces visual drift as sections evolve.",
+                "Then I scaffold reusable primitives and compose larger blocks from those primitives. It avoids one-off styling and makes future revisions significantly faster.",
+                "Finally, I validate responsiveness and edge cases early by testing the same component in multiple contexts before shipping."
+            ],
+            date: "2026-02-01",
+            readTime: "4 min read",
+            url: "/blog/design-to-code-workflow-that-saves-hours"
+        },
+        {
+            slug: "lessons-from-shipping-full-stack-portfolio-features",
+            title: "Lessons From Shipping Full-Stack Portfolio Features",
+            excerpt: "What I learned while integrating CMS editing, forms, and live activity widgets into one coherent experience.",
+            content: [
+                "End-to-end consistency matters more than isolated features. I define shared data models first, then map UI and backend around those models.",
+                "For form workflows, I treat delivery and persistence separately. Users get reliable submission feedback while admin tools still receive structured inbox data.",
+                "Live widgets like GitHub activity are strongest when they degrade gracefully. Fallback behavior keeps the experience stable even when external data sources are unavailable."
+            ],
+            date: "2026-01-15",
+            readTime: "6 min read",
+            url: "/blog/lessons-from-shipping-full-stack-portfolio-features"
+        }
+    ],
+    footerContent: {
+        description: "A multidisciplinary professional specializing in Web Development and Design.",
+        services: ["Web Development", "Graphic Design", "Consulting"]
+    },
     contactInfo: {
         email: USER_EMAIL,
         phone: "Available upon request",
@@ -82,6 +170,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         about: true,
         skills: true,
         work: true,
+        blog: true,
         contact: true
     }
 };
