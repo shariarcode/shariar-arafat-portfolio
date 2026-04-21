@@ -18,12 +18,14 @@ import Stats from './components/Stats';
 import Testimonials from './components/Testimonials';
 import GithubActivity from './components/GithubActivity';
 import CustomCursor from './components/CustomCursor';
+import CursorAnalysisOverlay from './components/CursorAnalysisOverlay';
 import { ArrowUpIcon } from './components/Icons';
 import { motion } from 'framer-motion';
 import type { PortfolioData, Skill, Project, ProjectService, Testimonial, TimelineEvent } from './types';
 import { DEFAULT_PORTFOLIO_DATA } from './constants';
 import { supabase } from './lib/supabaseClient';
 import { removeJsonLd, setSeoMeta } from './lib/seo';
+import { ToastProvider, useToast } from './components/Toast';
 
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
     const dServices = defaultServices || [];
@@ -152,7 +154,8 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
     return merged;
 };
 
-const App: React.FC = () => {
+const AppInner: React.FC = () => {
+    const { showToast } = useToast();
     const [darkMode, setDarkMode] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -245,8 +248,9 @@ const App: React.FC = () => {
             setIsAdmin(true);
             setShowLogin(false);
             setShowEditor(true);
+            showToast('Welcome back, Admin!', 'success');
         } else {
-            alert('Incorrect password.');
+            showToast('Incorrect password. Please try again.', 'error');
         }
     };
 
@@ -263,10 +267,10 @@ const App: React.FC = () => {
 
             const fullContent = mergeContentData(serializableContent, DEFAULT_PORTFOLIO_DATA);
             setContent(fullContent);
-            alert('Changes saved successfully!');
+            showToast('Changes saved successfully! 🎉', 'success');
         } catch (error: any) {
             console.error("Failed to save changes:", error);
-            alert(`Failed to save changes: ${error.message}`);
+            showToast(`Failed to save: ${error.message}`, 'error');
         } finally {
             setShowEditor(false);
             setLoading(false);
@@ -310,6 +314,7 @@ const App: React.FC = () => {
     return (
         <div className="bg-slate-50 dark:bg-dark-bg transition-colors duration-300 font-sans relative overflow-x-hidden">
             <CustomCursor />
+            <CursorAnalysisOverlay />
             <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} content={content} />
             <main className="relative z-10">
                 <Hero content={content} />
@@ -338,5 +343,11 @@ const App: React.FC = () => {
         </div>
     );
 };
+
+const App: React.FC = () => (
+    <ToastProvider>
+        <AppInner />
+    </ToastProvider>
+);
 
 export default App;

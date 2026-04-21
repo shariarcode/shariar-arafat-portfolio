@@ -12,27 +12,27 @@ interface EditorPanelProps {
 
 const FormInput: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string }> = ({ label, name, value, onChange, placeholder }) => (
     <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
+        <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
         <input 
             type="text" 
             name={name} 
             value={value} 
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all"
+            className="w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px]"
         />
     </div>
 );
 
 const FormTextarea: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void }> = ({ label, name, value, onChange }) => (
     <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
+        <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
         <textarea 
             name={name}
             value={value} 
             onChange={onChange}
             rows={3}
-            className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all"
+            className="w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px]"
         />
     </div>
 );
@@ -205,22 +205,22 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     ] as const;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99] flex items-center justify-center p-4 sm:p-8">
-            <div className="w-full h-full max-w-6xl bg-dark-bg shadow-2xl z-[100] rounded-2xl flex flex-col overflow-hidden border border-gray-700">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99] flex items-center justify-center p-0 sm:p-4 lg:p-8">
+            <div className="w-full h-full lg:max-w-6xl bg-dark-bg shadow-2xl z-[100] sm:rounded-2xl flex flex-col overflow-hidden border-0 sm:border border-gray-700">
                 {/* Header */}
-                <div className="p-6 flex justify-between items-center border-b border-gray-700 bg-gray-900">
-                    <h2 className="text-2xl font-bold text-white">Full CMS Dashboard</h2>
-                    <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700 transition-colors bg-gray-800"><CloseIcon /></button>
+                <div className="p-4 sm:p-6 flex justify-between items-center border-b border-gray-700 bg-gray-900">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white truncate mr-4">Full CMS Dashboard</h2>
+                    <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700 transition-colors bg-gray-800 min-w-[44px] min-h-[44px] flex items-center justify-center"><CloseIcon /></button>
                 </div>
                 
-                <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar Tabs */}
-                    <div className="w-48 bg-gray-900 border-r border-gray-700 flex flex-col p-4 gap-2">
+                <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+                    {/* Sidebar Tabs - Scrollable horizontally on mobile, vertically on desktop */}
+                    <div className="flex lg:flex-col lg:w-48 bg-gray-900 border-b lg:border-b-0 lg:border-r border-gray-700 p-2 sm:p-4 gap-1 sm:gap-2 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth">
                         {tabs.map(tab => (
                             <button 
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-4 py-3 text-left rounded-lg transition-colors font-medium ${activeTab === tab.id ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+                                className={`px-4 py-2 sm:py-3 text-sm sm:text-base text-center lg:text-left rounded-lg transition-colors font-medium whitespace-nowrap min-h-[44px] ${activeTab === tab.id ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
                             >
                                 {tab.label}
                             </button>
@@ -228,27 +228,27 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto p-8 bg-dark-bg text-white">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-dark-bg text-white">
                         
                         {/* HOME TAB */}
                         {activeTab === 'home' && (
-                            <div className="space-y-8 animate-fade-in">
-                                <h3 className="text-2xl font-bold text-primary mb-6">Home Section Details</h3>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="space-y-6 sm:space-y-8 animate-fade-in">
+                                <h3 className="text-xl sm:text-2xl font-bold text-primary mb-4 sm:mb-6">Home Section Details</h3>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                                     <div className="space-y-4">
                                         <FormInput label="Full Name" name="userName" value={formData.userName} onChange={handleChange} />
                                         <FormInput label="Roles (comma separated)" name="heroRoles" value={formData.heroRoles} onChange={handleChange} />
                                         <FormInput label="'Available for hire' Text" name="heroAvailableText" value={formData.heroAvailableText} onChange={handleChange} />
                                         <div>
                                             <FormInput label="Resume / CV PDF URL" name="resumeUrl" value={formData.resumeUrl} onChange={handleChange} placeholder="Paste a direct PDF link here..." />
-                                            <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
-                                                <p className="text-xs text-blue-300 font-semibold mb-1">📄 How to get your PDF link:</p>
-                                                <ol className="text-xs text-blue-400 space-y-1 list-decimal list-inside">
+                                            <div className="mt-3 p-3 sm:p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+                                                <p className="text-xs sm:text-sm text-blue-300 font-semibold mb-2">📄 How to get your PDF link:</p>
+                                                <ol className="text-xs sm:text-sm text-blue-400 space-y-2 list-decimal list-inside">
                                                     <li>Upload your CV PDF to <strong>Google Drive</strong></li>
                                                     <li>Right-click → <strong>Share</strong> → <strong>Anyone with the link</strong></li>
                                                     <li>Copy the link, then change <code className="bg-blue-900 px-1 rounded">/view</code> to <code className="bg-blue-900 px-1 rounded">/preview</code></li>
                                                 </ol>
-                                                <p className="text-xs text-blue-400 mt-2">Or use any direct <code className="bg-blue-900 px-1 rounded">.pdf</code> URL from any file hosting service.</p>
+                                                <p className="text-xs sm:text-sm text-blue-400 mt-2">Or use any direct <code className="bg-blue-900 px-1 rounded">.pdf</code> URL from any file hosting service.</p>
                                             </div>
                                             {!formData.resumeUrl && (
                                                 <p className="text-xs text-yellow-400 mt-1">⚠️ No resume URL set — buttons will not work until you add one.</p>

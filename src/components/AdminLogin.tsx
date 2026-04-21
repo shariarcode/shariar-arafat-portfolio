@@ -15,27 +15,27 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100]">
-            <div className="bg-white dark:bg-dark-card p-6 sm:p-8 rounded-lg shadow-xl relative w-full max-w-sm m-4">
-                <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+            <div className="bg-white dark:bg-dark-card p-6 sm:p-10 rounded-2xl shadow-2xl relative w-full max-w-sm border border-gray-200 dark:border-gray-800">
+                <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
                     <CloseIcon className="h-5 w-5" />
                 </button>
-                <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">Admin Login</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">Admin Login</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Security Password</label>
                         <input 
                             type="password" 
                             id="password" 
                             value={password} 
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary focus:border-primary"
-                            placeholder="Enter password"
+                            className="w-full px-4 py-3 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all text-base min-h-[44px]"
+                            placeholder="Enter admin password"
                             autoFocus
                         />
                     </div>
-                    <button type="submit" className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-colors duration-300">
-                        Login
+                    <button type="submit" className="w-full px-6 py-4 sm:py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 transform active:scale-[0.98] min-h-[48px]">
+                        Access Dashboard
                     </button>
                 </form>
             </div>

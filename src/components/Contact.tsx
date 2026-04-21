@@ -3,6 +3,7 @@ import type { PortfolioData } from '../types';
 import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon, LinkIcon, DribbbleIcon, InstagramIcon } from './Icons';
 import FadeIn from './FadeIn';
 import { supabase } from '../lib/supabaseClient';
+import { useToast } from './Toast';
 
 interface ContactProps {
     content: PortfolioData;
@@ -31,9 +32,9 @@ const WEB3FORMS_ACCESS_KEY = 'e3aeb435-16aa-49cd-a295-db833c402398';
 
 const Contact: React.FC<ContactProps> = ({ content }) => {
     const { contactInfo, socialLinks, sectionTitles } = content;
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-    const [submissionError, setSubmissionError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -42,29 +43,18 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (status === 'loading') return;
-
         setStatus('loading');
-        setSubmissionError(null);
 
         try {
-            const payload = {
-                access_key: WEB3FORMS_ACCESS_KEY,
-                ...formData,
-            };
-
+            const payload = { access_key: WEB3FORMS_ACCESS_KEY, ...formData };
             const response = await fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                 body: JSON.stringify(payload),
             });
-
             const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || 'Failed to send message via email. Please try again.');
-            }
+            if (!data.success) throw new Error(data.message || 'Failed to send message.');
 
             // Also store in Supabase for Admin Inbox
             try {
@@ -77,15 +67,15 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                 }]);
             } catch (dbError) {
                 console.error("Failed to save to Supabase inbox:", dbError);
-                // We don't throw here because the email was already sent successfully
             }
 
             setStatus('success');
+            showToast('Message sent! I\'ll get back to you shortly. 🎉', 'success');
             setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (error: any) {
             console.error('Error submitting message:', error);
-            setSubmissionError(error.message);
             setStatus('error');
+            showToast(`Failed to send: ${error.message}`, 'error');
         }
     };
 
@@ -144,19 +134,19 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                                 <textarea id="message" name="message" rows={5} value={formData.message} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your message"></textarea>
                             </div>
                             <div>
-                                <button type="submit" disabled={status === 'loading'} className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                                    {status === 'loading' && 'Sending...'}
-                                    {status === 'idle' && 'Send Message'}
-                                    {status === 'success' && 'Message Sent!'}
-                                    {status === 'error' && 'Retry Sending'}
+                                <button type="submit" disabled={status === 'loading'} className="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                                    {status === 'loading' && (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                            </svg>
+                                            Sending...
+                                        </span>
+                                    )}
+                                    {status !== 'loading' && 'Send Message'}
                                 </button>
                             </div>
-                            {status === 'success' && (
-                                <p className="mt-4 text-center text-green-500 dark:text-green-400">Message sent successfully! I will get back to you shortly.</p>
-                            )}
-                            {status === 'error' && submissionError && (
-                                 <p className="mt-4 text-center text-red-500 dark:text-red-400">Error: {submissionError}</p>
-                            )}
                         </form>
                     </FadeIn>
                 </div>
