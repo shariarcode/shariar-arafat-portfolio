@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import type { Skill, PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import { ICON_OPTIONS } from '../constants';
 import { CodeIcon } from './Icons';
 import FadeIn from './FadeIn';
 
 // ─── Glassmorphism Skill Card ─────────────────────────────────────
-const SkillCard: React.FC<{ skill: Skill }> = ({ skill }) => {
-    const IconComponent = skill.iconName ? ICON_OPTIONS[skill.iconName] : null;
+const SkillCard: React.FC<{ skill: any }> = ({ skill }) => {
+    const IconComponent = skill.iconName ? ICON_OPTIONS[skill.iconName as keyof typeof ICON_OPTIONS] : null;
     const renderIcon = IconComponent ? <IconComponent /> : skill.icon || <CodeIcon />;
 
     return (
@@ -29,7 +29,7 @@ const SkillCard: React.FC<{ skill: Skill }> = ({ skill }) => {
 
             {/* Tech tags */}
             <div className="flex flex-wrap gap-2 relative z-10">
-                {skill.technologies.map(tech => (
+                {skill.technologies.map((tech: string) => (
                     <span
                         key={tech}
                         className="bg-gray-100/80 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 text-xs font-medium px-3 py-1 rounded-full border border-gray-200/50 dark:border-gray-600/50 hover:border-primary/40 hover:text-primary dark:hover:text-primary-light transition-colors"
@@ -67,7 +67,7 @@ const SkillCard: React.FC<{ skill: Skill }> = ({ skill }) => {
 };
 
 // ─── SVG Radar Chart ─────────────────────────────────────────────
-const RadarChart: React.FC<{ skills: Skill[] }> = ({ skills }) => {
+const RadarChart: React.FC<{ skills: any[] }> = ({ skills }) => {
     const ref = useRef<SVGSVGElement>(null);
     const inView = useInView(ref, { once: true });
     const displaySkills = skills.slice(0, 6);
@@ -100,30 +100,42 @@ const RadarChart: React.FC<{ skills: Skill[] }> = ({ skills }) => {
         .join(' ') + ' Z';
 
     return (
-        <div className="flex flex-col items-center">
-            <svg ref={ref} width={size} height={size} className="overflow-visible">
-                {/* Grid rings */}
-                {levelPaths.map((d, i) => (
-                    <path key={i} d={d} fill="none" stroke="rgba(111,66,193,0.15)" strokeWidth={1} />
+        <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-gray-800/40 backdrop-blur-md rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl max-w-md mx-auto">
+            <svg ref={ref} width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+                {/* Background grid levels */}
+                {levelPaths.map((path, i) => (
+                    <path
+                        key={i}
+                        d={path}
+                        fill="none"
+                        className="stroke-gray-200 dark:stroke-gray-700"
+                        strokeWidth="1"
+                    />
                 ))}
-                {/* Spokes */}
+                {/* Axis lines */}
                 {displaySkills.map((_, i) => {
-                    const outer = pt(i, R);
-                    return <line key={i} x1={cx} y1={cy} x2={outer.x} y2={outer.y} stroke="rgba(111,66,193,0.2)" strokeWidth={1} />;
+                    const p = pt(i, R);
+                    return (
+                        <line
+                            key={i}
+                            x1={cx} y1={cy} x2={p.x} y2={p.y}
+                            className="stroke-gray-200 dark:stroke-gray-700"
+                            strokeWidth="1"
+                        />
+                    );
                 })}
-                {/* Data polygon */}
+                {/* Data area */}
                 <motion.path
                     d={dataPath}
                     fill="url(#radarFill)"
                     stroke="url(#radarStroke)"
-                    strokeWidth={2}
-                    initial={{ opacity: 0, scale: 0.3 }}
-                    animate={inView ? { opacity: 1, scale: 1 } : {}}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                    style={{ transformOrigin: `${cx}px ${cy}px` }}
+                    strokeWidth="3"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={inView ? { pathLength: 1, opacity: 1 } : {}}
+                    transition={{ duration: 1.5, ease: 'easeInOut' }}
                 />
                 {/* Data points */}
-                {inView && displaySkills.map((sk, i) => {
+                {displaySkills.map((sk, i) => {
                     const r = R * ((sk.proficiency || 80) / 100);
                     const p = pt(i, r);
                     return (
@@ -170,11 +182,8 @@ const RadarChart: React.FC<{ skills: Skill[] }> = ({ skills }) => {
 };
 
 // ─── Main Skills Section ──────────────────────────────────────────
-interface SkillsProps {
-    content: PortfolioData;
-}
-
-const Skills: React.FC<SkillsProps> = ({ content }) => {
+const Skills: React.FC = () => {
+    const { content } = usePortfolio();
     const [view, setView] = useState<'cards' | 'radar'>('cards');
 
     return (

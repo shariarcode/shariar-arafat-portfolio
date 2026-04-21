@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import FadeIn from './FadeIn';
-
-interface TestimonialsProps {
-    content: PortfolioData;
-}
 
 // Wave at top of section
 const WaveTop: React.FC = () => (
@@ -26,7 +22,8 @@ const StarIcon = () => (
     </svg>
 );
 
-const Testimonials: React.FC<TestimonialsProps> = ({ content }) => {
+const Testimonials: React.FC = () => {
+    const { content } = usePortfolio();
     const testimonials = useMemo(
         () => (content.testimonials && content.testimonials.length > 0 ? content.testimonials : []),
         [content.testimonials]

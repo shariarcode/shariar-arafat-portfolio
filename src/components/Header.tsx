@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SunIcon, MoonIcon, MenuIcon, CloseIcon } from './Icons';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import { motion, useScroll, useTransform } from 'framer-motion';
-
-interface HeaderProps {
-    darkMode: boolean;
-    toggleDarkMode: () => void;
-    content: PortfolioData;
-}
 
 const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () => void; className?: string }> = ({ href, children, onClick, className = '' }) => {
     const [active, setActive] = useState(false);
@@ -41,10 +35,13 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
     );
 };
 
-const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode, content }) => {
+const Header: React.FC = () => {
+    const { content, darkMode, setDarkMode } = usePortfolio();
     const { userName, navLinks, resumeUrl } = content;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+
+    const toggleDarkMode = () => setDarkMode(!darkMode);
 
     const visibleNavLinks = [
         { id: "home", label: "Home", visible: true },

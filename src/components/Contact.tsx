@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import { MailIcon, PhoneIcon, LocationIcon, GithubIcon, LinkedInIcon, BehanceIcon, ExternalLinkIcon, LinkIcon, DribbbleIcon, InstagramIcon } from './Icons';
 import FadeIn from './FadeIn';
 import { supabase } from '../lib/supabaseClient';
 import { useToast } from './Toast';
-
-interface ContactProps {
-    content: PortfolioData;
-}
 
 const InfoCard: React.FC<{ icon: React.ReactNode; title: string; value: string }> = ({ icon, title, value }) => (
     <div className="flex items-start gap-4">
@@ -30,7 +26,8 @@ const SocialProfile: React.FC<{ icon: React.ReactNode; name: string; href: strin
 
 const WEB3FORMS_ACCESS_KEY = 'e3aeb435-16aa-49cd-a295-db833c402398';
 
-const Contact: React.FC<ContactProps> = ({ content }) => {
+const Contact: React.FC = () => {
+    const { content } = usePortfolio();
     const { contactInfo, socialLinks, sectionTitles } = content;
     const { showToast } = useToast();
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -115,6 +112,15 @@ const Contact: React.FC<ContactProps> = ({ content }) => {
                     </FadeIn>
                     <FadeIn direction="right" className="lg:w-2/3">
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Honeypot field - hidden from users, filled by bots */}
+                            <input 
+                                type="text" 
+                                name="honeypot" 
+                                autoComplete="off" 
+                                style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}
+                                tabIndex={-1}
+                                onChange={() => {}}
+                            />
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>

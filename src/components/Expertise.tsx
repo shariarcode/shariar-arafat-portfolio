@@ -1,14 +1,11 @@
 import React from 'react';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import { CodeIcon, DesignIcon } from './Icons';
 import FadeIn from './FadeIn';
 import { motion } from 'framer-motion';
 
-interface ExpertiseProps {
-    content: PortfolioData;
-}
-
-const Expertise: React.FC<ExpertiseProps> = ({ content }) => {
+const Expertise: React.FC = () => {
+    const { content } = usePortfolio();
     const { careerObjective, expertiseAreas, sectionTitles } = content;
     return (
         <section id="about" className="py-20 bg-white dark:bg-dark-card scroll-mt-20 relative overflow-hidden">

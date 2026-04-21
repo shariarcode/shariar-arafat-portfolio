@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import FadeIn from './FadeIn';
 
-interface GithubActivityProps {
-    content: PortfolioData;
-}
-
-const GithubActivity: React.FC<GithubActivityProps> = ({ content }) => {
+const GithubActivity: React.FC = () => {
+    const { content } = usePortfolio();
     const [username, setUsername] = useState<string | null>(null);
 
     useEffect(() => {

@@ -1,11 +1,6 @@
 import React from 'react';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import { LinkedInIcon, GithubIcon, BehanceIcon, InstagramIcon, LinkIcon, DribbbleIcon } from './Icons';
-
-interface FooterProps {
-    content: PortfolioData;
-    onAdminClick: () => void;
-}
 
 // Wave divider — points upward into footer
 const WaveTop: React.FC = () => (
@@ -20,7 +15,8 @@ const WaveTop: React.FC = () => (
     </div>
 );
 
-const Footer: React.FC<FooterProps> = ({ content, onAdminClick }) => {
+const Footer: React.FC<{ onAdminClick: () => void }> = ({ onAdminClick }) => {
+    const { content } = usePortfolio();
     const { userName, contactInfo, socialLinks, footerContent } = content;
     const footerDescription = footerContent?.description || "A multidisciplinary professional specializing in Web Development and Design.";
     const services = footerContent?.services?.length ? footerContent.services : ["Web Development", "Graphic Design", "Consulting"];

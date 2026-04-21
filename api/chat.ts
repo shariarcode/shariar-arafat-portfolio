@@ -1,37 +1,40 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-interface PortfolioData {
-    userName: string;
-    userEmail: string;
-    userLocation: string;
-    careerObjective: string;
-    heroRoles: string[];
-    heroSubheading: string;
-    expertiseAreas: { name: string; description: string }[];
-    skillsData: { name: string; technologies: string[] }[];
-    projectsData: { title: string; description: string }[];
-    contactInfo: { phone: string };
-    socialLinks: { linkedin: string; github: string; behance: string };
-}
+// Simple in-memory rate limiting (Note: This resets on function redeploy/cold start)
+const rateLimit = new Map<string, { count: number, lastRequest: number }>();
+const LIMIT = 5; // max 5 requests
+const WINDOW = 60 * 1000; // per 1 minute
 
-interface ChatMessage {
-    role: 'user' | 'model';
-    text: string;
-}
+function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const userLimit = rateLimit.get(ip);
 
-// Helper to read the raw body from a Node.js IncomingMessage
-function readBody(req: VercelRequest): Promise<string> {
-    return new Promise((resolve, reject) => {
-        let body = '';
-        req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
-        req.on('end', () => resolve(body));
-        req.on('error', reject);
-    });
+    if (!userLimit) {
+        rateLimit.set(ip, { count: 1, lastRequest: now });
+        return false;
+    }
+
+    if (now - userLimit.lastRequest > WINDOW) {
+        rateLimit.set(ip, { count: 1, lastRequest: now });
+        return false;
+    }
+
+    if (userLimit.count >= LIMIT) {
+        return true;
+    }
+
+    userLimit.count++;
+    return false;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const ip = (req.headers['x-forwarded-for'] as string) || 'anonymous';
+    if (isRateLimited(ip)) {
+        return res.status(429).json({ error: 'Too many requests. Please try again in a minute.' });
     }
 
     try {

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CloseIcon, SparklesIcon, SendIcon } from './Icons';
-import type { PortfolioData, ChatMessage } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
+import type { ChatMessage } from '../types';
 
 interface ChatbotProps {
     onClose: () => void;
-    portfolioData: PortfolioData;
 }
 
-const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
+const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
+    const { content } = usePortfolio();
     const [messages, setMessages] = useState<ChatMessage[]>([
         { role: 'model', text: `Hello! I'm Shariar's AI assistant. How can I help you today?` }
     ]);
@@ -41,7 +42,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     history: newHistory,
-                    portfolioData: portfolioData
+                    portfolioData: content
                 })
             });
 
@@ -94,7 +95,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose, portfolioData }) => {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ history: newHistory, portfolioData })
+                body: JSON.stringify({ history: newHistory, portfolioData: content })
             });
 
             const data = await response.json();

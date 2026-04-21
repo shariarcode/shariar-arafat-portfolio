@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import type { PortfolioData } from '../types';
+import { usePortfolio } from '../context/PortfolioContext';
 import { ArrowRightIcon, DownloadIcon, LinkIcon, LinkedInIcon, BehanceIcon, DribbbleIcon, InstagramIcon, GithubIcon } from './Icons';
 import FadeIn from './FadeIn';
 
-interface HeroProps {
-    content: PortfolioData;
-}
-
-const Hero: React.FC<HeroProps> = ({ content }) => {
+const Hero: React.FC = () => {
+    const { content } = usePortfolio();
     const { userName, heroImage, heroRoles, heroSubheading, socialLinks, heroAvailableText, resumeUrl } = content;
     const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
     const [displayedRole, setDisplayedRole] = useState("");
