@@ -14,8 +14,7 @@ import Chatbot from './components/Chatbot';
 import { ArrowUpIcon } from './components/Icons';
 import type { PortfolioData, Skill, Project, ProjectService } from './types';
 import { DEFAULT_PORTFOLIO_DATA } from './constants';
-import { db } from './lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { supabase } from './lib/supabaseClient';
 
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
     const dServices = defaultServices || [];
@@ -110,14 +109,19 @@ const App: React.FC = () => {
         const fetchContent = async () => {
             setLoading(true);
             try {
-                const docRef = doc(db, "settings", "portfolio");
-                const docSnap = await getDoc(docRef);
+                const { data, error } = await supabase
+                    .from('settings')
+                    .select('content')
+                    .eq('id', 'portfolio')
+                    .single();
 
-                if (docSnap.exists()) {
-                    const savedContent = docSnap.data().content as Partial<PortfolioData>;
+                if (error && error.code !== 'PGRST116') {
+                    console.error("Error fetching portfolio from Supabase:", error);
+                } else if (data && data.content) {
+                    const savedContent = data.content as Partial<PortfolioData>;
                     setContent(mergeContentData(savedContent, DEFAULT_PORTFOLIO_DATA));
                 } else {
-                     console.warn("No portfolio data found in Firebase. Using default content.");
+                     console.warn("No portfolio data found in Supabase. Using default content.");
                 }
             } catch (err) {
                 console.error("An unexpected error occurred while fetching content:", err);
@@ -170,8 +174,12 @@ const App: React.FC = () => {
         setLoading(true);
         try {
             const serializableContent = JSON.parse(JSON.stringify(savedData));
-            const docRef = doc(db, "settings", "portfolio");
-            await setDoc(docRef, { content: serializableContent });
+            
+            const { error } = await supabase
+                .from('settings')
+                .upsert({ id: 'portfolio', content: serializableContent });
+
+            if (error) throw error;
 
             const fullContent = mergeContentData(serializableContent, DEFAULT_PORTFOLIO_DATA);
             setContent(fullContent);

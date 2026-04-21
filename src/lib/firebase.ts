@@ -4,13 +4,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCBXOHIFg4H2v1R-8QYHuYvj8iIgc7C4Q0",
-  authDomain: "shariar-arafat-portfolio.firebaseapp.com",
-  projectId: "shariar-arafat-portfolio",
-  storageBucket: "shariar-arafat-portfolio.firebasestorage.app",
-  messagingSenderId: "702383377696",
-  appId: "1:702383377696:web:7bc65eff18fe6c285ddb45",
-  measurementId: "G-W19BLTGWYP"
+  apiKey: "AIzaSyBGitX7ARXa7y-A-4Vq6uva2fFuNSpBgoo",
+  authDomain: "shariar-arafat-portfolio-f0324.firebaseapp.com",
+  projectId: "shariar-arafat-portfolio-f0324",
+  storageBucket: "shariar-arafat-portfolio-f0324.firebasestorage.app",
+  messagingSenderId: "559698565032",
+  appId: "1:559698565032:web:61f3d5a3303933acd12f9d",
+  measurementId: "G-81NGMDWYEZ"
 };
 
 const app = initializeApp(firebaseConfig);
