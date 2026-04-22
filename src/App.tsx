@@ -94,7 +94,7 @@ const AppInner: React.FC = () => {
     };
 
     const handleLogin = (password: string) => {
-        if (password === (import.meta as any).env.VITE_ADMIN_PASSWORD) {
+        if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
             setIsAdmin(true);
             setShowLogin(false);
             setShowEditor(true);
