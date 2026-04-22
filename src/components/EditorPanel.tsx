@@ -48,12 +48,13 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         serializableData.heroRoles = Array.isArray(data.heroRoles) ? data.heroRoles.join(', ') : '';
         
         // Ensure new objects exist
-        if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", work: "My Projects", pricing: "Pricing Plans", contact: "Get In Touch" };
+        if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", services: "Services", timeline: "My Journey", resume: "Resume", work: "My Projects", pricing: "Pricing Plans", blog: "Latest Posts", testimonials: "What Clients Say", contact: "Get In Touch" };
         if (!serializableData.pricingPlans) serializableData.pricingPlans = [];
-        if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, work: true, blog: true, contact: true };
+        if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, services: true, timeline: true, resume: true, work: true, blog: true, guestbook: true, contact: true };
         if (!serializableData.heroAvailableText) serializableData.heroAvailableText = "Available for hire";
         if (!serializableData.resumeUrl) serializableData.resumeUrl = "";
         if (!serializableData.footerContent) serializableData.footerContent = { description: "", services: [] };
+        if (!serializableData.bookingUrl) serializableData.bookingUrl = "";
         
         // Transform skills technologies for editing
         serializableData.skillsData = (serializableData.skillsData || []).map((skill: any) => ({
@@ -73,15 +74,42 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
+    const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
+    const [loadingGuestbook, setLoadingGuestbook] = useState(false);
 
     React.useEffect(() => {
         if (activeTab === 'inbox') {
             fetchInbox();
         }
+        if (activeTab === 'guestbook') {
+            fetchGuestbook();
+        }
     }, [activeTab]);
+
+    const fetchGuestbook = async () => {
+        setLoadingGuestbook(true);
+        try {
+            const stored = localStorage.getItem('guestbook_entries');
+            if (stored) {
+                setGuestbookMessages(JSON.parse(stored));
+            } else {
+                setGuestbookMessages([]);
+            }
+        } catch (err) {
+            console.error("Failed to load guestbook:", err);
+        } finally {
+            setLoadingGuestbook(false);
+        }
+    };
+
+    const deleteGuestbookEntry = (index: number) => {
+        const updated = guestbookMessages.filter((_, i) => i !== index);
+        setGuestbookMessages(updated);
+        localStorage.setItem('guestbook_entries', JSON.stringify(updated));
+    };
 
     const fetchInbox = async () => {
         setLoadingInbox(true);
@@ -203,6 +231,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         { id: 'testimonials', label: '💬 Testimonials' },
         { id: 'contact', label: '📬 Contact' },
         { id: 'inbox', label: '📥 Inbox' },
+        { id: 'guestbook', label: '📖 Guestbook' },
         { id: 'settings', label: '⚙️ Settings' }
     ] as const;
 
@@ -563,15 +592,20 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Section Titles</h4>
                                         <FormInput label="About Section Title" name="about" value={formData.sectionTitles?.about || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput label="Services Section Title" name="services" value={formData.sectionTitles?.services || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput label="Timeline Section Title" name="timeline" value={formData.sectionTitles?.timeline || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput label="Resume Section Title" name="resume" value={formData.sectionTitles?.resume || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Skills Section Title" name="skills" value={formData.sectionTitles?.skills || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Pricing Section Title" name="pricing" value={formData.sectionTitles?.pricing || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Work Section Title" name="work" value={formData.sectionTitles?.work || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput label="Blog Section Title" name="blog" value={formData.sectionTitles?.blog || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput label="Testimonials Section Title" name="testimonials" value={formData.sectionTitles?.testimonials || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Contact Section Title" name="contact" value={formData.sectionTitles?.contact || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                     </div>
                                     
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Navigation Links Visibility</h4>
-                                        {['about', 'skills', 'work', 'blog', 'contact'].map((navItem) => (
+                                        {['about', 'services', 'timeline', 'resume', 'skills', 'work', 'blog', 'guestbook', 'contact'].map((navItem) => (
                                             <div key={navItem} className="flex items-center gap-3">
                                                 <input 
                                                     type="checkbox" 
@@ -587,6 +621,15 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         <p className="text-xs text-gray-500 mt-4 leading-relaxed">
                                             Toggle these checks to hide or show specific links in the header navigation menu. Note that the section will still exist on the page, but the link will be hidden.
                                         </p>
+                                    </div>
+                                    <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
+                                        <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Booking / Calendar</h4>
+                                        <FormInput label="Calendly URL" name="bookingUrl" value={formData.bookingUrl || ''} onChange={handleChange} placeholder="https://calendly.com/your-username" />
+                                        <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+                                            <p className="text-xs text-blue-400">
+                                                Enter your Calendly (or similar) URL to enable the booking feature. Users will be able to schedule calls with you.
+                                            </p>
+                                        </div>
                                     </div>
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Footer Content</h4>
@@ -623,6 +666,44 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                     <p className="text-sm font-semibold text-gray-400 mb-1">Subject: {msg.subject}</p>
                                                     <p className="text-gray-300 whitespace-pre-wrap">{msg.message}</p>
                                                 </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* GUESTBOOK TAB */}
+                        {activeTab === 'guestbook' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Guestbook Entries</h3>
+                                    <button onClick={fetchGuestbook} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">Refresh</button>
+                                </div>
+                                <p className="text-sm text-gray-400 mb-4">
+                                    Manage visitor messages from the guestbook section. These entries are stored locally in the browser.
+                                </p>
+                                {loadingGuestbook ? (
+                                    <div className="text-gray-400 text-center py-10">Loading...</div>
+                                ) : guestbookMessages.length === 0 ? (
+                                    <div className="text-gray-500 text-center py-10 bg-gray-900 rounded-xl border border-gray-700">No guestbook entries yet.</div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {guestbookMessages.map((msg, i) => (
+                                            <div key={i} className="bg-gray-900 border border-gray-700 p-5 rounded-xl">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-200">{msg.name}</h4>
+                                                        <span className="text-xs text-gray-500">{msg.date}</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => deleteGuestbookEntry(i)} 
+                                                        className="text-red-500 hover:text-red-400 p-2 rounded-full hover:bg-gray-800"
+                                                    >
+                                                        <TrashIcon />
+                                                    </button>
+                                                </div>
+                                                <p className="text-gray-300 whitespace-pre-wrap">{msg.message}</p>
                                             </div>
                                         ))}
                                     </div>
