@@ -73,7 +73,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, calendlyUr
 const Booking: React.FC = () => {
     const { content, t } = usePortfolio();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const calendlyUrl = content.bookingUrl;
+    const calendlyUrl = content.bookingUrl?.trim();
 
     return (
         <>

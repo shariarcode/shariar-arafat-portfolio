@@ -93,7 +93,7 @@ const Contact: React.FC = () => {
                     <FadeIn direction="up" delay={0.1}>
                         <div className="text-center mb-8">
                             <a
-                                href={content.bookingUrl}
+                                href={content.bookingUrl.trim()}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all duration-300"
