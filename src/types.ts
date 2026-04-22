@@ -103,6 +103,9 @@ export interface PortfolioData {
         work?: string;
         pricing?: string;
         contact?: string;
+        services?: string;
+        timeline?: string;
+        resume?: string;
     };
     pricingPlans?: PricingPlan[];
     navLinks?: {
@@ -111,5 +114,9 @@ export interface PortfolioData {
         work?: boolean;
         blog?: boolean;
         contact?: boolean;
+        services?: boolean;
+        timeline?: boolean;
+        resume?: boolean;
     };
+    bookingUrl?: string;
 }

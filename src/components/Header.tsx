@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { SunIcon, MoonIcon, MenuIcon, CloseIcon } from './Icons';
 import { usePortfolio } from '../context/PortfolioContext';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import SearchButton from './SearchButton';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () => void; className?: string }> = ({ href, children, onClick, className = '' }) => {
     const [active, setActive] = useState(false);
@@ -36,21 +37,23 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
 };
 
 const Header: React.FC = () => {
-    const { content, darkMode, setDarkMode, language, setLanguage, t } = usePortfolio();
+    const { content, darkMode, setDarkMode, t } = usePortfolio();
     const { userName, navLinks, resumeUrl } = content;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
-    const toggleLanguage = () => setLanguage(language === 'en' ? 'bn' : 'en');
 
     const visibleNavLinks = [
         { id: "home", label: t.nav.home, visible: true },
         { id: "about", label: t.nav.about, visible: navLinks?.about !== false },
+        { id: "services", label: t.nav.services, visible: navLinks?.services !== false },
+        { id: "timeline", label: t.nav.timeline, visible: navLinks?.timeline !== false },
         { id: "skills", label: t.nav.skills, visible: navLinks?.skills !== false },
         { id: "pricing", label: "Pricing", visible: true },
         { id: "work", label: t.nav.work, visible: navLinks?.work !== false },
         { id: "blog", label: t.nav.blog, visible: navLinks?.blog !== false },
+        { id: "guestbook", label: t.nav.guestbook, visible: true },
         { id: "contact", label: t.nav.contact, visible: navLinks?.contact !== false }
     ].filter(item => item.visible);
 
@@ -93,7 +96,9 @@ const Header: React.FC = () => {
                             ))}
                         </div>
 
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                            <SearchButton />
+                            <LanguageSwitcher />
                             {resumeUrl ? (
                                 <a
                                     href={resumeUrl}
@@ -101,16 +106,9 @@ const Header: React.FC = () => {
                                     rel="noopener noreferrer"
                                     className="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 hover:scale-105 transition-all duration-300 shadow-md shadow-primary/20"
                                 >
-                                    Resume
+                                    {t.nav.resume}
                                 </a>
                             ) : null}
-                            <button
-                                onClick={toggleLanguage}
-                                className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 backdrop-blur-sm transition-colors font-semibold text-xs"
-                                title={language === 'en' ? 'বাংলা' : 'English'}
-                            >
-                                {language === 'en' ? 'BN' : 'EN'}
-                            </button>
                             <button
                                 onClick={toggleDarkMode}
                                 className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 backdrop-blur-sm transition-colors"
@@ -149,6 +147,10 @@ const Header: React.FC = () => {
                                 {link.label}
                             </NavLink>
                         ))}
+                        <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <SearchButton />
+                            <LanguageSwitcher />
+                        </div>
                         {resumeUrl && (
                             <a
                                 href={resumeUrl}
@@ -157,7 +159,7 @@ const Header: React.FC = () => {
                                 onClick={closeMenu}
                                 className="mt-4 text-center px-4 py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 transition-all duration-300"
                             >
-                                Resume
+                                {t.nav.resume}
                             </a>
                         )}
                     </div>

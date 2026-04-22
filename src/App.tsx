@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
+import About from './components/About';
 import Expertise from './components/Expertise';
+import Services from './components/Services';
+import Timeline from './components/Timeline';
 import Skills from './components/Skills';
 import Work from './components/Work';
 import Pricing from './components/Pricing';
@@ -21,11 +24,13 @@ import Testimonials from './components/Testimonials';
 import GithubActivity from './components/GithubActivity';
 import CustomCursor from './components/CustomCursor';
 import CursorAnalysisOverlay from './components/CursorAnalysisOverlay';
+import Resume from './components/Resume';
+import Guestbook from './components/Guestbook';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import CookieConsent from './components/CookieConsent';
 import { ArrowUpIcon } from './components/Icons';
 import { motion } from 'framer-motion';
-import type { PortfolioData, Skill, Project, ProjectService, Testimonial, TimelineEvent } from './types';
-import { DEFAULT_PORTFOLIO_DATA } from './constants';
-import { supabase } from './lib/supabaseClient';
+import type { PortfolioData } from './types';
 import { removeJsonLd, setSeoMeta } from './lib/seo';
 import { usePortfolio } from './context/PortfolioContext';
 import { ToastProvider, useToast } from './components/Toast';
@@ -155,16 +160,23 @@ return (
             <main className="relative z-10">
                 <Hero />
                 <Stats />
+                <About />
                 <Expertise />
+                <Services />
+                <Timeline />
                 <Skills />
+                <Resume />
                 <Pricing />
                 <GithubActivity />
                 <Work />
                 <Blog />
                 <Testimonials />
+                <Guestbook />
                 <Contact />
+                <AnalyticsDashboard />
             </main>
             <Footer onAdminClick={handleAdminClick} />
+            <CookieConsent />
             
             {showScrollTop && !isChatOpen && (
                  <button onClick={scrollToTop} className="fixed bottom-[max(2rem,env(safe-area-inset-bottom))] right-8 bg-primary hover:bg-primary-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50 min-w-[44px] min-h-[44px] flex items-center justify-center">
