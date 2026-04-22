@@ -164,8 +164,56 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         about: "About Me",
         skills: "Technical Skills",
         work: "My Projects",
+        pricing: "Pricing Plans",
         contact: "Get In Touch"
     },
+    pricingPlans: [
+        {
+            name: "Basic",
+            description: "Perfect for small projects and simple websites.",
+            price: "$150",
+            period: "per project",
+            features: [
+                "Single page website",
+                "Responsive design",
+                "Contact form integration",
+                "Basic SEO setup",
+                "7 days support"
+            ],
+            buttonText: "Get Started"
+        },
+        {
+            name: "Standard",
+            description: "Ideal for growing businesses and portfolios.",
+            price: "$350",
+            period: "per project",
+            features: [
+                "Up to 5 pages",
+                "Custom design",
+                "CMS integration",
+                "Advanced SEO",
+                "Social media links",
+                "30 days support"
+            ],
+            isPopular: true,
+            buttonText: "Get Started"
+        },
+        {
+            name: "Premium",
+            description: "Complete solution for businesses and e-commerce.",
+            price: "$750",
+            period: "per project",
+            features: [
+                "Unlimited pages",
+                "E-commerce functionality",
+                "Custom animations",
+                "Payment integration",
+                "Priority support",
+                "3 months maintenance"
+            ],
+            buttonText: "Contact Me"
+        }
+    ],
     navLinks: {
         about: true,
         skills: true,

@@ -44,6 +44,16 @@ export interface TimelineEvent {
     description: string;
 }
 
+export interface PricingPlan {
+    name: string;
+    description: string;
+    price: string;
+    period?: string;
+    features: string[];
+    isPopular?: boolean;
+    buttonText?: string;
+}
+
 export interface BlogPost {
     slug: string;
     title: string;
@@ -91,8 +101,10 @@ export interface PortfolioData {
         about?: string;
         skills?: string;
         work?: string;
+        pricing?: string;
         contact?: string;
     };
+    pricingPlans?: PricingPlan[];
     navLinks?: {
         about?: boolean;
         skills?: boolean;

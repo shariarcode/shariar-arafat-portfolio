@@ -48,6 +48,7 @@ const Header: React.FC = () => {
         { id: "home", label: t.nav.home, visible: true },
         { id: "about", label: t.nav.about, visible: navLinks?.about !== false },
         { id: "skills", label: t.nav.skills, visible: navLinks?.skills !== false },
+        { id: "pricing", label: "Pricing", visible: true },
         { id: "work", label: t.nav.work, visible: navLinks?.work !== false },
         { id: "blog", label: t.nav.blog, visible: navLinks?.blog !== false },
         { id: "contact", label: t.nav.contact, visible: navLinks?.contact !== false }

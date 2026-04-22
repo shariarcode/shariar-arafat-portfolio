@@ -48,7 +48,8 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         serializableData.heroRoles = Array.isArray(data.heroRoles) ? data.heroRoles.join(', ') : '';
         
         // Ensure new objects exist
-        if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", work: "My Projects", contact: "Get In Touch" };
+        if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", work: "My Projects", pricing: "Pricing Plans", contact: "Get In Touch" };
+        if (!serializableData.pricingPlans) serializableData.pricingPlans = [];
         if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, work: true, blog: true, contact: true };
         if (!serializableData.heroAvailableText) serializableData.heroAvailableText = "Available for hire";
         if (!serializableData.resumeUrl) serializableData.resumeUrl = "";
@@ -72,7 +73,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox'>('home');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
 
@@ -196,6 +197,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         { id: 'home', label: '🏠 Home' },
         { id: 'about', label: '👤 About' },
         { id: 'skills', label: '🛠️ Skills' },
+        { id: 'pricing', label: '💰 Pricing' },
         { id: 'work', label: '💼 Work' },
         { id: 'blog', label: '📝 Blog' },
         { id: 'testimonials', label: '💬 Testimonials' },
@@ -357,6 +359,71 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                             </div>
                         )}
 
+                        {/* PRICING TAB */}
+                        {activeTab === 'pricing' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Pricing Plans</h3>
+                                    <button onClick={() => handleAddItem('pricingPlans', { name: "New Plan", description: "", price: "$0", period: "per project", features: [], buttonText: "Get Started" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Plan</button>
+                                </div>
+
+                                <div className="space-y-8">
+                                    {formData.pricingPlans?.map((plan: any, index: number) => (
+                                        <div key={index} className="border border-gray-600 p-6 rounded-xl relative group bg-gray-900/50">
+                                            <button onClick={() => handleDeleteItem('pricingPlans', index)} className="absolute top-4 right-4 text-red-500 hover:text-red-400"><TrashIcon/></button>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <FormInput label="Plan Name" name="name" value={plan.name} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                                <FormInput label="Price" name="price" value={plan.price} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                                <FormInput label="Period (e.g., per project)" name="period" value={plan.period || ''} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                                <FormInput label="Button Text" name="buttonText" value={plan.buttonText || ''} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                            </div>
+                                            <div className="mt-4">
+                                                <FormTextarea label="Description" name="description" value={plan.description} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                            </div>
+                                            <div className="mt-4">
+                                                <label className="block text-sm font-medium text-gray-400 mb-2">Features (one per line)</label>
+                                                <textarea 
+                                                    name="features" 
+                                                    value={Array.isArray(plan.features) ? plan.features.join('\n') : ''}
+                                                    onChange={(e) => {
+                                                        const features = e.target.value.split('\n').filter(f => f.trim());
+                                                        setFormData((prev: any) => {
+                                                            const newData = { ...prev };
+                                                            newData.pricingPlans = [...(newData.pricingPlans || [])];
+                                                            newData.pricingPlans[index] = { ...newData.pricingPlans[index], features };
+                                                            return newData;
+                                                        });
+                                                    }}
+                                                    rows={5}
+                                                    className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm"
+                                                    placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                                                />
+                                            </div>
+                                            <div className="mt-4 flex items-center gap-3">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id={`isPopular-${index}`}
+                                                    checked={plan.isPopular || false}
+                                                    onChange={(e) => {
+                                                        setFormData((prev: any) => {
+                                                            const newData = { ...prev };
+                                                            newData.pricingPlans = [...(newData.pricingPlans || [])];
+                                                            newData.pricingPlans[index] = { ...newData.pricingPlans[index], isPopular: e.target.checked };
+                                                            return newData;
+                                                        });
+                                                    }}
+                                                    className="w-4 h-4 rounded border-gray-600"
+                                                />
+                                                <label htmlFor={`isPopular-${index}`} className="text-sm text-gray-300">Mark as Most Popular</label>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* WORK TAB */}
                         {activeTab === 'work' && (
                             <div className="space-y-8 animate-fade-in">
@@ -497,6 +564,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Section Titles</h4>
                                         <FormInput label="About Section Title" name="about" value={formData.sectionTitles?.about || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Skills Section Title" name="skills" value={formData.sectionTitles?.skills || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput label="Pricing Section Title" name="pricing" value={formData.sectionTitles?.pricing || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Work Section Title" name="work" value={formData.sectionTitles?.work || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                         <FormInput label="Contact Section Title" name="contact" value={formData.sectionTitles?.contact || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
                                     </div>

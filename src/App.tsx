@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import Expertise from './components/Expertise';
 import Skills from './components/Skills';
 import Work from './components/Work';
+import Pricing from './components/Pricing';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Blog from './components/Blog';
@@ -156,6 +157,7 @@ return (
                 <Stats />
                 <Expertise />
                 <Skills />
+                <Pricing />
                 <GithubActivity />
                 <Work />
                 <Blog />
