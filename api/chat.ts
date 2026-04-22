@@ -1,5 +1,22 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+interface ChatMessage {
+    role: 'user' | 'model';
+    text: string;
+}
+
+interface PortfolioData {
+    userName: string;
+    userEmail: string;
+    userLocation: string;
+    heroSubheading: string;
+    heroRoles: string[];
+    careerObjective: string;
+    expertiseAreas: { name: string }[];
+    skillsData: { technologies: string[] }[];
+    projectsData: { title: string }[];
+}
+
 // Simple in-memory rate limiting (Note: This resets on function redeploy/cold start)
 const rateLimit = new Map<string, { count: number, lastRequest: number }>();
 const LIMIT = 5; // max 5 requests
@@ -38,16 +55,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        // Parse body — Vercel may auto-parse it or leave it as a stream
         let history: ChatMessage[];
         let portfolioData: PortfolioData;
 
         if (req.body && typeof req.body === 'object') {
-            // Already parsed by Vercel middleware
             ({ history, portfolioData } = req.body);
         } else {
-            const rawBody = await readBody(req);
-            ({ history, portfolioData } = JSON.parse(rawBody));
+            return res.status(400).json({ error: 'Invalid request body' });
         }
 
         let OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY;

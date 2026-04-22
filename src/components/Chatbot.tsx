@@ -73,13 +73,6 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
         }
     };
 
-    const handleQuickReply = (text: string) => {
-        setUserInput(text);
-        // We need to wait for state update or just pass text to a synthetic event
-        // Hack: trigger form submit equivalent directly
-    };
-    
-    // Quick reply function
     const sendQuickReply = async (text: string) => {
         if (isLoading) return;
 

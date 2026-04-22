@@ -22,9 +22,21 @@ interface PortfolioContextType {
 
 const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
 
+const isValidProjectService = (s: unknown): s is ProjectService => {
+    return s !== null && typeof s === 'object' && 'name' in s;
+};
+
+const isValidSkill = (s: unknown): s is Skill => {
+    return s !== null && typeof s === 'object' && 'name' in s;
+};
+
+const isValidProject = (p: unknown): p is Project => {
+    return p !== null && typeof p === 'object' && 'title' in p;
+};
+
 const mergeProjectServices = (savedServices: any[], defaultServices: ProjectService[]): ProjectService[] => {
     const dServices = defaultServices || [];
-    return savedServices
+    const result = savedServices
         .filter(s => s && typeof s === 'object' && 'name' in s)
         .map((savedService, serviceIndex) => {
             const defaultService = dServices.find(ds => ds.name === savedService.name) || dServices[serviceIndex] || dServices[0];
@@ -33,8 +45,9 @@ const mergeProjectServices = (savedServices: any[], defaultServices: ProjectServ
                 name: savedService.name || defaultService.name, 
                 icon: defaultService.icon,
                 iconName: savedService.iconName || defaultService.iconName
-            };
-        }).filter((s): s is ProjectService => s !== null);
+            } as ProjectService;
+        }).filter(isValidProjectService);
+    return result;
 }
 
 const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData): PortfolioData => {
@@ -68,7 +81,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                 }))
             : defaults.expertiseAreas,
         skillsData: Array.isArray(s.skillsData)
-            ? s.skillsData
+            ? (s.skillsData
                 .filter(skill => skill && typeof skill === 'object' && skill.name)
                 .map((savedSkill, index) => {
                     const defaultSkill = defaults.skillsData.find(ds => ds.name === savedSkill.name) || defaults.skillsData[index] || defaults.skillsData[0];
@@ -81,10 +94,10 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                         technologies: savedSkill.technologies || defaultSkill.technologies,
                         proficiency: savedSkill.proficiency !== undefined ? savedSkill.proficiency : defaultSkill.proficiency || 85,
                     };
-                }).filter((skill): skill is Skill => skill !== null)
+                }).filter(isValidSkill) as Skill[])
             : defaults.skillsData,
         projectsData: Array.isArray(s.projectsData)
-            ? s.projectsData
+            ? (s.projectsData
                 .filter(project => project && typeof project === 'object' && project.title)
                 .map((savedProject, index) => {
                     const defaultProject = defaults.projectsData.find(dp => dp.title === savedProject.title) || defaults.projectsData[index] || defaults.projectsData[0];
@@ -100,7 +113,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                         imageUrl: savedProject.imageUrl !== undefined ? savedProject.imageUrl : defaultProject.imageUrl,
                         liveUrl: savedProject.liveUrl !== undefined ? savedProject.liveUrl : defaultProject.liveUrl
                     };
-                }).filter((p): p is Project => p !== null)
+                }).filter(isValidProject) as Project[])
             : defaults.projectsData,
         testimonials: Array.isArray(s.testimonials)
             ? s.testimonials

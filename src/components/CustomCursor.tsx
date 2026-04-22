@@ -5,8 +5,6 @@ const CustomCursor: React.FC = () => {
     const [isHovering, setIsHovering] = useState(false);
     const cursorX = useMotionValue(-100);
     const cursorY = useMotionValue(-100);
-    const outerX = useMotionValue(-100);
-    const outerY = useMotionValue(-100);
 
     // Outer ring lags behind with spring physics
     const springX = useSpring(cursorX, { stiffness: 120, damping: 22, mass: 0.5 });
