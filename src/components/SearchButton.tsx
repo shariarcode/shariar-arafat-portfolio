@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { SearchIcon, XIcon, ArrowRightIcon } from './Icons';
 import FadeIn from './FadeIn';
@@ -10,33 +10,30 @@ interface SearchResult {
     url: string;
 }
 
-const SearchModal: React.FC<{ triggerOpen?: boolean }> = ({ triggerOpen }) => {
+const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
     const { content } = usePortfolio();
-    const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
-    const prevTriggerRef = useRef(triggerOpen);
-
-    useEffect(() => {
-        if (triggerOpen && !prevTriggerRef.current) {
-            setIsOpen(true);
-        }
-        prevTriggerRef.current = triggerOpen;
-    }, [triggerOpen]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                setIsOpen(true);
             }
-            if (e.key === 'Escape') {
-                setIsOpen(false);
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
             }
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [isOpen, onClose]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setQuery('');
+            setResults([]);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (query.length < 2) {
@@ -89,7 +86,7 @@ const SearchModal: React.FC<{ triggerOpen?: boolean }> = ({ triggerOpen }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
             <FadeIn>
                 <div className="relative bg-white dark:bg-dark-card rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
                     <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
@@ -103,7 +100,7 @@ const SearchModal: React.FC<{ triggerOpen?: boolean }> = ({ triggerOpen }) => {
                             autoFocus
                         />
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={onClose}
                             className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                         >
                             <XIcon className="w-5 h-5 text-gray-400" />
@@ -117,7 +114,7 @@ const SearchModal: React.FC<{ triggerOpen?: boolean }> = ({ triggerOpen }) => {
                                     key={index}
                                     href={result.url}
                                     className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={onClose}
                                 >
                                     <span className={`px-2 py-0.5 text-xs font-medium rounded ${
                                         result.type === 'blog' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -152,19 +149,19 @@ const SearchModal: React.FC<{ triggerOpen?: boolean }> = ({ triggerOpen }) => {
 };
 
 const SearchButton: React.FC = () => {
-    const [openCount, setOpenCount] = useState(0);
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
         <>
             <button
-                onClick={() => setOpenCount(c => c + 1)}
+                onClick={() => setIsOpen(true)}
                 className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
                 <SearchIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Search</span>
                 <kbd className="hidden sm:inline px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded text-xs">⌘K</kbd>
             </button>
-            <SearchModal triggerOpen={openCount > 0} key={openCount} />
+            <SearchModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </>
     );
 };
