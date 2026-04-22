@@ -8,31 +8,40 @@ create table if not exists public.settings (
   updated_at timestamptz default now()
 );
 
--- 2. Enable Row Level Security (RLS)
+-- 2. IMPORTANT: If the table already existed, the column 'updated_at' might be missing.
+-- This command will add it safely.
+alter table public.settings 
+add column if not exists updated_at timestamptz default now();
+
+-- 3. Enable Row Level Security (RLS)
 alter table public.settings enable row level security;
 
--- 3. Drop existing policies if they exist (to avoid errors on re-run)
+-- 4. Drop existing policies to ensure we have a clean slate
 drop policy if exists "Allow public read access" on public.settings;
 drop policy if exists "Allow anonymous upsert access" on public.settings;
+drop policy if exists "Allow anonymous update access" on public.settings;
+drop policy if exists "Allow anonymous insert access" on public.settings;
 
--- 4. Create policy to allow ANYONE to read the settings
--- This is necessary for visitors to see your portfolio content
+-- 5. Create policy to allow ANYONE to read the settings
 create policy "Allow public read access"
   on public.settings for select
   using (true);
 
--- 5. Create policy to allow anonymous UPSERT access
+-- 6. Create policies to allow anonymous INSERT and UPDATE (necessary for UPSERT)
 -- Since your app uses a local admin password and the 'anon' key for Supabase,
--- we need to allow 'anon' role to insert/update the 'settings' table.
--- Security Note: This is required for the current architecture to work.
-create policy "Allow anonymous upsert access"
-  on public.settings for all
+-- we need to allow 'anon' role to manage the 'settings' table.
+create policy "Allow anonymous insert access"
+  on public.settings for insert
+  to anon
+  with check (true);
+
+create policy "Allow anonymous update access"
+  on public.settings for update
   to anon
   using (true)
   with check (true);
 
--- 6. Insert default content if the table is empty (Optional but recommended)
--- Note: The 'portfolio' ID is what the app looks for.
+-- 7. Ensure the 'portfolio' row exists
 insert into public.settings (id, content)
 values ('portfolio', '{}')
 on conflict (id) do nothing;
