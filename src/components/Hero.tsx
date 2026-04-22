@@ -4,7 +4,7 @@ import { ArrowRightIcon, DownloadIcon, LinkIcon, LinkedInIcon, BehanceIcon, Drib
 import FadeIn from './FadeIn';
 
 const Hero: React.FC = () => {
-    const { content } = usePortfolio();
+    const { content, t } = usePortfolio();
     const { userName, heroImage, heroRoles, heroSubheading, socialLinks, heroAvailableText, resumeUrl } = content;
     const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
     const [displayedRole, setDisplayedRole] = useState("");
@@ -48,7 +48,7 @@ const Hero: React.FC = () => {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                         </span>
-                        {heroAvailableText || "Available for hire"}
+                        {heroAvailableText || t.hero.availableForHire}
                     </span>
 
                     <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mt-2">
@@ -73,7 +73,7 @@ const Hero: React.FC = () => {
                             href="#contact"
                             className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white font-semibold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300"
                         >
-                            Get in Touch <ArrowRightIcon />
+                            {t.hero.getInTouch} <ArrowRightIcon />
                         </a>
                         <a
                             href={resumeUrl || undefined}
@@ -81,7 +81,7 @@ const Hero: React.FC = () => {
                             rel="noopener noreferrer"
                             className={`w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white/70 dark:bg-dark-card/70 backdrop-blur-sm border border-gray-200/80 dark:border-gray-700/80 text-gray-700 dark:text-gray-200 font-semibold rounded-xl shadow-md hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:scale-105 ${!resumeUrl ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
                         >
-                            <DownloadIcon /> Download Resume
+                            <DownloadIcon /> {t.hero.downloadResume}
                         </a>
                     </div>
 

@@ -3,15 +3,19 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import type { PortfolioData, ProjectService, Skill, Project, Testimonial, TimelineEvent } from '../types';
 import { DEFAULT_PORTFOLIO_DATA } from '../constants';
 import { supabase } from '../lib/supabaseClient';
+import { Language, translations, Translations } from '../translations';
 
 interface PortfolioContextType {
     content: PortfolioData;
     loading: boolean;
     isAdmin: boolean;
     darkMode: boolean;
+    language: Language;
     setDarkMode: (dark: boolean) => void;
     setIsAdmin: (admin: boolean) => void;
     setContent: (data: PortfolioData) => void;
+    setLanguage: (lang: Language) => void;
+    t: Translations;
     refreshContent: () => Promise<void>;
     saveContent: (newData: PortfolioData) => Promise<boolean>;
 }
@@ -156,6 +160,19 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         if (saved !== null) return saved === 'true';
         return window.matchMedia('(prefers-color-scheme: dark)').matches;
     });
+    const [language, setLanguageState] = useState<Language>(() => {
+        const saved = localStorage.getItem('language');
+        if (saved === 'en' || saved === 'bn') return saved;
+        const browserLang = navigator.language.slice(0, 2);
+        return browserLang === 'bn' ? 'bn' : 'en';
+    });
+
+    const t = translations[language];
+
+    const setLanguage = (lang: Language) => {
+        setLanguageState(lang);
+        localStorage.setItem('language', lang);
+    };
 
     const fetchContent = async () => {
         setLoading(true);
@@ -217,9 +234,12 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
             loading, 
             isAdmin, 
             darkMode, 
+            language,
             setDarkMode, 
             setIsAdmin, 
             setContent,
+            setLanguage,
+            t,
             refreshContent: fetchContent,
             saveContent
         }}>

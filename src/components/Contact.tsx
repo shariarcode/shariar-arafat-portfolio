@@ -27,7 +27,7 @@ const SocialProfile: React.FC<{ icon: React.ReactNode; name: string; href: strin
 const WEB3FORMS_ACCESS_KEY = 'e3aeb435-16aa-49cd-a295-db833c402398';
 
 const Contact: React.FC = () => {
-    const { content } = usePortfolio();
+    const { content, t } = usePortfolio();
     const { contactInfo, socialLinks, sectionTitles } = content;
     const { showToast } = useToast();
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -81,9 +81,29 @@ const Contact: React.FC = () => {
             <div className="container mx-auto px-6">
                 <FadeIn direction="up">
                     <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{sectionTitles?.contact || "Get In Touch"}</h2>
+                        <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{sectionTitles?.contact || t.contact.title}</h2>
                         <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                            Have a project in mind or want to discuss potential opportunities? I'd love to hear from you.
+                            {t.contact.subtitle}
+                        </p>
+                    </div>
+                </FadeIn>
+
+                {/* Calendly Booking Button */}
+                <FadeIn direction="up" delay={0.1}>
+                    <div className="text-center mb-8">
+                        <a
+                            href="https://calendly.com/shariar-arafat/30min"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all duration-300"
+                        >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Book a Call
+                        </a>
+                        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            Schedule a 30-minute call to discuss your project
                         </p>
                     </div>
                 </FadeIn>
@@ -123,21 +143,21 @@ const Contact: React.FC = () => {
                             />
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your name"/>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.contact.name}</label>
+                                    <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder={t.contact.name}/>
                                 </div>
                                 <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your email"/>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.contact.email}</label>
+                                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder={t.contact.email}/>
                                 </div>
                             </div>
                             <div>
                                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
-                                <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Subject of your message"/>
+                                <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Subject"/>
                             </div>
                              <div>
-                                <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
-                                <textarea id="message" name="message" rows={5} value={formData.message} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder="Your message"></textarea>
+                                <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t.contact.message}</label>
+                                <textarea id="message" name="message" rows={5} value={formData.message} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary" placeholder={t.contact.message}></textarea>
                             </div>
                             <div>
                                 <button type="submit" disabled={status === 'loading'} className="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
@@ -150,7 +170,7 @@ const Contact: React.FC = () => {
                                             Sending...
                                         </span>
                                     )}
-                                    {status !== 'loading' && 'Send Message'}
+                                    {status !== 'loading' && t.contact.send}
                                 </button>
                             </div>
                         </form>

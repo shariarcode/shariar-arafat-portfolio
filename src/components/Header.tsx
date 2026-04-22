@@ -36,20 +36,21 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
 };
 
 const Header: React.FC = () => {
-    const { content, darkMode, setDarkMode } = usePortfolio();
+    const { content, darkMode, setDarkMode, language, setLanguage, t } = usePortfolio();
     const { userName, navLinks, resumeUrl } = content;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
+    const toggleLanguage = () => setLanguage(language === 'en' ? 'bn' : 'en');
 
     const visibleNavLinks = [
-        { id: "home", label: "Home", visible: true },
-        { id: "about", label: "About", visible: navLinks?.about !== false },
-        { id: "skills", label: "Skills", visible: navLinks?.skills !== false },
-        { id: "work", label: "Work", visible: navLinks?.work !== false },
-        { id: "blog", label: "Blog", visible: navLinks?.blog !== false },
-        { id: "contact", label: "Contact", visible: navLinks?.contact !== false }
+        { id: "home", label: t.nav.home, visible: true },
+        { id: "about", label: t.nav.about, visible: navLinks?.about !== false },
+        { id: "skills", label: t.nav.skills, visible: navLinks?.skills !== false },
+        { id: "work", label: t.nav.work, visible: navLinks?.work !== false },
+        { id: "blog", label: t.nav.blog, visible: navLinks?.blog !== false },
+        { id: "contact", label: t.nav.contact, visible: navLinks?.contact !== false }
     ].filter(item => item.visible);
 
     useEffect(() => {
@@ -102,6 +103,13 @@ const Header: React.FC = () => {
                                     Resume
                                 </a>
                             ) : null}
+                            <button
+                                onClick={toggleLanguage}
+                                className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 backdrop-blur-sm transition-colors font-semibold text-xs"
+                                title={language === 'en' ? 'বাংলা' : 'English'}
+                            >
+                                {language === 'en' ? 'BN' : 'EN'}
+                            </button>
                             <button
                                 onClick={toggleDarkMode}
                                 className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 backdrop-blur-sm transition-colors"
