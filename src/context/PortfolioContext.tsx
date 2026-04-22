@@ -158,6 +158,23 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     };
                 }).filter(post => Boolean(post.title && post.excerpt))
             : defaults.blogPosts,
+        pricingPlans: Array.isArray(s.pricingPlans)
+            ? s.pricingPlans
+                .filter(plan => plan && typeof plan === 'object' && plan.name)
+                .map((savedPlan, index) => {
+                    const defaultPlan = defaults.pricingPlans?.[index] || defaults.pricingPlans?.[0];
+                    return {
+                        name: savedPlan.name || defaultPlan?.name || 'New Plan',
+                        description: savedPlan.description || defaultPlan?.description || '',
+                        price: savedPlan.price || defaultPlan?.price || '$0',
+                        period: savedPlan.period || defaultPlan?.period || 'per project',
+                        features: Array.isArray(savedPlan.features) ? savedPlan.features : (defaultPlan?.features || []),
+                        isPopular: savedPlan.isPopular !== undefined ? savedPlan.isPopular : defaultPlan?.isPopular,
+                        buttonText: savedPlan.buttonText || defaultPlan?.buttonText || 'Get Started'
+                    };
+                })
+            : defaults.pricingPlans,
+        bookingUrl: s.bookingUrl !== undefined ? s.bookingUrl : defaults.bookingUrl,
     };
     return merged;
 };
@@ -211,11 +228,20 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     const saveContent = async (newData: PortfolioData): Promise<boolean> => {
         try {
+            console.log("Saving portfolio content to Supabase...", newData);
             const { error } = await supabase
                 .from('settings')
-                .upsert({ id: 'portfolio', content: newData, updated_at: new Date() });
+                .upsert({ 
+                    id: 'portfolio', 
+                    content: newData, 
+                    updated_at: new Date().toISOString() 
+                });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase upsert error:", error);
+                throw error;
+            }
+            
             setContent(newData);
             return true;
         } catch (err) {
