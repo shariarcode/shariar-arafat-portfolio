@@ -650,14 +650,29 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             </div>
                                             <div className="mt-4">
                                                 <label className="block text-sm font-medium text-gray-400 mb-2">Features (one per line)</label>
-                                                <textarea 
-                                                    name="features" 
-                                                    value={plan.features || ''}
-                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)}
-                                                    rows={5}
-                                                    className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm"
-                                                    placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
-                                                />
+                                                <div className="relative">
+                                                    <textarea 
+                                                        value={typeof plan.features === 'string' ? plan.features : (plan.features || []).join('\n')}
+                                                        onChange={(e) => {
+                                                            const newPlans = [...formData.pricingPlans];
+                                                            newPlans[index] = { ...newPlans[index], features: e.target.value };
+                                                            setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                        }}
+                                                        rows={5}
+                                                        className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all pr-10"
+                                                        placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                                                    />
+                                                    <AIEnhanceButton 
+                                                        onClick={() => handleEnhance(`plan-features-${index}`, typeof plan.features === 'string' ? plan.features : (plan.features || []).join('\n'), (val) => {
+                                                            const newPlans = [...formData.pricingPlans];
+                                                            newPlans[index] = { ...newPlans[index], features: val };
+                                                            setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                        })} 
+                                                        isLoading={!!enhancingFields[`plan-features-${index}`]} 
+                                                        disabled={!(typeof plan.features === 'string' ? plan.features : (plan.features || []).join('\n')).trim()} 
+                                                    />
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-1">Press Enter to add more features.</p>
                                             </div>
                                             <div className="mt-4 flex items-center gap-3">
                                                 <input 
