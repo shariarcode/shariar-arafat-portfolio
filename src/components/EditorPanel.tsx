@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import type { PortfolioData } from '../types';
-import { CloseIcon } from './Icons';
+import { CloseIcon, SparklesIcon, LoadingSpinner } from './Icons';
 import { ICON_OPTIONS } from '../constants';
 import { supabase } from '../lib/supabaseClient';
+import { useToast } from './Toast';
 
 interface EditorPanelProps {
     data: PortfolioData;
@@ -10,8 +11,19 @@ interface EditorPanelProps {
     onClose: () => void;
 }
 
-const FormInput: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string }> = ({ label, name, value, onChange, placeholder }) => (
-    <div>
+const AIEnhanceButton: React.FC<{ onClick: () => void, isLoading: boolean, disabled?: boolean }> = ({ onClick, isLoading, disabled }) => (
+    <button 
+        onClick={(e) => { e.preventDefault(); onClick(); }}
+        disabled={disabled || isLoading}
+        title="Enhance with AI"
+        className="absolute right-2 top-8 sm:top-7 p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+    >
+        {isLoading ? <LoadingSpinner className="w-4 h-4" /> : <SparklesIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+    </button>
+);
+
+const FormInput: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string, onEnhance?: () => void, isEnhancing?: boolean }> = ({ label, name, value, onChange, placeholder, onEnhance, isEnhancing }) => (
+    <div className="relative">
         <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
         <input 
             type="text" 
@@ -19,21 +31,23 @@ const FormInput: React.FC<{ label: string, name: string, value: string, onChange
             value={value} 
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px]"
+            className={`w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px] ${onEnhance ? 'pr-10' : ''}`}
         />
+        {onEnhance && <AIEnhanceButton onClick={onEnhance} isLoading={!!isEnhancing} disabled={!value.trim()} />}
     </div>
 );
 
-const FormTextarea: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void }> = ({ label, name, value, onChange }) => (
-    <div>
+const FormTextarea: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, onEnhance?: () => void, isEnhancing?: boolean }> = ({ label, name, value, onChange, onEnhance, isEnhancing }) => (
+    <div className="relative">
         <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
         <textarea 
             name={name}
             value={value} 
             onChange={onChange}
             rows={3}
-            className="w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px]"
+            className={`w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px] ${onEnhance ? 'pr-10' : ''}`}
         />
+        {onEnhance && <AIEnhanceButton onClick={onEnhance} isLoading={!!isEnhancing} disabled={!value.trim()} />}
     </div>
 );
 
@@ -84,6 +98,32 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     const [loadingInbox, setLoadingInbox] = useState(false);
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
     const [loadingGuestbook, setLoadingGuestbook] = useState(false);
+    const [enhancingFields, setEnhancingFields] = useState<Record<string, boolean>>({});
+    const { showToast } = useToast();
+
+    const handleEnhance = async (fieldId: string, currentText: string, setter: (val: string) => void) => {
+        if (!currentText.trim() || enhancingFields[fieldId]) return;
+
+        setEnhancingFields(prev => ({ ...prev, [fieldId]: true }));
+        try {
+            const response = await fetch('/api/enhance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: currentText })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Failed to enhance text');
+
+            setter(data.enhancedText);
+            showToast('Writing enhanced! ✨', 'success');
+        } catch (err: any) {
+            console.error("Enhance error:", err);
+            showToast(err.message || 'AI Enhancement failed', 'error');
+        } finally {
+            setEnhancingFields(prev => ({ ...prev, [fieldId]: false }));
+        }
+    };
 
     React.useEffect(() => {
         if (activeTab === 'inbox') {
@@ -296,7 +336,14 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 <p className="text-xs text-yellow-400 mt-1">⚠️ No resume URL set — buttons will not work until you add one.</p>
                                             )}
                                         </div>
-                                        <FormTextarea label="Subheading" name="heroSubheading" value={formData.heroSubheading} onChange={handleChange} />
+                                        <FormTextarea 
+                                            label="Subheading" 
+                                            name="heroSubheading" 
+                                            value={formData.heroSubheading} 
+                                            onChange={handleChange} 
+                                            onEnhance={() => handleEnhance('heroSubheading', formData.heroSubheading, (val) => setFormData((prev: any) => ({ ...prev, heroSubheading: val })))}
+                                            isEnhancing={enhancingFields['heroSubheading']}
+                                        />
                                     </div>
                                     <div className="space-y-4">
                                         <label className="block text-sm font-medium text-gray-400 mb-1">Profile Image</label>
@@ -323,7 +370,14 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                         {activeTab === 'about' && (
                             <div className="space-y-8 animate-fade-in">
                                 <h3 className="text-2xl font-bold text-primary mb-6">About Me Section</h3>
-                                <FormTextarea label="Career Objective" name="careerObjective" value={formData.careerObjective} onChange={handleChange} />
+                                <FormTextarea 
+                                    label="Career Objective" 
+                                    name="careerObjective" 
+                                    value={formData.careerObjective} 
+                                    onChange={handleChange} 
+                                    onEnhance={() => handleEnhance('careerObjective', formData.careerObjective, (val) => setFormData((prev: any) => ({ ...prev, careerObjective: val })))}
+                                    isEnhancing={enhancingFields['careerObjective']}
+                                />
                                 
                                 <div className="space-y-4 pt-4 border-t border-gray-700">
                                     <div className="flex justify-between items-center">
@@ -335,7 +389,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         {formData.expertiseAreas.map((area: any, index: number) => (
                                             <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
                                                 <FormInput label="Area Name" name="name" value={area.name} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />
-                                                <FormTextarea label="Area Description" name="description" value={area.description || ''} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />
+                                                <FormTextarea 
+                                                    label="Area Description" 
+                                                    name="description" 
+                                                    value={area.description || ''} 
+                                                    onChange={(e) => handleArrayChange('expertiseAreas', index, e)} 
+                                                    onEnhance={() => handleEnhance(`expertise-${index}`, area.description, (val) => {
+                                                        const newAreas = [...formData.expertiseAreas];
+                                                        newAreas[index] = { ...newAreas[index], description: val };
+                                                        setFormData((prev: any) => ({ ...prev, expertiseAreas: newAreas }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`expertise-${index}`]}
+                                                />
                                                 <button onClick={() => handleDeleteItem('expertiseAreas', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                             </div>
                                         ))}
@@ -354,7 +419,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                     <FormInput label="Year" name="year" value={event.year || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
                                                     <FormInput label="Milestone Title" name="title" value={event.title || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
                                                 </div>
-                                                <FormTextarea label="Milestone Description" name="description" value={event.description || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
+                                                <FormTextarea 
+                                                    label="Milestone Description" 
+                                                    name="description" 
+                                                    value={event.description || ''} 
+                                                    onChange={(e) => handleArrayChange('timeline', index, e)} 
+                                                    onEnhance={() => handleEnhance(`timeline-${index}`, event.description, (val) => {
+                                                        const newTimeline = [...formData.timeline];
+                                                        newTimeline[index] = { ...newTimeline[index], description: val };
+                                                        setFormData((prev: any) => ({ ...prev, timeline: newTimeline }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`timeline-${index}`]}
+                                                />
                                                 <button onClick={() => handleDeleteItem('timeline', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                             </div>
                                         ))}
@@ -420,7 +496,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 <FormInput label="Button Text" name="buttonText" value={plan.buttonText || ''} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
                                             </div>
                                             <div className="mt-4">
-                                                <FormTextarea label="Description" name="description" value={plan.description} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                                <FormTextarea 
+                                                    label="Description" 
+                                                    name="description" 
+                                                    value={plan.description} 
+                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)} 
+                                                    onEnhance={() => handleEnhance(`plan-desc-${index}`, plan.description, (val) => {
+                                                        const newPlans = [...formData.pricingPlans];
+                                                        newPlans[index] = { ...newPlans[index], description: val };
+                                                        setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`plan-desc-${index}`]}
+                                                />
                                             </div>
                                             <div className="mt-4">
                                                 <label className="block text-sm font-medium text-gray-400 mb-2">Features (one per line)</label>
@@ -474,7 +561,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                     <FormInput label="Live URL" name="liveUrl" value={project.liveUrl || ''} onChange={(e) => handleArrayChange('projectsData', index, e)} />
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <FormTextarea label="Description" name="description" value={project.description} onChange={(e) => handleArrayChange('projectsData', index, e)} />
+                                                    <FormTextarea 
+                                                        label="Description" 
+                                                        name="description" 
+                                                        value={project.description} 
+                                                        onChange={(e) => handleArrayChange('projectsData', index, e)} 
+                                                        onEnhance={() => handleEnhance(`project-${index}`, project.description, (val) => {
+                                                            const newProjects = [...formData.projectsData];
+                                                            newProjects[index] = { ...newProjects[index], description: val };
+                                                            setFormData((prev: any) => ({ ...prev, projectsData: newProjects }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`project-${index}`]}
+                                                    />
                                                     <FormInput label="Image URL" name="imageUrl" value={project.imageUrl || ''} onChange={(e) => handleArrayChange('projectsData', index, e)} />
                                                 </div>
                                             </div>
@@ -524,8 +622,30 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 <FormInput label="Read Time" name="readTime" value={post.readTime || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
                                                 <FormInput label="Article URL" name="url" value={post.url || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
                                             </div>
-                                            <FormTextarea label="Excerpt" name="excerpt" value={post.excerpt || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
-                                            <FormTextarea label="Post Content (one paragraph per line)" name="content" value={post.content || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                            <FormTextarea 
+                                                label="Excerpt" 
+                                                name="excerpt" 
+                                                value={post.excerpt || ''} 
+                                                onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                onEnhance={() => handleEnhance(`blog-excerpt-${index}`, post.excerpt, (val) => {
+                                                    const newPosts = [...formData.blogPosts];
+                                                    newPosts[index] = { ...newPosts[index], excerpt: val };
+                                                    setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                })}
+                                                isEnhancing={enhancingFields[`blog-excerpt-${index}`]}
+                                            />
+                                            <FormTextarea 
+                                                label="Post Content (one paragraph per line)" 
+                                                name="content" 
+                                                value={post.content || ''} 
+                                                onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                onEnhance={() => handleEnhance(`blog-content-${index}`, post.content, (val) => {
+                                                    const newPosts = [...formData.blogPosts];
+                                                    newPosts[index] = { ...newPosts[index], content: val };
+                                                    setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                })}
+                                                isEnhancing={enhancingFields[`blog-content-${index}`]}
+                                            />
                                             <button onClick={() => handleDeleteItem('blogPosts', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                         </div>
                                     ))}
@@ -554,7 +674,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                     <input type="number" min={1} max={5} name="rating" value={testimonial.rating || 5} onChange={(e) => handleArrayChange('testimonials', index, e)} className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all" />
                                                 </div>
                                             </div>
-                                            <FormTextarea label="Testimonial Content" name="content" value={testimonial.content || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                            <FormTextarea 
+                                                label="Testimonial Content" 
+                                                name="content" 
+                                                value={testimonial.content || ''} 
+                                                onChange={(e) => handleArrayChange('testimonials', index, e)} 
+                                                onEnhance={() => handleEnhance(`testimonial-${index}`, testimonial.content, (val) => {
+                                                    const newTestimonials = [...formData.testimonials];
+                                                    newTestimonials[index] = { ...newTestimonials[index], content: val };
+                                                    setFormData((prev: any) => ({ ...prev, testimonials: newTestimonials }));
+                                                })}
+                                                isEnhancing={enhancingFields[`testimonial-${index}`]}
+                                            />
                                             <button onClick={() => handleDeleteItem('testimonials', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                         </div>
                                     ))}
