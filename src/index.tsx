@@ -1,6 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 import { ToastProvider } from './components/Toast';
 import { PortfolioProvider } from './context/PortfolioContext';
@@ -16,6 +17,7 @@ root.render(
     <PortfolioProvider>
       <ToastProvider>
         <App />
+        <Analytics />
       </ToastProvider>
     </PortfolioProvider>
   </React.StrictMode>
