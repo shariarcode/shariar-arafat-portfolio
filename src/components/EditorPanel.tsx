@@ -318,11 +318,40 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                 <h3 className="text-xl sm:text-2xl font-bold text-primary mb-4 sm:mb-6">Home Section Details</h3>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                                     <div className="space-y-4">
-                                        <FormInput label="Full Name" name="userName" value={formData.userName} onChange={handleChange} />
-                                        <FormInput label="Roles (comma separated)" name="heroRoles" value={formData.heroRoles} onChange={handleChange} />
-                                        <FormInput label="'Available for hire' Text" name="heroAvailableText" value={formData.heroAvailableText} onChange={handleChange} />
+                                        <FormInput 
+                                            label="Full Name" 
+                                            name="userName" 
+                                            value={formData.userName} 
+                                            onChange={handleChange} 
+                                            onEnhance={() => handleEnhance('userName', formData.userName, (val) => setFormData((prev: any) => ({ ...prev, userName: val })))}
+                                            isEnhancing={enhancingFields['userName']}
+                                        />
+                                        <FormInput 
+                                            label="Roles (comma separated)" 
+                                            name="heroRoles" 
+                                            value={formData.heroRoles} 
+                                            onChange={handleChange} 
+                                            onEnhance={() => handleEnhance('heroRoles', formData.heroRoles, (val) => setFormData((prev: any) => ({ ...prev, heroRoles: val })))}
+                                            isEnhancing={enhancingFields['heroRoles']}
+                                        />
+                                        <FormInput 
+                                            label="'Available for hire' Text" 
+                                            name="heroAvailableText" 
+                                            value={formData.heroAvailableText} 
+                                            onChange={handleChange} 
+                                            onEnhance={() => handleEnhance('heroAvailableText', formData.heroAvailableText, (val) => setFormData((prev: any) => ({ ...prev, heroAvailableText: val })))}
+                                            isEnhancing={enhancingFields['heroAvailableText']}
+                                        />
                                         <div>
-                                            <FormInput label="Resume / CV PDF URL" name="resumeUrl" value={formData.resumeUrl} onChange={handleChange} placeholder="Paste a direct PDF link here..." />
+                                            <FormInput 
+                                                label="Resume / CV PDF URL" 
+                                                name="resumeUrl" 
+                                                value={formData.resumeUrl} 
+                                                onChange={handleChange} 
+                                                placeholder="Paste a direct PDF link here..." 
+                                                onEnhance={() => handleEnhance('resumeUrl', formData.resumeUrl, (val) => setFormData((prev: any) => ({ ...prev, resumeUrl: val })))}
+                                                isEnhancing={enhancingFields['resumeUrl']}
+                                            />
                                             <div className="mt-3 p-3 sm:p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg">
                                                 <p className="text-xs sm:text-sm text-blue-300 font-semibold mb-2">📄 How to get your PDF link:</p>
                                                 <ol className="text-xs sm:text-sm text-blue-400 space-y-2 list-decimal list-inside">
@@ -388,7 +417,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                         {formData.expertiseAreas.map((area: any, index: number) => (
                                             <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
-                                                <FormInput label="Area Name" name="name" value={area.name} onChange={(e) => handleArrayChange('expertiseAreas', index, e)} />
+                                                <FormInput 
+                                                    label="Area Name" 
+                                                    name="name" 
+                                                    value={area.name} 
+                                                    onChange={(e) => handleArrayChange('expertiseAreas', index, e)} 
+                                                    onEnhance={() => handleEnhance(`expertise-name-${index}`, area.name, (val) => {
+                                                        const newAreas = [...formData.expertiseAreas];
+                                                        newAreas[index] = { ...newAreas[index], name: val };
+                                                        setFormData((prev: any) => ({ ...prev, expertiseAreas: newAreas }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`expertise-name-${index}`]}
+                                                />
                                                 <FormTextarea 
                                                     label="Area Description" 
                                                     name="description" 
@@ -416,8 +456,30 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         {(formData.timeline || []).map((event: any, index: number) => (
                                             <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
                                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                                    <FormInput label="Year" name="year" value={event.year || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
-                                                    <FormInput label="Milestone Title" name="title" value={event.title || ''} onChange={(e) => handleArrayChange('timeline', index, e)} />
+                                                    <FormInput 
+                                                        label="Year" 
+                                                        name="year" 
+                                                        value={event.year || ''} 
+                                                        onChange={(e) => handleArrayChange('timeline', index, e)} 
+                                                        onEnhance={() => handleEnhance(`timeline-year-${index}`, event.year, (val) => {
+                                                            const newTimeline = [...formData.timeline];
+                                                            newTimeline[index] = { ...newTimeline[index], year: val };
+                                                            setFormData((prev: any) => ({ ...prev, timeline: newTimeline }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`timeline-year-${index}`]}
+                                                    />
+                                                    <FormInput 
+                                                        label="Milestone Title" 
+                                                        name="title" 
+                                                        value={event.title || ''} 
+                                                        onChange={(e) => handleArrayChange('timeline', index, e)} 
+                                                        onEnhance={() => handleEnhance(`timeline-title-${index}`, event.title, (val) => {
+                                                            const newTimeline = [...formData.timeline];
+                                                            newTimeline[index] = { ...newTimeline[index], title: val };
+                                                            setFormData((prev: any) => ({ ...prev, timeline: newTimeline }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`timeline-title-${index}`]}
+                                                    />
                                                 </div>
                                                 <FormTextarea 
                                                     label="Milestone Description" 
@@ -451,7 +513,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     {formData.skillsData.map((skill: any, index: number) => (
                                         <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
                                             <div className="grid grid-cols-2 gap-4">
-                                                <FormInput label="Skill Name" name="name" value={skill.name} onChange={(e) => handleArrayChange('skillsData', index, e)} />
+                                                <FormInput 
+                                                    label="Skill Name" 
+                                                    name="name" 
+                                                    value={skill.name} 
+                                                    onChange={(e) => handleArrayChange('skillsData', index, e)} 
+                                                    onEnhance={() => handleEnhance(`skill-name-${index}`, skill.name, (val) => {
+                                                        const newSkills = [...formData.skillsData];
+                                                        newSkills[index] = { ...newSkills[index], name: val };
+                                                        setFormData((prev: any) => ({ ...prev, skillsData: newSkills }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`skill-name-${index}`]}
+                                                />
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-400 mb-1">Icon</label>
                                                     <select 
@@ -466,8 +539,30 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                     </select>
                                                 </div>
                                             </div>
-                                            <FormInput label="Technologies (comma separated)" name="technologies" value={skill.technologies} onChange={(e) => handleArrayChange('skillsData', index, e)} />
-                                            <FormTextarea label="Description" name="description" value={skill.description} onChange={(e) => handleArrayChange('skillsData', index, e)} />
+                                            <FormInput 
+                                                label="Technologies (comma separated)" 
+                                                name="technologies" 
+                                                value={skill.technologies} 
+                                                onChange={(e) => handleArrayChange('skillsData', index, e)} 
+                                                onEnhance={() => handleEnhance(`skill-tech-${index}`, skill.technologies, (val) => {
+                                                    const newSkills = [...formData.skillsData];
+                                                    newSkills[index] = { ...newSkills[index], technologies: val };
+                                                    setFormData((prev: any) => ({ ...prev, skillsData: newSkills }));
+                                                })}
+                                                isEnhancing={enhancingFields[`skill-tech-${index}`]}
+                                            />
+                                            <FormTextarea 
+                                                label="Description" 
+                                                name="description" 
+                                                value={skill.description} 
+                                                onChange={(e) => handleArrayChange('skillsData', index, e)} 
+                                                onEnhance={() => handleEnhance(`skill-desc-${index}`, skill.description, (val) => {
+                                                    const newSkills = [...formData.skillsData];
+                                                    newSkills[index] = { ...newSkills[index], description: val };
+                                                    setFormData((prev: any) => ({ ...prev, skillsData: newSkills }));
+                                                })}
+                                                isEnhancing={enhancingFields[`skill-desc-${index}`]}
+                                            />
                                             <button onClick={() => handleDeleteItem('skillsData', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                         </div>
                                     ))}
@@ -488,12 +583,56 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         <div key={index} className="border border-gray-600 p-6 rounded-xl relative group bg-gray-900/50">
                                             <button onClick={() => handleDeleteItem('pricingPlans', index)} className="absolute top-4 right-4 text-red-500 hover:text-red-400"><TrashIcon/></button>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <FormInput label="Plan Name" name="name" value={plan.name} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
-                                                <FormInput label="Price" name="price" value={plan.price} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                                <FormInput 
+                                                    label="Plan Name" 
+                                                    name="name" 
+                                                    value={plan.name} 
+                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)} 
+                                                    onEnhance={() => handleEnhance(`plan-name-${index}`, plan.name, (val) => {
+                                                        const newPlans = [...formData.pricingPlans];
+                                                        newPlans[index] = { ...newPlans[index], name: val };
+                                                        setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`plan-name-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Price" 
+                                                    name="price" 
+                                                    value={plan.price} 
+                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)} 
+                                                    onEnhance={() => handleEnhance(`plan-price-${index}`, plan.price, (val) => {
+                                                        const newPlans = [...formData.pricingPlans];
+                                                        newPlans[index] = { ...newPlans[index], price: val };
+                                                        setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`plan-price-${index}`]}
+                                                />
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                                                <FormInput label="Period (e.g., per project)" name="period" value={plan.period || ''} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
-                                                <FormInput label="Button Text" name="buttonText" value={plan.buttonText || ''} onChange={(e) => handleArrayChange('pricingPlans', index, e)} />
+                                                <FormInput 
+                                                    label="Period (e.g., per project)" 
+                                                    name="period" 
+                                                    value={plan.period || ''} 
+                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)} 
+                                                    onEnhance={() => handleEnhance(`plan-period-${index}`, plan.period, (val) => {
+                                                        const newPlans = [...formData.pricingPlans];
+                                                        newPlans[index] = { ...newPlans[index], period: val };
+                                                        setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`plan-period-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Button Text" 
+                                                    name="buttonText" 
+                                                    value={plan.buttonText || ''} 
+                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)} 
+                                                    onEnhance={() => handleEnhance(`plan-btn-${index}`, plan.buttonText, (val) => {
+                                                        const newPlans = [...formData.pricingPlans];
+                                                        newPlans[index] = { ...newPlans[index], buttonText: val };
+                                                        setFormData((prev: any) => ({ ...prev, pricingPlans: newPlans }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`plan-btn-${index}`]}
+                                                />
                                             </div>
                                             <div className="mt-4">
                                                 <FormTextarea 
@@ -556,9 +695,42 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                         <div key={index} className="border border-gray-600 p-6 rounded-xl relative group bg-gray-900/50">
                                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
                                                 <div className="space-y-4">
-                                                    <FormInput label="Project Title" name="title" value={project.title} onChange={(e) => handleArrayChange('projectsData', index, e)} />
-                                                    <FormInput label="Category" name="category" value={project.category} onChange={(e) => handleArrayChange('projectsData', index, e)} />
-                                                    <FormInput label="Live URL" name="liveUrl" value={project.liveUrl || ''} onChange={(e) => handleArrayChange('projectsData', index, e)} />
+                                                    <FormInput 
+                                                        label="Project Title" 
+                                                        name="title" 
+                                                        value={project.title} 
+                                                        onChange={(e) => handleArrayChange('projectsData', index, e)} 
+                                                        onEnhance={() => handleEnhance(`project-title-${index}`, project.title, (val) => {
+                                                            const newProjects = [...formData.projectsData];
+                                                            newProjects[index] = { ...newProjects[index], title: val };
+                                                            setFormData((prev: any) => ({ ...prev, projectsData: newProjects }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`project-title-${index}`]}
+                                                    />
+                                                    <FormInput 
+                                                        label="Category" 
+                                                        name="category" 
+                                                        value={project.category} 
+                                                        onChange={(e) => handleArrayChange('projectsData', index, e)} 
+                                                        onEnhance={() => handleEnhance(`project-cat-${index}`, project.category, (val) => {
+                                                            const newProjects = [...formData.projectsData];
+                                                            newProjects[index] = { ...newProjects[index], category: val };
+                                                            setFormData((prev: any) => ({ ...prev, projectsData: newProjects }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`project-cat-${index}`]}
+                                                    />
+                                                    <FormInput 
+                                                        label="Live URL" 
+                                                        name="liveUrl" 
+                                                        value={project.liveUrl || ''} 
+                                                        onChange={(e) => handleArrayChange('projectsData', index, e)} 
+                                                        onEnhance={() => handleEnhance(`project-url-${index}`, project.liveUrl, (val) => {
+                                                            const newProjects = [...formData.projectsData];
+                                                            newProjects[index] = { ...newProjects[index], liveUrl: val };
+                                                            setFormData((prev: any) => ({ ...prev, projectsData: newProjects }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`project-url-${index}`]}
+                                                    />
                                                 </div>
                                                 <div className="space-y-4">
                                                     <FormTextarea 
@@ -573,7 +745,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                         })}
                                                         isEnhancing={enhancingFields[`project-${index}`]}
                                                     />
-                                                    <FormInput label="Image URL" name="imageUrl" value={project.imageUrl || ''} onChange={(e) => handleArrayChange('projectsData', index, e)} />
+                                                    <FormInput 
+                                                        label="Image URL" 
+                                                        name="imageUrl" 
+                                                        value={project.imageUrl || ''} 
+                                                        onChange={(e) => handleArrayChange('projectsData', index, e)} 
+                                                        onEnhance={() => handleEnhance(`project-img-${index}`, project.imageUrl, (val) => {
+                                                            const newProjects = [...formData.projectsData];
+                                                            newProjects[index] = { ...newProjects[index], imageUrl: val };
+                                                            setFormData((prev: any) => ({ ...prev, projectsData: newProjects }));
+                                                        })}
+                                                        isEnhancing={enhancingFields[`project-img-${index}`]}
+                                                    />
                                                 </div>
                                             </div>
                                             
@@ -616,11 +799,66 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     {(formData.blogPosts || []).map((post: any, index: number) => (
                                         <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
                                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                                <FormInput label="Post Slug" name="slug" value={post.slug || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
-                                                <FormInput label="Post Title" name="title" value={post.title || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
-                                                <FormInput label="Published Date (YYYY-MM-DD)" name="date" value={post.date || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
-                                                <FormInput label="Read Time" name="readTime" value={post.readTime || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
-                                                <FormInput label="Article URL" name="url" value={post.url || ''} onChange={(e) => handleArrayChange('blogPosts', index, e)} />
+                                                <FormInput 
+                                                    label="Post Slug" 
+                                                    name="slug" 
+                                                    value={post.slug || ''} 
+                                                    onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                    onEnhance={() => handleEnhance(`blog-slug-${index}`, post.slug, (val) => {
+                                                        const newPosts = [...formData.blogPosts];
+                                                        newPosts[index] = { ...newPosts[index], slug: val };
+                                                        setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`blog-slug-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Post Title" 
+                                                    name="title" 
+                                                    value={post.title || ''} 
+                                                    onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                    onEnhance={() => handleEnhance(`blog-title-${index}`, post.title, (val) => {
+                                                        const newPosts = [...formData.blogPosts];
+                                                        newPosts[index] = { ...newPosts[index], title: val };
+                                                        setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`blog-title-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Published Date (YYYY-MM-DD)" 
+                                                    name="date" 
+                                                    value={post.date || ''} 
+                                                    onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                    onEnhance={() => handleEnhance(`blog-date-${index}`, post.date, (val) => {
+                                                        const newPosts = [...formData.blogPosts];
+                                                        newPosts[index] = { ...newPosts[index], date: val };
+                                                        setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`blog-date-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Read Time" 
+                                                    name="readTime" 
+                                                    value={post.readTime || ''} 
+                                                    onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                    onEnhance={() => handleEnhance(`blog-read-${index}`, post.readTime, (val) => {
+                                                        const newPosts = [...formData.blogPosts];
+                                                        newPosts[index] = { ...newPosts[index], readTime: val };
+                                                        setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`blog-read-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Article URL" 
+                                                    name="url" 
+                                                    value={post.url || ''} 
+                                                    onChange={(e) => handleArrayChange('blogPosts', index, e)} 
+                                                    onEnhance={() => handleEnhance(`blog-url-${index}`, post.url, (val) => {
+                                                        const newPosts = [...formData.blogPosts];
+                                                        newPosts[index] = { ...newPosts[index], url: val };
+                                                        setFormData((prev: any) => ({ ...prev, blogPosts: newPosts }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`blog-url-${index}`]}
+                                                />
                                             </div>
                                             <FormTextarea 
                                                 label="Excerpt" 
@@ -665,10 +903,54 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     {(formData.testimonials || []).map((testimonial: any, index: number) => (
                                         <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
                                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                                <FormInput label="Client Name" name="name" value={testimonial.name || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
-                                                <FormInput label="Client Role" name="role" value={testimonial.role || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
-                                                <FormInput label="Company" name="company" value={testimonial.company || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
-                                                <FormInput label="Profile Image URL" name="image" value={testimonial.image || ''} onChange={(e) => handleArrayChange('testimonials', index, e)} />
+                                                <FormInput 
+                                                    label="Client Name" 
+                                                    name="name" 
+                                                    value={testimonial.name || ''} 
+                                                    onChange={(e) => handleArrayChange('testimonials', index, e)} 
+                                                    onEnhance={() => handleEnhance(`test-name-${index}`, testimonial.name, (val) => {
+                                                        const newTest = [...formData.testimonials];
+                                                        newTest[index] = { ...newTest[index], name: val };
+                                                        setFormData((prev: any) => ({ ...prev, testimonials: newTest }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`test-name-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Client Role" 
+                                                    name="role" 
+                                                    value={testimonial.role || ''} 
+                                                    onChange={(e) => handleArrayChange('testimonials', index, e)} 
+                                                    onEnhance={() => handleEnhance(`test-role-${index}`, testimonial.role, (val) => {
+                                                        const newTest = [...formData.testimonials];
+                                                        newTest[index] = { ...newTest[index], role: val };
+                                                        setFormData((prev: any) => ({ ...prev, testimonials: newTest }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`test-role-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Company" 
+                                                    name="company" 
+                                                    value={testimonial.company || ''} 
+                                                    onChange={(e) => handleArrayChange('testimonials', index, e)} 
+                                                    onEnhance={() => handleEnhance(`test-company-${index}`, testimonial.company, (val) => {
+                                                        const newTest = [...formData.testimonials];
+                                                        newTest[index] = { ...newTest[index], company: val };
+                                                        setFormData((prev: any) => ({ ...prev, testimonials: newTest }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`test-company-${index}`]}
+                                                />
+                                                <FormInput 
+                                                    label="Profile Image URL" 
+                                                    name="image" 
+                                                    value={testimonial.image || ''} 
+                                                    onChange={(e) => handleArrayChange('testimonials', index, e)} 
+                                                    onEnhance={() => handleEnhance(`test-img-${index}`, testimonial.image, (val) => {
+                                                        const newTest = [...formData.testimonials];
+                                                        newTest[index] = { ...newTest[index], image: val };
+                                                        setFormData((prev: any) => ({ ...prev, testimonials: newTest }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`test-img-${index}`]}
+                                                />
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-400 mb-1">Rating (1-5)</label>
                                                     <input type="number" min={1} max={5} name="rating" value={testimonial.rating || 5} onChange={(e) => handleArrayChange('testimonials', index, e)} className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all" />
@@ -700,19 +982,82 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Contact Info</h4>
-                                        <FormInput label="Email Address" name="email" value={formData.contactInfo?.email || ''} onChange={(e) => handleNestedChange('contactInfo', e)} />
-                                        <FormInput label="Phone Number" name="phone" value={formData.contactInfo?.phone || ''} onChange={(e) => handleNestedChange('contactInfo', e)} />
-                                        <FormInput label="Location" name="location" value={formData.contactInfo?.location || ''} onChange={(e) => handleNestedChange('contactInfo', e)} />
+                                        <FormInput 
+                                            label="Email Address" 
+                                            name="email" 
+                                            value={formData.contactInfo?.email || ''} 
+                                            onChange={(e) => handleNestedChange('contactInfo', e)} 
+                                            onEnhance={() => handleEnhance('contact-email', formData.contactInfo.email, (val) => setFormData((prev: any) => ({ ...prev, contactInfo: { ...prev.contactInfo, email: val } })))}
+                                            isEnhancing={enhancingFields['contact-email']}
+                                        />
+                                        <FormInput 
+                                            label="Phone Number" 
+                                            name="phone" 
+                                            value={formData.contactInfo?.phone || ''} 
+                                            onChange={(e) => handleNestedChange('contactInfo', e)} 
+                                            onEnhance={() => handleEnhance('contact-phone', formData.contactInfo.phone, (val) => setFormData((prev: any) => ({ ...prev, contactInfo: { ...prev.contactInfo, phone: val } })))}
+                                            isEnhancing={enhancingFields['contact-phone']}
+                                        />
+                                        <FormInput 
+                                            label="Location" 
+                                            name="location" 
+                                            value={formData.contactInfo?.location || ''} 
+                                            onChange={(e) => handleNestedChange('contactInfo', e)} 
+                                            onEnhance={() => handleEnhance('contact-loc', formData.contactInfo.location, (val) => setFormData((prev: any) => ({ ...prev, contactInfo: { ...prev.contactInfo, location: val } })))}
+                                            isEnhancing={enhancingFields['contact-loc']}
+                                        />
                                     </div>
                                     
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Social Links</h4>
-                                        <FormInput label="LinkedIn URL" name="linkedin" value={formData.socialLinks?.linkedin || ''} onChange={(e) => handleNestedChange('socialLinks', e)} />
-                                        <FormInput label="GitHub URL" name="github" value={formData.socialLinks?.github || ''} onChange={(e) => handleNestedChange('socialLinks', e)} />
-                                        <FormInput label="Behance URL" name="behance" value={formData.socialLinks?.behance || ''} onChange={(e) => handleNestedChange('socialLinks', e)} />
-                                        <FormInput label="Website URL" name="website" value={formData.socialLinks?.website || ''} onChange={(e) => handleNestedChange('socialLinks', e)} />
-                                        <FormInput label="Dribbble URL" name="dribbble" value={formData.socialLinks?.dribbble || ''} onChange={(e) => handleNestedChange('socialLinks', e)} />
-                                        <FormInput label="Instagram URL" name="instagram" value={formData.socialLinks?.instagram || ''} onChange={(e) => handleNestedChange('socialLinks', e)} />
+                                        <FormInput 
+                                            label="LinkedIn URL" 
+                                            name="linkedin" 
+                                            value={formData.socialLinks?.linkedin || ''} 
+                                            onChange={(e) => handleNestedChange('socialLinks', e)} 
+                                            onEnhance={() => handleEnhance('social-li', formData.socialLinks.linkedin, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, linkedin: val } })))}
+                                            isEnhancing={enhancingFields['social-li']}
+                                        />
+                                        <FormInput 
+                                            label="GitHub URL" 
+                                            name="github" 
+                                            value={formData.socialLinks?.github || ''} 
+                                            onChange={(e) => handleNestedChange('socialLinks', e)} 
+                                            onEnhance={() => handleEnhance('social-gh', formData.socialLinks.github, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, github: val } })))}
+                                            isEnhancing={enhancingFields['social-gh']}
+                                        />
+                                        <FormInput 
+                                            label="Behance URL" 
+                                            name="behance" 
+                                            value={formData.socialLinks?.behance || ''} 
+                                            onChange={(e) => handleNestedChange('socialLinks', e)} 
+                                            onEnhance={() => handleEnhance('social-be', formData.socialLinks.behance, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, behance: val } })))}
+                                            isEnhancing={enhancingFields['social-be']}
+                                        />
+                                        <FormInput 
+                                            label="Website URL" 
+                                            name="website" 
+                                            value={formData.socialLinks?.website || ''} 
+                                            onChange={(e) => handleNestedChange('socialLinks', e)} 
+                                            onEnhance={() => handleEnhance('social-web', formData.socialLinks.website, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, website: val } })))}
+                                            isEnhancing={enhancingFields['social-web']}
+                                        />
+                                        <FormInput 
+                                            label="Dribbble URL" 
+                                            name="dribbble" 
+                                            value={formData.socialLinks?.dribbble || ''} 
+                                            onChange={(e) => handleNestedChange('socialLinks', e)} 
+                                            onEnhance={() => handleEnhance('social-dr', formData.socialLinks.dribbble, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, dribbble: val } })))}
+                                            isEnhancing={enhancingFields['social-dr']}
+                                        />
+                                        <FormInput 
+                                            label="Instagram URL" 
+                                            name="instagram" 
+                                            value={formData.socialLinks?.instagram || ''} 
+                                            onChange={(e) => handleNestedChange('socialLinks', e)} 
+                                            onEnhance={() => handleEnhance('social-ig', formData.socialLinks.instagram, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, instagram: val } })))}
+                                            isEnhancing={enhancingFields['social-ig']}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -725,16 +1070,86 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Section Titles</h4>
-                                        <FormInput label="About Section Title" name="about" value={formData.sectionTitles?.about || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Services Section Title" name="services" value={formData.sectionTitles?.services || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Timeline Section Title" name="timeline" value={formData.sectionTitles?.timeline || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Resume Section Title" name="resume" value={formData.sectionTitles?.resume || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Skills Section Title" name="skills" value={formData.sectionTitles?.skills || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Pricing Section Title" name="pricing" value={formData.sectionTitles?.pricing || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Work Section Title" name="work" value={formData.sectionTitles?.work || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Blog Section Title" name="blog" value={formData.sectionTitles?.blog || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Testimonials Section Title" name="testimonials" value={formData.sectionTitles?.testimonials || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
-                                        <FormInput label="Contact Section Title" name="contact" value={formData.sectionTitles?.contact || ''} onChange={(e) => handleNestedChange('sectionTitles', e)} />
+                                        <FormInput 
+                                            label="About Section Title" 
+                                            name="about" 
+                                            value={formData.sectionTitles?.about || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-about', formData.sectionTitles.about, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, about: val } })))}
+                                            isEnhancing={enhancingFields['st-about']}
+                                        />
+                                        <FormInput 
+                                            label="Services Section Title" 
+                                            name="services" 
+                                            value={formData.sectionTitles?.services || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-services', formData.sectionTitles.services, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, services: val } })))}
+                                            isEnhancing={enhancingFields['st-services']}
+                                        />
+                                        <FormInput 
+                                            label="Timeline Section Title" 
+                                            name="timeline" 
+                                            value={formData.sectionTitles?.timeline || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-timeline', formData.sectionTitles.timeline, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, timeline: val } })))}
+                                            isEnhancing={enhancingFields['st-timeline']}
+                                        />
+                                        <FormInput 
+                                            label="Resume Section Title" 
+                                            name="resume" 
+                                            value={formData.sectionTitles?.resume || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-resume', formData.sectionTitles.resume, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, resume: val } })))}
+                                            isEnhancing={enhancingFields['st-resume']}
+                                        />
+                                        <FormInput 
+                                            label="Skills Section Title" 
+                                            name="skills" 
+                                            value={formData.sectionTitles?.skills || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-skills', formData.sectionTitles.skills, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, skills: val } })))}
+                                            isEnhancing={enhancingFields['st-skills']}
+                                        />
+                                        <FormInput 
+                                            label="Pricing Section Title" 
+                                            name="pricing" 
+                                            value={formData.sectionTitles?.pricing || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-pricing', formData.sectionTitles.pricing, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, pricing: val } })))}
+                                            isEnhancing={enhancingFields['st-pricing']}
+                                        />
+                                        <FormInput 
+                                            label="Work Section Title" 
+                                            name="work" 
+                                            value={formData.sectionTitles?.work || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-work', formData.sectionTitles.work, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, work: val } })))}
+                                            isEnhancing={enhancingFields['st-work']}
+                                        />
+                                        <FormInput 
+                                            label="Blog Section Title" 
+                                            name="blog" 
+                                            value={formData.sectionTitles?.blog || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-blog', formData.sectionTitles.blog, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, blog: val } })))}
+                                            isEnhancing={enhancingFields['st-blog']}
+                                        />
+                                        <FormInput 
+                                            label="Testimonials Section Title" 
+                                            name="testimonials" 
+                                            value={formData.sectionTitles?.testimonials || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-test', formData.sectionTitles.testimonials, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, testimonials: val } })))}
+                                            isEnhancing={enhancingFields['st-test']}
+                                        />
+                                        <FormInput 
+                                            label="Contact Section Title" 
+                                            name="contact" 
+                                            value={formData.sectionTitles?.contact || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-contact', formData.sectionTitles.contact, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, contact: val } })))}
+                                            isEnhancing={enhancingFields['st-contact']}
+                                        />
                                     </div>
                                     
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
@@ -758,7 +1173,15 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     </div>
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Booking / Calendar</h4>
-                                        <FormInput label="Calendly URL" name="bookingUrl" value={formData.bookingUrl || ''} onChange={handleChange} placeholder="https://calendly.com/your-username" />
+                                        <FormInput 
+                                            label="Calendly URL" 
+                                            name="bookingUrl" 
+                                            value={formData.bookingUrl || ''} 
+                                            onChange={handleChange} 
+                                            placeholder="https://calendly.com/your-username" 
+                                            onEnhance={() => handleEnhance('booking-url', formData.bookingUrl, (val) => setFormData((prev: any) => ({ ...prev, bookingUrl: val })))}
+                                            isEnhancing={enhancingFields['booking-url']}
+                                        />
                                         <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
                                             <p className="text-xs text-blue-400">
                                                 Enter your Calendly (or similar) URL to enable the booking feature. Users will be able to schedule calls with you.
@@ -767,8 +1190,22 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     </div>
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Footer Content</h4>
-                                        <FormTextarea label="Footer Description" name="description" value={formData.footerContent?.description || ''} onChange={(e) => handleNestedChange('footerContent', e)} />
-                                        <FormInput label="Footer Services (comma separated)" name="services" value={formData.footerContent?.services || ''} onChange={(e) => handleNestedChange('footerContent', e)} />
+                                        <FormTextarea 
+                                            label="Footer Description" 
+                                            name="description" 
+                                            value={formData.footerContent?.description || ''} 
+                                            onChange={(e) => handleNestedChange('footerContent', e)} 
+                                            onEnhance={() => handleEnhance('footer-desc', formData.footerContent.description, (val) => setFormData((prev: any) => ({ ...prev, footerContent: { ...prev.footerContent, description: val } })))}
+                                            isEnhancing={enhancingFields['footer-desc']}
+                                        />
+                                        <FormInput 
+                                            label="Footer Services (comma separated)" 
+                                            name="services" 
+                                            value={formData.footerContent?.services || ''} 
+                                            onChange={(e) => handleNestedChange('footerContent', e)} 
+                                            onEnhance={() => handleEnhance('footer-serv', formData.footerContent.services, (val) => setFormData((prev: any) => ({ ...prev, footerContent: { ...prev.footerContent, services: val } })))}
+                                            isEnhancing={enhancingFields['footer-serv']}
+                                        />
                                     </div>
                                 </div>
                             </div>
