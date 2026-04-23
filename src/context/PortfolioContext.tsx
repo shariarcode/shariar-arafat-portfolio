@@ -175,6 +175,18 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                 })
             : defaults.pricingPlans,
         bookingUrl: s.bookingUrl !== undefined ? s.bookingUrl : defaults.bookingUrl,
+        stats: Array.isArray(s.stats)
+            ? s.stats
+                .filter(stat => stat && typeof stat === 'object')
+                .map((savedStat, index) => {
+                    const defaultStat = defaults.stats?.[index];
+                    return {
+                        endValue: savedStat.endValue !== undefined ? Number(savedStat.endValue) : (defaultStat?.endValue || 0),
+                        label: savedStat.label || defaultStat?.label || 'Stat',
+                        suffix: savedStat.suffix || defaultStat?.suffix || '+',
+                    };
+                })
+            : defaults.stats,
     };
     return merged;
 };
