@@ -50,6 +50,11 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         // Ensure new objects exist
         if (!serializableData.sectionTitles) serializableData.sectionTitles = { about: "About Me", skills: "Technical Skills", services: "Services", timeline: "My Journey", resume: "Resume", work: "My Projects", pricing: "Pricing Plans", blog: "Latest Posts", testimonials: "What Clients Say", contact: "Get In Touch" };
         if (!serializableData.pricingPlans) serializableData.pricingPlans = [];
+        serializableData.pricingPlans = serializableData.pricingPlans.map((plan: any) => ({
+            ...plan,
+            features: Array.isArray(plan.features) ? plan.features.join('\n') : (plan.features || '')
+        }));
+        
         if (!serializableData.navLinks) serializableData.navLinks = { about: true, skills: true, services: true, timeline: true, resume: true, work: true, blog: true, guestbook: true, contact: true };
         if (!serializableData.heroAvailableText) serializableData.heroAvailableText = "Available for hire";
         if (!serializableData.resumeUrl) serializableData.resumeUrl = "";
@@ -207,6 +212,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                     ? formData.footerContent.services.split(',').map((s: string) => s.trim()).filter(Boolean)
                     : formData.footerContent?.services
             },
+            pricingPlans: (formData.pricingPlans || []).map((plan: any) => ({
+                ...plan,
+                features: typeof plan.features === 'string'
+                    ? plan.features.split('\n').map((f: string) => f.trim()).filter(Boolean)
+                    : plan.features
+            })),
             blogPosts: (formData.blogPosts || []).map((post: any) => ({
                 ...post,
                 content: typeof post.content === 'string'
@@ -415,16 +426,8 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 <label className="block text-sm font-medium text-gray-400 mb-2">Features (one per line)</label>
                                                 <textarea 
                                                     name="features" 
-                                                    value={Array.isArray(plan.features) ? plan.features.join('\n') : ''}
-                                                    onChange={(e) => {
-                                                        const features = e.target.value.split('\n').filter(f => f.trim());
-                                                        setFormData((prev: any) => {
-                                                            const newData = { ...prev };
-                                                            newData.pricingPlans = [...(newData.pricingPlans || [])];
-                                                            newData.pricingPlans[index] = { ...newData.pricingPlans[index], features };
-                                                            return newData;
-                                                        });
-                                                    }}
+                                                    value={plan.features || ''}
+                                                    onChange={(e) => handleArrayChange('pricingPlans', index, e)}
                                                     rows={5}
                                                     className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm"
                                                     placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
