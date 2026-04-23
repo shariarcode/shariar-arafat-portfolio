@@ -220,5 +220,11 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         work: true,
         blog: true,
         contact: true
-    }
+    },
+    stats: [
+        { endValue: 5, label: "Years of Experience", suffix: "+" },
+        { endValue: 20, label: "Projects Completed", suffix: "+" },
+        { endValue: 15, label: "Happy Clients", suffix: "+" },
+        { endValue: 10, label: "Tech Mastered", suffix: "+" }
+    ]
 };

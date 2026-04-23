@@ -3,6 +3,8 @@ import { useInView } from 'framer-motion';
 
 interface StatsProps {}
 
+import { usePortfolio } from '../context/PortfolioContext';
+
 const StatItem: React.FC<{ endValue: number; label: string; duration?: number; suffix?: string }> = ({ endValue, label, duration = 2, suffix = "+" }) => {
     const [count, setCount] = useState(0);
     const ref = useRef(null);
@@ -40,14 +42,23 @@ const StatItem: React.FC<{ endValue: number; label: string; duration?: number; s
 };
 
 const Stats: React.FC<StatsProps> = () => {
+    const { content } = usePortfolio();
+    const stats = content.stats || [];
+
+    if (stats.length === 0) return null;
+
     return (
         <section className="py-12 bg-slate-50 dark:bg-dark-bg relative z-20 -mt-10">
             <div className="container mx-auto px-6">
                 <div className="flex flex-wrap justify-center gap-6">
-                    <StatItem endValue={5} label="Years of Experience" />
-                    <StatItem endValue={20} label="Projects Completed" />
-                    <StatItem endValue={15} label="Happy Clients" />
-                    <StatItem endValue={10} label="Tech Mastered" />
+                    {stats.map((stat, index) => (
+                        <StatItem 
+                            key={index}
+                            endValue={stat.endValue} 
+                            label={stat.label} 
+                            suffix={stat.suffix}
+                        />
+                    ))}
                 </div>
             </div>
         </section>

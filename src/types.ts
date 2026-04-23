@@ -64,6 +64,12 @@ export interface BlogPost {
     url?: string;
 }
 
+export interface Stat {
+    endValue: number;
+    label: string;
+    suffix?: string;
+}
+
 export interface PortfolioData {
     userName: string;
     userEmail: string;
@@ -119,4 +125,5 @@ export interface PortfolioData {
         resume?: boolean;
     };
     bookingUrl?: string;
+    stats?: Stat[];
 }

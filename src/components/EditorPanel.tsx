@@ -90,10 +90,11 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         }));
         serializableData.footerContent.services = Array.isArray(serializableData.footerContent.services) ? serializableData.footerContent.services.join(', ') : '';
 
+        if (!Array.isArray(serializableData.stats)) serializableData.stats = [];
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
@@ -275,6 +276,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     const tabs = [
         { id: 'home', label: '🏠 Home' },
         { id: 'about', label: '👤 About' },
+        { id: 'stats', label: '📊 Stats' },
         { id: 'skills', label: '🛠️ Skills' },
         { id: 'pricing', label: '💰 Pricing' },
         { id: 'work', label: '💼 Work' },
@@ -495,9 +497,76 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 />
                                                 <button onClick={() => handleDeleteItem('timeline', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                             </div>
-                                        ))}
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* STATS TAB */}
+                        {activeTab === 'stats' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Portfolio Stats</h3>
+                                    <button 
+                                        onClick={() => handleAddItem('stats', { endValue: 0, label: "New Stat", suffix: "+" })} 
+                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600"
+                                    >
+                                        + Add Stat
+                                    </button>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {(formData.stats || []).map((stat: any, index: number) => (
+                                        <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50 hover:border-primary/30 transition-all">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="relative">
+                                                    <label className="block text-sm font-medium text-gray-400 mb-1">Number</label>
+                                                    <input 
+                                                        type="number" 
+                                                        name="endValue" 
+                                                        value={stat.endValue} 
+                                                        onChange={(e) => handleArrayChange('stats', index, e)} 
+                                                        className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm sm:text-base min-h-[44px]"
+                                                    />
+                                                </div>
+                                                <div className="relative">
+                                                    <label className="block text-sm font-medium text-gray-400 mb-1">Suffix</label>
+                                                    <input 
+                                                        type="text" 
+                                                        name="suffix" 
+                                                        value={stat.suffix || '+'} 
+                                                        onChange={(e) => handleArrayChange('stats', index, e)} 
+                                                        className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm sm:text-base min-h-[44px]"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <FormInput 
+                                                label="Label" 
+                                                name="label" 
+                                                value={stat.label} 
+                                                onChange={(e) => handleArrayChange('stats', index, e)} 
+                                                onEnhance={() => handleEnhance(`stat-label-${index}`, stat.label, (val) => {
+                                                    const newStats = [...formData.stats];
+                                                    newStats[index] = { ...newStats[index], label: val };
+                                                    setFormData((prev: any) => ({ ...prev, stats: newStats }));
+                                                })}
+                                                isEnhancing={enhancingFields[`stat-label-${index}`]}
+                                            />
+                                            <button 
+                                                onClick={() => handleDeleteItem('stats', index)} 
+                                                className="absolute -top-2 -right-2 text-white p-1.5 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 shadow-lg z-10"
+                                            >
+                                                <TrashIcon/>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                {(!formData.stats || formData.stats.length === 0) && (
+                                    <div className="text-center py-12 bg-gray-900/30 rounded-xl border-2 border-dashed border-gray-700">
+                                        <p className="text-gray-500 italic">No stats added yet. Click "+ Add Stat" to begin.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
