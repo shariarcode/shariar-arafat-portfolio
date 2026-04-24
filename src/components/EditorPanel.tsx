@@ -91,10 +91,11 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         serializableData.footerContent.services = Array.isArray(serializableData.footerContent.services) ? serializableData.footerContent.services.join(', ') : '';
 
         if (!Array.isArray(serializableData.stats)) serializableData.stats = [];
+        if (!serializableData.githubConfig) serializableData.githubConfig = { username: "", sectionTitle: "GitHub Contributions", description: "Proof of continuous learning and building. I push code regularly.", showStats: true, showLanguages: true };
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'pages' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'pages' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'github' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
@@ -281,6 +282,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         { id: 'skills', label: '🛠️ Skills' },
         { id: 'pricing', label: '💰 Pricing' },
         { id: 'work', label: '💼 Work' },
+        { id: 'github', label: '🐙 GitHub' },
         { id: 'blog', label: '📝 Blog' },
         { id: 'testimonials', label: '💬 Testimonials' },
         { id: 'contact', label: '📬 Contact' },
@@ -963,6 +965,74 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             <button onClick={() => handleDeleteItem('projectsData', index)} className="absolute top-4 right-4 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* GITHUB TAB */}
+                        {activeTab === 'github' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <h3 className="text-2xl font-bold text-primary mb-6">GitHub Activity Settings</h3>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
+                                        <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Profile Configuration</h4>
+                                        <FormInput 
+                                            label="GitHub Username" 
+                                            name="username" 
+                                            value={formData.githubConfig?.username || ''} 
+                                            onChange={(e) => handleNestedChange('githubConfig', e)} 
+                                            placeholder="e.g. shariarcode"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-2">
+                                            This will be used to fetch your contribution graph and statistics.
+                                        </p>
+                                        
+                                        <div className="pt-4 space-y-4">
+                                            <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Display Options</h4>
+                                            <div className="flex items-center gap-3">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="showStats"
+                                                    name="showStats" 
+                                                    checked={formData.githubConfig?.showStats !== false} 
+                                                    onChange={(e) => handleCheckboxChange('githubConfig', e)}
+                                                    className="w-5 h-5 rounded border-gray-600 text-primary focus:ring-primary bg-gray-800"
+                                                />
+                                                <label htmlFor="showStats" className="text-gray-300 font-medium cursor-pointer">Show GitHub Stats Card</label>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <input 
+                                                    type="checkbox" 
+                                                    id="showLanguages"
+                                                    name="showLanguages" 
+                                                    checked={formData.githubConfig?.showLanguages !== false} 
+                                                    onChange={(e) => handleCheckboxChange('githubConfig', e)}
+                                                    className="w-5 h-5 rounded border-gray-600 text-primary focus:ring-primary bg-gray-800"
+                                                />
+                                                <label htmlFor="showLanguages" className="text-gray-300 font-medium cursor-pointer">Show Top Languages Card</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
+                                        <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Section Content</h4>
+                                        <FormInput 
+                                            label="Section Title" 
+                                            name="sectionTitle" 
+                                            value={formData.githubConfig?.sectionTitle || ''} 
+                                            onChange={(e) => handleNestedChange('githubConfig', e)} 
+                                            onEnhance={() => handleEnhance('gh-title', formData.githubConfig.sectionTitle, (val) => setFormData((prev: any) => ({ ...prev, githubConfig: { ...prev.githubConfig, sectionTitle: val } })))}
+                                            isEnhancing={enhancingFields['gh-title']}
+                                        />
+                                        <FormTextarea 
+                                            label="Section Description" 
+                                            name="description" 
+                                            value={formData.githubConfig?.description || ''} 
+                                            onChange={(e) => handleNestedChange('githubConfig', e)} 
+                                            onEnhance={() => handleEnhance('gh-desc', formData.githubConfig.description, (val) => setFormData((prev: any) => ({ ...prev, githubConfig: { ...prev.githubConfig, description: val } })))}
+                                            isEnhancing={enhancingFields['gh-desc']}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

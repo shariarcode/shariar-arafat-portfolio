@@ -132,6 +132,13 @@ export interface PortfolioData {
         timeline?: boolean;
         resume?: boolean;
     };
+    githubConfig?: {
+        username?: string;
+        sectionTitle?: string;
+        description?: string;
+        showStats?: boolean;
+        showLanguages?: boolean;
+    };
     bookingUrl?: string;
     stats?: Stat[];
 }

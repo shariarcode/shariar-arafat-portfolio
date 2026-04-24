@@ -221,6 +221,13 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         blog: true,
         contact: true
     },
+    githubConfig: {
+        username: "shariarcode",
+        sectionTitle: "GitHub Contributions",
+        description: "Proof of continuous learning and building. I push code regularly.",
+        showStats: true,
+        showLanguages: true
+    },
     stats: [
         { endValue: 5, label: "Years of Experience", suffix: "+" },
         { endValue: 20, label: "Projects Completed", suffix: "+" },
