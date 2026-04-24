@@ -37,25 +37,29 @@ const Services: React.FC = () => {
                     </div>
                 </FadeIn>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="flex flex-wrap justify-center gap-8">
                     {displayServices.map((service, index) => (
-                        <FadeIn key={index} delay={index * 0.1}>
-                            <div className="group bg-white dark:bg-dark-card rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-800 hover:border-primary/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-4 group-hover:from-primary/30 group-hover:to-secondary/30 transition-all">
-                                    <service.IconComponent className="w-7 h-7 text-primary" />
+                        <FadeIn key={index} delay={index * 0.1} className="w-full md:w-[calc(33.333%-1.5rem)] max-w-sm">
+                            <div className="group h-full flex flex-col bg-white dark:bg-dark-card rounded-2xl p-8 shadow-lg border border-gray-100 dark:border-gray-800 hover:border-primary/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                <div className="flex-grow">
+                                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-6 group-hover:from-primary/30 group-hover:to-secondary/30 transition-all">
+                                        <service.IconComponent className="w-7 h-7 text-primary" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                                        {service.name}
+                                    </h3>
+                                    <p className="text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
+                                        {service.description}
+                                    </p>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                                    {service.name}
-                                </h3>
-                                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                                    {service.description}
-                                </p>
-                                <a 
-                                    href="#contact" 
-                                    className="inline-flex items-center gap-1 text-primary font-semibold text-sm group-hover:gap-2 transition-all"
-                                >
-                                    Get Started <ChevronRightIcon className="w-4 h-4" />
-                                </a>
+                                <div className="mt-auto">
+                                    <a 
+                                        href="#contact" 
+                                        className="inline-flex items-center gap-1 text-primary font-bold text-sm group-hover:gap-2 transition-all"
+                                    >
+                                        {t.common?.getStarted || 'Get Started'} <ChevronRightIcon className="w-4 h-4" />
+                                    </a>
+                                </div>
                             </div>
                         </FadeIn>
                     ))}
