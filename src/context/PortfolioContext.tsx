@@ -12,7 +12,7 @@ interface PortfolioContextType {
     darkMode: boolean;
     language: Language;
     setDarkMode: (dark: boolean) => void;
-    setIsAdmin: (admin: boolean) => void;
+    setIsAdmin: (admin: boolean, persist?: boolean) => void;
     setContent: (data: PortfolioData) => void;
     setLanguage: (lang: Language) => void;
     t: Translations;
@@ -194,8 +194,8 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
 export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [content, setContent] = useState<PortfolioData>(DEFAULT_PORTFOLIO_DATA);
     const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(() => {
-        return localStorage.getItem('isAdmin') === 'true';
+    const [isAdmin, setIsAdminState] = useState(() => {
+        return localStorage.getItem('isAdmin') === 'true' || sessionStorage.getItem('isAdmin') === 'true';
     });
     const [darkMode, setDarkMode] = useState(() => {
         const saved = localStorage.getItem('darkMode');
@@ -214,6 +214,22 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
         localStorage.setItem('language', lang);
+    };
+
+    const setIsAdmin = (admin: boolean, persist: boolean = false) => {
+        setIsAdminState(admin);
+        if (admin) {
+            if (persist) {
+                localStorage.setItem('isAdmin', 'true');
+                sessionStorage.removeItem('isAdmin');
+            } else {
+                sessionStorage.setItem('isAdmin', 'true');
+                localStorage.removeItem('isAdmin');
+            }
+        } else {
+            localStorage.removeItem('isAdmin');
+            sessionStorage.removeItem('isAdmin');
+        }
     };
 
     const fetchContent = async () => {
@@ -275,9 +291,7 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         }
     }, [darkMode]);
 
-    useEffect(() => {
-        localStorage.setItem('isAdmin', String(isAdmin));
-    }, [isAdmin]);
+
 
     return (
         <PortfolioContext.Provider value={{ 

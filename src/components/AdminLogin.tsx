@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { CloseIcon, EyeIcon, EyeOffIcon } from './Icons';
+import { CloseIcon, EyeIcon, EyeOffIcon, ShieldCheckIcon } from './Icons';
 
 interface AdminLoginProps {
-    onLogin: (password: string) => void;
+    onLogin: (password: string, trustDevice: boolean) => void;
     onClose: () => void;
 }
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [trustDevice, setTrustDevice] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onLogin(password.trim());
+        onLogin(password.trim(), trustDevice);
     };
 
     return (
@@ -46,6 +47,28 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onClose }) => {
                             </button>
                         </div>
                     </div>
+
+                    <div className="flex items-center space-x-3">
+                        <label className="flex items-center cursor-pointer group">
+                            <div className="relative">
+                                <input 
+                                    type="checkbox" 
+                                    checked={trustDevice}
+                                    onChange={(e) => setTrustDevice(e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`w-10 h-5 bg-gray-200 dark:bg-gray-700 rounded-full shadow-inner transition-colors duration-300 ${trustDevice ? 'bg-primary' : ''}`}></div>
+                                <div className={`absolute top-0 left-0 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 transform ${trustDevice ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            </div>
+                            <div className="ml-3 flex items-center">
+                                <ShieldCheckIcon className={`h-4 w-4 mr-1.5 transition-colors duration-300 ${trustDevice ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`} />
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                                    Trust this device
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+
                     <button type="submit" className="w-full px-6 py-4 sm:py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all duration-300 transform active:scale-[0.98] min-h-[48px]">
                         Access Dashboard
                     </button>

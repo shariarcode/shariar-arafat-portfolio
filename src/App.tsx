@@ -116,9 +116,9 @@ const AppInner: React.FC = () => {
         else setShowLogin(true);
     };
 
-    const handleLogin = (password: string) => {
+    const handleLogin = (password: string, trustDevice: boolean) => {
         if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
-            setIsAdmin(true);
+            setIsAdmin(true, trustDevice);
             setShowLogin(false);
             setShowEditor(true);
             showToast('Welcome back, Admin!', 'success');
