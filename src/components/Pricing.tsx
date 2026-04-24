@@ -5,8 +5,8 @@ import FadeIn from './FadeIn';
 
 const PricingCard: React.FC<{ plan: PricingPlan; index: number }> = ({ plan, index }) => {
     return (
-        <FadeIn direction="up" delay={index * 0.1}>
-            <div className={`relative glass-card rounded-2xl p-6 md:p-8 flex flex-col ${plan.isPopular ? 'ring-2 ring-primary scale-105 md:scale-110 z-10' : ''}`}>
+        <FadeIn direction="up" delay={index * 0.1} className="h-full">
+            <div className={`relative glass-card rounded-2xl p-6 md:p-8 flex flex-col h-full ${plan.isPopular ? 'ring-2 ring-primary scale-105 md:scale-110 z-10' : ''}`}>
                 {plan.isPopular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary to-purple-600 text-white text-xs font-bold rounded-full shadow-lg">
                         Most Popular
