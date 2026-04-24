@@ -45,12 +45,22 @@ const Header: React.FC = () => {
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
 
-    const visibleNavLinks = (content.sections || [])
-        .filter(section => section.visible && section.id !== 'hero' && section.id !== 'stats' && section.id !== 'expertise' && section.id !== 'analytics')
-        .map(section => ({
-            id: section.id,
-            label: section.navLabel,
-        }));
+    const visibleNavLinks = [
+        ...(content.sections || [])
+            .filter(section => section.visible && section.id !== 'hero' && section.id !== 'stats' && section.id !== 'expertise' && section.id !== 'analytics')
+            .map(section => ({
+                id: section.id,
+                label: section.navLabel,
+                path: `/#${section.id}`
+            })),
+        ...(content.customPages || [])
+            .filter(page => page.visible && page.showInNav)
+            .map(page => ({
+                id: page.id,
+                label: page.navLabel,
+                path: `/p/${page.slug}`
+            }))
+    ];
 
     const mainLinksLimit = 6;
     const mainLinks = visibleNavLinks.slice(0, mainLinksLimit);
@@ -104,7 +114,7 @@ const Header: React.FC = () => {
                         {/* Desktop nav */}
                         <div className="hidden lg:flex items-center gap-x-6 xl:gap-x-8 flex-1 justify-center">
                             {mainLinks.map(link => (
-                                <NavLink key={link.id} href={`#${link.id}`}>{link.label}</NavLink>
+                                <NavLink key={link.id} href={link.path}>{link.label}</NavLink>
                             ))}
                             
                             {moreLinks.length > 0 && (
@@ -121,7 +131,7 @@ const Header: React.FC = () => {
                                             {moreLinks.map(link => (
                                                 <a 
                                                     key={link.id} 
-                                                    href={`#${link.id}`}
+                                                    href={link.path}
                                                     onClick={() => setIsMoreOpen(false)}
                                                     className="block px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors"
                                                 >
@@ -190,7 +200,7 @@ const Header: React.FC = () => {
                     </div>
                     <div className="flex flex-col p-6 space-y-2 flex-1 overflow-y-auto">
                         {visibleNavLinks.map(link => (
-                            <NavLink key={link.id} href={`#${link.id}`} onClick={closeMenu} className="text-lg py-3 block w-full border-b border-gray-50 dark:border-gray-800/50">
+                            <NavLink key={link.id} href={link.path} onClick={closeMenu} className="text-lg py-3 block w-full border-b border-gray-50 dark:border-gray-800/50">
                                 {link.label}
                             </NavLink>
                         ))}

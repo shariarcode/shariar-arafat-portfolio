@@ -228,6 +228,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         showStats: true,
         showLanguages: true
     },
+    customPages: [],
     stats: [
         { endValue: 5, label: "Years of Experience", suffix: "+" },
         { endValue: 20, label: "Projects Completed", suffix: "+" },

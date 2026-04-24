@@ -139,6 +139,19 @@ export interface PortfolioData {
         showStats?: boolean;
         showLanguages?: boolean;
     };
+    customPages?: CustomPage[];
     bookingUrl?: string;
     stats?: Stat[];
+}
+
+export interface CustomPage {
+    id: string;
+    slug: string;
+    title: string;
+    navLabel: string;
+    showInNav: boolean;
+    content: string;
+    layout: 'standard' | 'narrow' | 'wide';
+    theme: 'default' | 'glass' | 'minimal';
+    visible: boolean;
 }

@@ -209,13 +209,22 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     };
                 })
             : defaults.stats,
-        githubConfig: s.githubConfig ? {
-            username: s.githubConfig.username || s.socialLinks?.github || defaults.githubConfig?.username,
-            sectionTitle: s.githubConfig.sectionTitle || defaults.githubConfig?.sectionTitle,
-            description: s.githubConfig.description || defaults.githubConfig?.description,
             showStats: s.githubConfig.showStats !== undefined ? s.githubConfig.showStats : defaults.githubConfig?.showStats,
             showLanguages: s.githubConfig.showLanguages !== undefined ? s.githubConfig.showLanguages : defaults.githubConfig?.showLanguages,
         } : defaults.githubConfig,
+        customPages: Array.isArray(s.customPages)
+            ? s.customPages.map(page => ({
+                id: page.id || Math.random().toString(36).substr(2, 9),
+                slug: page.slug || '',
+                title: page.title || 'Untitled Page',
+                navLabel: page.navLabel || page.title || 'Page',
+                showInNav: page.showInNav !== undefined ? page.showInNav : false,
+                content: page.content || '',
+                layout: page.layout || 'standard',
+                theme: page.theme || 'default',
+                visible: page.visible !== undefined ? page.visible : true,
+            }))
+            : [],
     };
     return merged;
 };

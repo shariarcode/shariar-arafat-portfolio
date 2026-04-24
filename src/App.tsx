@@ -32,6 +32,7 @@ import ReadingProgressBar from './components/ReadingProgressBar';
 import NewsletterModal from './components/NewsletterModal';
 import Skeleton from './components/Skeleton';
 import CookieConsent from './components/CookieConsent';
+import CustomPageRenderer from './components/CustomPageRenderer';
 import { ArrowUpIcon } from './components/Icons';
 import type { PortfolioData } from './types';
 import { removeJsonLd, setSeoMeta } from './lib/seo';
@@ -57,7 +58,8 @@ const AppInner: React.FC = () => {
     const currentPath = window.location.pathname;
     const isBlogRoute = currentPath.startsWith('/blog/');
     const isProjectRoute = currentPath.startsWith('/project/');
-    const routeSlug = isBlogRoute || isProjectRoute ? currentPath.split('/').pop()?.replace(/\/+$/, '') : '';
+    const isCustomPageRoute = currentPath.startsWith('/p/');
+    const routeSlug = isBlogRoute || isProjectRoute || isCustomPageRoute ? currentPath.split('/').pop()?.replace(/\/+$/, '') : '';
 
     useEffect(() => {
         const canonicalUrl = `${window.location.origin}${currentPath}`;
@@ -69,6 +71,15 @@ const AppInner: React.FC = () => {
                 imageUrl: `${window.location.origin}/og-image.jpg`,
             });
             removeJsonLd('blog-post');
+        } else if (isCustomPageRoute) {
+            const page = (content.customPages || []).find(p => p.slug === routeSlug);
+            if (page) {
+                setSeoMeta({
+                    title: `${page.title} | ${content.userName}`,
+                    description: page.title,
+                    canonicalUrl,
+                });
+            }
         } else if (!isBlogRoute) {
             setSeoMeta({
                 title: `404 | ${content.userName}`,
@@ -77,25 +88,22 @@ const AppInner: React.FC = () => {
             });
             removeJsonLd('blog-post');
         }
-    }, [content.heroSubheading, content.userName, currentPath, isBlogRoute]);
+    }, [content.heroSubheading, content.userName, currentPath, isBlogRoute, isCustomPageRoute, routeSlug, content.customPages]);
 
     useEffect(() => {
         const checkScroll = () => {
-            // Scroll to top button logic
             if (!showScrollTop && window.pageYOffset > 400) {
                 setShowScrollTop(true);
             } else if (showScrollTop && window.pageYOffset <= 400) {
                 setShowScrollTop(false);
             }
 
-            // Newsletter trigger logic (70% scroll)
             const scrollPercentage = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
             if (scrollPercentage > 0.7 && !localStorage.getItem('newsletter_dismissed') && !localStorage.getItem('newsletter_subscribed')) {
                 setShowNewsletter(true);
             }
         };
 
-        // Newsletter trigger logic (15s timer)
         const timer = setTimeout(() => {
             if (!localStorage.getItem('newsletter_dismissed') && !localStorage.getItem('newsletter_subscribed')) {
                 setShowNewsletter(true);
@@ -179,6 +187,9 @@ const AppInner: React.FC = () => {
         mainContent = post ? <BlogPostPage post={post} /> : <NotFound />;
     } else if (isProjectRoute) {
         mainContent = <ProjectDetailPage />;
+    } else if (isCustomPageRoute) {
+        const page = (content.customPages || []).find(p => p.slug === routeSlug);
+        mainContent = page ? <CustomPageRenderer page={page} /> : <NotFound />;
     } else if (currentPath !== '/') {
         mainContent = <NotFound />;
     } else {

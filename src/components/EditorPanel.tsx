@@ -92,6 +92,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
         if (!Array.isArray(serializableData.stats)) serializableData.stats = [];
         if (!serializableData.githubConfig) serializableData.githubConfig = { username: "", sectionTitle: "GitHub Contributions", description: "Proof of continuous learning and building. I push code regularly.", showStats: true, showLanguages: true };
+        if (!Array.isArray(serializableData.customPages)) serializableData.customPages = [];
         return serializableData;
     });
 
@@ -201,40 +202,24 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         });
     };
 
+    const handleCustomPageChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target as any;
+        setFormData((prev: any) => {
+            const newPages = [...prev.customPages];
+            newPages[index] = { 
+                ...newPages[index], 
+                [name]: type === 'checkbox' ? (e.target as any).checked : value 
+            };
+            return { ...prev, customPages: newPages };
+        });
+    };
+
     const handleAddItem = (arrayName: string, defaultItem: any) => {
         setFormData((prev: any) => ({ ...prev, [arrayName]: [...(prev as any)[arrayName], defaultItem] }));
     };
 
     const handleDeleteItem = (arrayName: string, index: number) => {
         setFormData((prev: any) => ({ ...prev, [arrayName]: (prev as any)[arrayName].filter((_: any, i: number) => i !== index) }));
-    };
-
-    const handleNestedArrayChange = (arrayName: string, index: number, nestedArrayName: string, nestedIndex: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev: any) => {
-            const newArray = [...(prev as any)[arrayName]];
-            const newNestedArray = [...(newArray[index][nestedArrayName] || [])];
-            newNestedArray[nestedIndex] = { ...newNestedArray[nestedIndex], [name]: value };
-            newArray[index][nestedArrayName] = newNestedArray;
-            return { ...prev, [arrayName]: newArray };
-        });
-    };
-    
-    const handleAddNestedItem = (arrayName: string, index: number, nestedArrayName: string, defaultItem: any) => {
-        setFormData((prev: any) => {
-            const newArray = [...(prev as any)[arrayName]];
-            const nested = newArray[index][nestedArrayName] || [];
-            newArray[index][nestedArrayName] = [...nested, defaultItem];
-            return { ...prev, [arrayName]: newArray };
-        });
-    };
-    
-    const handleDeleteNestedItem = (arrayName: string, index: number, nestedArrayName: string, nestedIndex: number) => {
-        setFormData((prev: any) => {
-            const newArray = [...(prev as any)[arrayName]];
-            newArray[index][nestedArrayName] = newArray[index][nestedArrayName].filter((_: any, i: number) => i !== nestedIndex);
-            return { ...prev, [arrayName]: newArray };
-        });
     };
 
     const handleSave = () => {
@@ -316,6 +301,143 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
                     {/* Content Area */}
                     <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-dark-bg text-white">
+                        
+                        {/* PAGES TAB */}
+                        {activeTab === 'pages' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Custom Pages</h3>
+                                    <button 
+                                        onClick={() => handleAddItem('customPages', { 
+                                            id: Math.random().toString(36).substr(2, 9),
+                                            slug: "new-page",
+                                            title: "New Page",
+                                            navLabel: "New Page",
+                                            showInNav: false,
+                                            content: "<h1>New Page</h1><p>Start editing this page...</p>",
+                                            layout: 'standard',
+                                            theme: 'default',
+                                            visible: true
+                                        })} 
+                                        className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600"
+                                    >
+                                        + Create Page
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    {(formData.customPages || []).map((page: any, index: number) => (
+                                        <div key={page.id || index} className="border border-gray-600 p-6 rounded-xl relative group bg-gray-900/50">
+                                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                                <div className="lg:col-span-2 space-y-4">
+                                                    <FormInput 
+                                                        label="Page Title" 
+                                                        name="title" 
+                                                        value={page.title} 
+                                                        onChange={(e) => handleCustomPageChange(index, e)} 
+                                                    />
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <FormInput 
+                                                            label="Slug (/p/...)" 
+                                                            name="slug" 
+                                                            value={page.slug} 
+                                                            onChange={(e) => handleCustomPageChange(index, e)} 
+                                                        />
+                                                        <FormInput 
+                                                            label="Nav Label" 
+                                                            name="navLabel" 
+                                                            value={page.navLabel} 
+                                                            onChange={(e) => handleCustomPageChange(index, e)} 
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4 bg-gray-800/50 p-4 rounded-lg">
+                                                    <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Settings</h4>
+                                                    <div className="flex items-center gap-3">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            name="showInNav"
+                                                            checked={page.showInNav} 
+                                                            onChange={(e) => handleCustomPageChange(index, e)}
+                                                            className="w-4 h-4 rounded border-gray-600"
+                                                        />
+                                                        <label className="text-sm text-gray-300">Show in Navigation</label>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            name="visible"
+                                                            checked={page.visible} 
+                                                            onChange={(e) => handleCustomPageChange(index, e)}
+                                                            className="w-4 h-4 rounded border-gray-600"
+                                                        />
+                                                        <label className="text-sm text-gray-300">Published</label>
+                                                    </div>
+                                                    <div className="pt-2">
+                                                        <label className="block text-xs font-medium text-gray-500 mb-1">Layout</label>
+                                                        <select name="layout" value={page.layout} onChange={(e) => handleCustomPageChange(index, e)} className="w-full px-2 py-1 bg-gray-900 rounded text-sm text-white border border-gray-600">
+                                                            <option value="standard">Standard</option>
+                                                            <option value="narrow">Narrow</option>
+                                                            <option value="wide">Wide</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="pt-2">
+                                                        <label className="block text-xs font-medium text-gray-500 mb-1">Theme</label>
+                                                        <select name="theme" value={page.theme} onChange={(e) => handleCustomPageChange(index, e)} className="w-full px-2 py-1 bg-gray-900 rounded text-sm text-white border border-gray-600">
+                                                            <option value="default">Default</option>
+                                                            <option value="glass">Glassmorphism</option>
+                                                            <option value="minimal">Minimal</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center">
+                                                    <label className="block text-sm font-medium text-gray-400">Content (HTML/Markdown supported)</label>
+                                                    <button 
+                                                        className="text-xs text-primary hover:underline"
+                                                        onClick={() => {
+                                                            const example = "<h2>Our Philosophy</h2>\n<p>We believe in building things that matter...</p>\n<ul>\n<li>Quality First</li>\n<li>Speed second</li>\n</ul>";
+                                                            const newPages = [...formData.customPages];
+                                                            newPages[index] = { ...newPages[index], content: example };
+                                                            setFormData((prev: any) => ({ ...prev, customPages: newPages }));
+                                                        }}
+                                                    >
+                                                        Insert Example
+                                                    </button>
+                                                </div>
+                                                <FormTextarea 
+                                                    name="content" 
+                                                    value={page.content} 
+                                                    onChange={(e) => handleCustomPageChange(index, e)} 
+                                                    rows={10}
+                                                    onEnhance={() => handleEnhance(`page-${index}`, page.content, (val) => {
+                                                        const newPages = [...formData.customPages];
+                                                        newPages[index] = { ...newPages[index], content: val };
+                                                        setFormData((prev: any) => ({ ...prev, customPages: newPages }));
+                                                    })}
+                                                    isEnhancing={enhancingFields[`page-${index}`]}
+                                                />
+                                            </div>
+                                            
+                                            <button 
+                                                onClick={() => handleDeleteItem('customPages', index)} 
+                                                className="absolute top-4 right-4 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-xl border border-gray-700"
+                                            >
+                                                <TrashIcon/>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    
+                                    {(!formData.customPages || formData.customPages.length === 0) && (
+                                        <div className="text-center py-20 border-2 border-dashed border-gray-700 rounded-2xl bg-gray-900/20">
+                                            <p className="text-gray-500 italic">No custom pages yet. Create one to get started!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         
                         {/* HOME TAB */}
                         {activeTab === 'home' && (
