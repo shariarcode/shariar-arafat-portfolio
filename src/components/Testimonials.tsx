@@ -71,8 +71,8 @@ const Testimonials: React.FC = () => {
             <div className="container mx-auto px-6 pt-10 relative z-10">
                 <FadeIn direction="up">
                     <div className="text-center mb-16">
-                        <span className="text-primary font-semibold text-sm uppercase tracking-widest">Social Proof</span>
-                        <h2 className="section-heading mt-2">What Clients Say</h2>
+                        <span className="block text-primary font-semibold text-sm uppercase tracking-widest">Social Proof</span>
+                        <h2 className="section-heading mt-3">What Clients Say</h2>
                         <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
                             Don't just take my word for it. Here is feedback from people I've worked with.
                         </p>
