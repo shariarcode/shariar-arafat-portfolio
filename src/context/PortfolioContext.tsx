@@ -52,6 +52,27 @@ const mergeProjectServices = (savedServices: any[], defaultServices: ProjectServ
 
 const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData): PortfolioData => {
     const s = saved || {};
+    
+    // Default sections order and configuration
+    const defaultSections = [
+        { id: 'hero', navLabel: 'Home', visible: true },
+        { id: 'stats', navLabel: 'Stats', visible: true },
+        { id: 'about', navLabel: 'About', visible: true },
+        { id: 'expertise', navLabel: 'Expertise', visible: true },
+        { id: 'services', navLabel: 'Services', visible: true },
+        { id: 'timeline', navLabel: 'Timeline', visible: true },
+        { id: 'skills', navLabel: 'Skills', visible: true },
+        { id: 'resume', navLabel: 'Resume', visible: true },
+        { id: 'pricing', navLabel: 'Pricing', visible: true },
+        { id: 'github', navLabel: 'GitHub', visible: true },
+        { id: 'work', navLabel: 'Work', visible: true },
+        { id: 'blog', navLabel: 'Blog', visible: true },
+        { id: 'testimonials', navLabel: 'Testimonials', visible: true },
+        { id: 'guestbook', navLabel: 'Guestbook', visible: true },
+        { id: 'contact', navLabel: 'Contact', visible: true },
+        { id: 'analytics', navLabel: 'Analytics', visible: true }
+    ];
+
     const merged: PortfolioData = {
         userName: s.userName || defaults.userName,
         userEmail: s.userEmail || defaults.userEmail,
@@ -65,6 +86,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
         careerObjective: s.careerObjective || defaults.careerObjective,
         contactInfo: { ...defaults.contactInfo, ...(s.contactInfo || {}) },
         socialLinks: { ...defaults.socialLinks, ...(s.socialLinks || {}) },
+        sections: Array.isArray(s.sections) ? s.sections : defaultSections,
         footerContent: {
             description: s.footerContent?.description || defaults.footerContent?.description,
             services: Array.isArray(s.footerContent?.services) ? s.footerContent?.services : defaults.footerContent?.services

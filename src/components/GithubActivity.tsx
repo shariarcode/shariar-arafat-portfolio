@@ -27,7 +27,7 @@ const GithubActivity: React.FC = () => {
     if (!username || username === '#') return null;
 
     return (
-        <section className="py-20 bg-white dark:bg-dark-card border-y border-gray-100 dark:border-gray-800 scroll-mt-20 relative">
+        <section id="github" className="py-20 bg-white dark:bg-dark-card border-y border-gray-100 dark:border-gray-800 scroll-mt-20 relative">
              <div className="absolute top-0 right-0 w-64 h-64 bg-primary opacity-5 blur-[100px] rounded-full pointer-events-none"></div>
              <div className="container mx-auto px-6 relative z-10">
                 <FadeIn direction="up">

@@ -8,7 +8,7 @@ const Expertise: React.FC = () => {
     const { content } = usePortfolio();
     const { careerObjective, expertiseAreas, sectionTitles } = content;
     return (
-        <section id="about" className="py-20 bg-white dark:bg-dark-card scroll-mt-20 relative overflow-hidden">
+        <section id="expertise" className="py-20 bg-white dark:bg-dark-card scroll-mt-20 relative overflow-hidden">
             {/* Ambient glows */}
             <div className="absolute top-10 right-10 w-72 h-72 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
             <div className="absolute bottom-10 left-10 w-56 h-56 bg-secondary/5 rounded-full blur-[80px] pointer-events-none" />

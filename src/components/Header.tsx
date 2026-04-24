@@ -44,18 +44,13 @@ const Header: React.FC = () => {
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
 
-    const visibleNavLinks = [
-        { id: "home", label: t.nav.home, visible: true },
-        { id: "about", label: t.nav.about, visible: navLinks?.about !== false },
-        { id: "services", label: t.nav.services, visible: navLinks?.services !== false },
-        { id: "timeline", label: t.nav.timeline, visible: navLinks?.timeline !== false },
-        { id: "skills", label: t.nav.skills, visible: navLinks?.skills !== false },
-        { id: "pricing", label: "Pricing", visible: true },
-        { id: "work", label: t.nav.work, visible: navLinks?.work !== false },
-        { id: "blog", label: t.nav.blog, visible: navLinks?.blog !== false },
-        { id: "guestbook", label: t.nav.guestbook, visible: true },
-        { id: "contact", label: t.nav.contact, visible: navLinks?.contact !== false }
-    ].filter(item => item.visible);
+    const visibleNavLinks = (content.sections || [])
+        .filter(section => section.visible && section.id !== 'hero' && section.id !== 'stats' && section.id !== 'expertise' && section.id !== 'analytics')
+        .map(section => ({
+            id: section.id,
+            label: section.navLabel,
+            visible: true
+        }));
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -83,7 +78,7 @@ const Header: React.FC = () => {
                 <div className="container mx-auto px-6 py-4">
                     <nav className="flex items-center justify-between">
                         {/* Logo — gradient text */}
-                        <a href="#home" className="text-xl font-extrabold">
+                        <a href="#hero" className="text-xl font-extrabold">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                                 {initials}
                             </span>

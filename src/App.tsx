@@ -154,6 +154,25 @@ const AppInner: React.FC = () => {
         );
     }
 
+    const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
+        hero: Hero,
+        stats: Stats,
+        about: About,
+        expertise: Expertise,
+        services: Services,
+        timeline: Timeline,
+        skills: Skills,
+        resume: Resume,
+        pricing: Pricing,
+        github: GithubActivity,
+        work: Work,
+        blog: Blog,
+        testimonials: Testimonials,
+        guestbook: Guestbook,
+        contact: Contact,
+        analytics: AnalyticsDashboard,
+    };
+
     let mainContent;
     if (isBlogRoute) {
         const post = (content.blogPosts || []).find((p: any) => p.slug === routeSlug);
@@ -165,22 +184,11 @@ const AppInner: React.FC = () => {
     } else {
         mainContent = (
             <main className="relative z-10">
-                <Hero />
-                <Stats />
-                <About />
-                <Expertise />
-                <Services />
-                <Timeline />
-                <Skills />
-                <Resume />
-                <Pricing />
-                <GithubActivity />
-                <Work />
-                <Blog />
-                <Testimonials />
-                <Guestbook />
-                <Contact />
-                <AnalyticsDashboard />
+                {(content.sections || []).map(section => {
+                    const Component = SECTION_COMPONENTS[section.id];
+                    if (!Component || !section.visible) return null;
+                    return <Component key={section.id} />;
+                })}
             </main>
         );
     }

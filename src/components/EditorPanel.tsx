@@ -94,7 +94,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'pages' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
@@ -275,6 +275,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
     const tabs = [
         { id: 'home', label: '🏠 Home' },
+        { id: 'pages', label: '📄 Pages' },
         { id: 'about', label: '👤 About' },
         { id: 'stats', label: '📊 Stats' },
         { id: 'skills', label: '🛠️ Skills' },
@@ -397,7 +398,100 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                             </div>
                         )}
 
-                        {/* ABOUT TAB */}
+                        {/* PAGES TAB */}
+                        {activeTab === 'pages' && (
+                            <div className="space-y-6 sm:space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl sm:text-2xl font-bold text-primary">Page & Section Manager</h3>
+                                    <p className="text-sm text-gray-400">Reorder and toggle visibility of your website sections.</p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {(formData.sections || []).map((section: any, index: number) => (
+                                        <div key={section.id} className="bg-gray-800/50 border border-gray-700 p-4 rounded-xl flex items-center gap-4 group hover:border-primary/50 transition-all">
+                                            <div className="flex flex-col gap-1">
+                                                <button 
+                                                    disabled={index === 0}
+                                                    onClick={() => {
+                                                        const newSections = [...formData.sections];
+                                                        const temp = newSections[index];
+                                                        newSections[index] = newSections[index - 1];
+                                                        newSections[index - 1] = temp;
+                                                        setFormData({ ...formData, sections: newSections });
+                                                    }}
+                                                    className="p-1 hover:text-primary disabled:opacity-30 disabled:hover:text-gray-500"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                                <button 
+                                                    disabled={index === formData.sections.length - 1}
+                                                    onClick={() => {
+                                                        const newSections = [...formData.sections];
+                                                        const temp = newSections[index];
+                                                        newSections[index] = newSections[index + 1];
+                                                        newSections[index + 1] = temp;
+                                                        setFormData({ ...formData, sections: newSections });
+                                                    }}
+                                                    className="p-1 hover:text-primary disabled:opacity-30 disabled:hover:text-gray-500"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">Nav Label</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={section.navLabel} 
+                                                        onChange={(e) => {
+                                                            const newSections = [...formData.sections];
+                                                            newSections[index] = { ...newSections[index], navLabel: e.target.value };
+                                                            setFormData({ ...formData, sections: newSections });
+                                                        }}
+                                                        className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded-md text-sm focus:ring-1 focus:ring-primary"
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <span className="block text-xs font-medium text-gray-500 mb-1">ID: <code className="text-primary/70">{section.id}</code></span>
+                                                        <span className="text-sm font-semibold text-gray-300">{section.id.toUpperCase()}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            id={`visible-${section.id}`}
+                                                            checked={section.visible} 
+                                                            onChange={(e) => {
+                                                                const newSections = [...formData.sections];
+                                                                newSections[index] = { ...newSections[index], visible: e.target.checked };
+                                                                setFormData({ ...formData, sections: newSections });
+                                                            }}
+                                                            className="w-4 h-4 rounded border-gray-600 text-primary"
+                                                        />
+                                                        <label htmlFor={`visible-${section.id}`} className="text-xs text-gray-400 cursor-pointer">Visible</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-8 p-6 bg-primary/5 border border-primary/20 rounded-2xl">
+                                    <h4 className="text-primary font-bold mb-2 flex items-center gap-2">
+                                        <SparklesIcon className="w-5 h-5" /> Pro Tip
+                                    </h4>
+                                    <p className="text-sm text-gray-400 leading-relaxed">
+                                        You can now drag-and-drop sections or use the arrows to change the vertical flow of your portfolio. 
+                                        Hiding a section here will remove it from both the <strong>Navigation Bar</strong> and the <strong>Main Page</strong> content.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                         {activeTab === 'about' && (
                             <div className="space-y-8 animate-fade-in">
                                 <h3 className="text-2xl font-bold text-primary mb-6">About Me Section</h3>

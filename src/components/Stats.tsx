@@ -48,7 +48,7 @@ const Stats: React.FC<StatsProps> = () => {
     if (stats.length === 0) return null;
 
     return (
-        <section className="py-12 bg-slate-50 dark:bg-dark-bg relative z-20 -mt-10">
+        <section id="stats" className="py-12 bg-slate-50 dark:bg-dark-bg relative z-20 -mt-10">
             <div className="container mx-auto px-6">
                 <div className="flex flex-wrap justify-center gap-6">
                     {stats.map((stat, index) => (

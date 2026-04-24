@@ -30,7 +30,7 @@ const Hero: React.FC = () => {
     }, [displayedRole, isDeleting, currentRoleIndex, heroRoles]);
 
     return (
-        <section id="home" className="min-h-[100dvh] flex items-center pt-28 sm:pt-24 pb-12 relative overflow-hidden">
+        <section id="hero" className="min-h-[100dvh] flex items-center pt-28 sm:pt-24 pb-12 relative overflow-hidden">
             {/* Aurora animated background */}
             <div className="aurora-bg" aria-hidden="true">
                 <div className="aurora-blob aurora-blob-1" />

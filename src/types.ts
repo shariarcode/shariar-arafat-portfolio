@@ -70,6 +70,13 @@ export interface Stat {
     suffix?: string;
 }
 
+export interface SectionConfig {
+    id: string;
+    navLabel: string;
+    sectionTitle?: string;
+    visible: boolean;
+}
+
 export interface PortfolioData {
     userName: string;
     userEmail: string;
@@ -81,6 +88,7 @@ export interface PortfolioData {
     resumeUrl?: string;
     careerObjective: string;
     expertiseAreas: { name: string; description: string }[];
+    sections?: SectionConfig[];
     skillsData: Skill[];
     projectsData: Project[];
     testimonials?: Testimonial[];
