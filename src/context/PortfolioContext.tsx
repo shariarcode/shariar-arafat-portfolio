@@ -209,6 +209,10 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     };
                 })
             : defaults.stats,
+        githubConfig: s.githubConfig ? {
+            username: s.githubConfig.username || s.socialLinks?.github || defaults.githubConfig?.username,
+            sectionTitle: s.githubConfig.sectionTitle || defaults.githubConfig?.sectionTitle,
+            description: s.githubConfig.description || defaults.githubConfig?.description,
             showStats: s.githubConfig.showStats !== undefined ? s.githubConfig.showStats : defaults.githubConfig?.showStats,
             showLanguages: s.githubConfig.showLanguages !== undefined ? s.githubConfig.showLanguages : defaults.githubConfig?.showLanguages,
         } : defaults.githubConfig,
