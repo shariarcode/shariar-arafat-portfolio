@@ -149,9 +149,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
                 )}
 
                 {/* Suggested Questions */}
-                {messages.length === 1 && !isLoading && (
+                {messages.length === 1 && !isLoading && aiSettings?.quickReplies && aiSettings.quickReplies.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
-                        {["What are your top skills?", "Are you available for freelance?", "What projects have you built?"].map((q, idx) => (
+                        {aiSettings.quickReplies.map((q, idx) => (
                             <button 
                                 key={idx} 
                                 onClick={() => sendQuickReply(q)}

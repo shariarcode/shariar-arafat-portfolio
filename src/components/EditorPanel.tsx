@@ -93,10 +93,18 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         if (!Array.isArray(serializableData.stats)) serializableData.stats = [];
         if (!serializableData.githubConfig) serializableData.githubConfig = { username: "", sectionTitle: "GitHub Contributions", description: "Proof of continuous learning and building. I push code regularly.", showStats: true, showLanguages: true };
         if (!Array.isArray(serializableData.customPages)) serializableData.customPages = [];
+        if (!serializableData.aiSettings) {
+            serializableData.aiSettings = {
+                enabled: true,
+                systemInstruction: "You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational.",
+                welcomeMessage: "Hello! I'm Shariar's AI assistant. How can I help you today?",
+                quickReplies: ["What are your top skills?", "Are you available for freelance?", "What projects have you built?"]
+            };
+        }
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'pages' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'github' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook'>('home');
+    const [activeTab, setActiveTab] = useState<'home' | 'pages' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'github' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook' | 'ai'>('home');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
@@ -273,6 +281,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         { id: 'contact', label: '📬 Contact' },
         { id: 'inbox', label: '📥 Inbox' },
         { id: 'guestbook', label: '📖 Guestbook' },
+        { id: 'ai', label: '🤖 AI Assistant' },
         { id: 'settings', label: '⚙️ Settings' }
     ] as const;
 
@@ -1429,6 +1438,141 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             onEnhance={() => handleEnhance('social-ig', formData.socialLinks.instagram, (val) => setFormData((prev: any) => ({ ...prev, socialLinks: { ...prev.socialLinks, instagram: val } })))}
                                             isEnhancing={enhancingFields['social-ig']}
                                         />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* AI ASSISTANT TAB */}
+                        {activeTab === 'ai' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">AI Assistant Training</h3>
+                                    <div className="flex items-center gap-3 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700">
+                                        <label className="text-sm text-gray-300">Enable Assistant</label>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={formData.aiSettings?.enabled ?? true}
+                                            onChange={(e) => {
+                                                setFormData((prev: any) => ({
+                                                    ...prev,
+                                                    aiSettings: { ...(prev.aiSettings || {}), enabled: e.target.checked }
+                                                }));
+                                            }}
+                                            className="w-5 h-5 rounded border-gray-600 text-primary focus:ring-primary transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-8">
+                                    <div className="bg-gray-900/50 border border-gray-700 p-6 rounded-2xl space-y-6">
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <label className="block text-sm font-medium text-gray-400">System Instruction (The AI's Brain)</label>
+                                                <span className="text-[10px] text-gray-500 bg-gray-800 px-2 py-1 rounded border border-gray-700 uppercase tracking-widest font-bold">Training Core</span>
+                                            </div>
+                                            <FormTextarea 
+                                                name="systemInstruction"
+                                                label=""
+                                                value={formData.aiSettings?.systemInstruction || ''}
+                                                onChange={(e) => {
+                                                    setFormData((prev: any) => ({
+                                                        ...prev,
+                                                        aiSettings: { ...(prev.aiSettings || {}), systemInstruction: e.target.value }
+                                                    }));
+                                                }}
+                                                onEnhance={() => handleEnhance('ai-system', formData.aiSettings?.systemInstruction || '', (val) => {
+                                                    setFormData((prev: any) => ({
+                                                        ...prev,
+                                                        aiSettings: { ...(prev.aiSettings || {}), systemInstruction: val }
+                                                    }));
+                                                })}
+                                                isEnhancing={enhancingFields['ai-system']}
+                                            />
+                                            <p className="text-xs text-gray-500 italic leading-relaxed">
+                                                <strong>Tip:</strong> Describe Shariar's personality. Example: "You are a professional yet creative assistant for Shariar. Use emoji occasionally but remain focused on his technical skills."
+                                            </p>
+                                        </div>
+
+                                        <div className="pt-6 border-t border-gray-800">
+                                            <FormInput 
+                                                label="Custom Welcome Message"
+                                                name="welcomeMessage"
+                                                value={formData.aiSettings?.welcomeMessage || ''}
+                                                onChange={(e) => {
+                                                    setFormData((prev: any) => ({
+                                                        ...prev,
+                                                        aiSettings: { ...(prev.aiSettings || {}), welcomeMessage: e.target.value }
+                                                    }));
+                                                }}
+                                                placeholder="e.g. Hello! I'm here to help you explore Shariar's work."
+                                            />
+                                        </div>
+
+                                        <div className="pt-6 border-t border-gray-800 space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-400">Quick Replies</label>
+                                                    <p className="text-xs text-gray-500">Suggested questions for your visitors.</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => {
+                                                        const replies = [...(formData.aiSettings?.quickReplies || [])];
+                                                        replies.push("New Question?");
+                                                        setFormData((prev: any) => ({
+                                                            ...prev,
+                                                            aiSettings: { ...(prev.aiSettings || {}), quickReplies: replies }
+                                                        }));
+                                                    }}
+                                                    className="px-3 py-1 bg-gray-800 text-primary border border-primary/20 rounded-md text-xs hover:bg-primary/10 transition-colors"
+                                                >
+                                                    + Add Question
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="flex flex-wrap gap-3">
+                                                {(formData.aiSettings?.quickReplies || []).map((reply: string, idx: number) => (
+                                                    <div key={idx} className="flex items-center gap-2 bg-gray-800/80 border border-gray-700 px-4 py-2 rounded-full group hover:border-primary/30 transition-all shadow-sm">
+                                                        <input 
+                                                            type="text"
+                                                            value={reply}
+                                                            onChange={(e) => {
+                                                                const replies = [...formData.aiSettings.quickReplies];
+                                                                replies[idx] = e.target.value;
+                                                                setFormData((prev: any) => ({
+                                                                    ...prev,
+                                                                    aiSettings: { ...(prev.aiSettings || {}), quickReplies: replies }
+                                                                }));
+                                                            }}
+                                                            className="bg-transparent border-none focus:ring-0 text-sm text-white w-auto min-w-[140px] p-0"
+                                                        />
+                                                        <button 
+                                                            onClick={() => {
+                                                                const replies = formData.aiSettings.quickReplies.filter((_: any, i: number) => i !== idx);
+                                                                setFormData((prev: any) => ({
+                                                                    ...prev,
+                                                                    aiSettings: { ...(prev.aiSettings || {}), quickReplies: replies }
+                                                                }));
+                                                            }}
+                                                            className="text-gray-500 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <CloseIcon />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 bg-blue-900/10 border border-blue-800/30 rounded-2xl">
+                                        <h4 className="text-blue-400 font-bold mb-2 flex items-center gap-2 text-sm">
+                                            <SparklesIcon className="w-4 h-4" /> Automated Knowledge
+                                        </h4>
+                                        <p className="text-xs text-gray-400 leading-relaxed">
+                                            Your AI assistant is automatically connected to your <strong>Projects</strong>, <strong>Skills</strong>, and <strong>About</strong> sections. 
+                                            You don't need to manually type your skills here; the AI already knows them. Use these settings primarily to shape its 
+                                            <strong> tone</strong>, <strong>language</strong>, and <strong>specific behaviors</strong>.
+                                        </p>
                                     </div>
                                 </div>
                             </div>

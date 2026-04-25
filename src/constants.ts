@@ -240,5 +240,11 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         { endValue: 20, label: "Projects Completed", suffix: "+" },
         { endValue: 15, label: "Happy Clients", suffix: "+" },
         { endValue: 10, label: "Tech Mastered", suffix: "+" }
-    ]
+    ],
+    aiSettings: {
+        enabled: true,
+        systemInstruction: "You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational. If you don't know something, be honest.",
+        welcomeMessage: "Hello! I'm Shariar's AI assistant. How can I help you today?",
+        quickReplies: ["What are your top skills?", "Are you available for freelance?", "What projects have you built?"]
+    }
 };

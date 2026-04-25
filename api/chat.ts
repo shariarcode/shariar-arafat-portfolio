@@ -83,7 +83,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const skillsText = [...new Set(portfolioData.skillsData.flatMap(s => s.technologies))].join(', ');
         const projectsText = portfolioData.projectsData.map(p => p.title).join(', ');
 
-        const systemInstruction = `You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational.
+        const customInstruction = portfolioData.aiSettings?.systemInstruction;
+        
+        const systemInstruction = customInstruction || `You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational.
 
 CONTEXT ABOUT SHARIAR ARAFAT:
 - Name: ${portfolioData.userName}
@@ -97,6 +99,11 @@ CONTEXT ABOUT SHARIAR ARAFAT:
 
 If asked something outside this context, politely say you don't have that information. Always be helpful and professional.`;
 
+        // If custom instruction exists, we should still append the context to help it answer facts
+        const finalInstruction = customInstruction 
+            ? `${customInstruction}\n\nUSE THIS CONTEXT TO ANSWER QUESTIONS:\n- Name: ${portfolioData.userName}\n- Skills: ${skillsText}\n- Projects: ${projectsText}\n- Contact: ${portfolioData.userEmail}`
+            : systemInstruction;
+
         let validContents = history;
         if (validContents.length > 0 && validContents[0].role === 'model') {
             validContents = validContents.slice(1); // skip initial greeting
@@ -107,7 +114,7 @@ If asked something outside this context, politely say you don't have that inform
         }
 
         const messages = [
-            { role: 'system', content: systemInstruction },
+            { role: 'system', content: finalInstruction },
             ...validContents.map(msg => ({
                 role: msg.role === 'model' ? 'assistant' : 'user',
                 content: msg.text,

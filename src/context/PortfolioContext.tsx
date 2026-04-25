@@ -229,6 +229,12 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                 visible: page.visible !== undefined ? page.visible : true,
             }))
             : [],
+        aiSettings: s.aiSettings ? {
+            enabled: s.aiSettings.enabled !== undefined ? s.aiSettings.enabled : defaults.aiSettings?.enabled || true,
+            systemInstruction: s.aiSettings.systemInstruction || defaults.aiSettings?.systemInstruction || '',
+            welcomeMessage: s.aiSettings.welcomeMessage || defaults.aiSettings?.welcomeMessage || '',
+            quickReplies: Array.isArray(s.aiSettings.quickReplies) ? s.aiSettings.quickReplies : (defaults.aiSettings?.quickReplies || []),
+        } : defaults.aiSettings,
     };
     return merged;
 };

@@ -77,6 +77,13 @@ export interface SectionConfig {
     visible: boolean;
 }
 
+export interface AiSettings {
+    enabled: boolean;
+    systemInstruction: string;
+    welcomeMessage: string;
+    quickReplies: string[];
+}
+
 export interface PortfolioData {
     userName: string;
     userEmail: string;
@@ -147,6 +154,7 @@ export interface PortfolioData {
     customPages?: CustomPage[];
     bookingUrl?: string;
     stats?: Stat[];
+    aiSettings?: AiSettings;
 }
 
 export interface CustomPage {
