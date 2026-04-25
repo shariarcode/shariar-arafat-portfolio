@@ -234,6 +234,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
             systemInstruction: s.aiSettings.systemInstruction || defaults.aiSettings?.systemInstruction || '',
             welcomeMessage: s.aiSettings.welcomeMessage || defaults.aiSettings?.welcomeMessage || '',
             quickReplies: Array.isArray(s.aiSettings.quickReplies) ? s.aiSettings.quickReplies : (defaults.aiSettings?.quickReplies || []),
+            personalInfo: s.aiSettings.personalInfo || defaults.aiSettings?.personalInfo || '',
         } : defaults.aiSettings,
     };
     return merged;

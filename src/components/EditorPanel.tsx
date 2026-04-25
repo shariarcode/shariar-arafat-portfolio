@@ -1494,6 +1494,34 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             </p>
                                         </div>
 
+                                        <div className="pt-6 border-t border-gray-800 space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <label className="block text-sm font-medium text-gray-400">AI Personal Knowledge Base (Private)</label>
+                                                <span className="text-[10px] text-blue-400 bg-blue-900/20 px-2 py-1 rounded border border-blue-800/30 uppercase tracking-widest font-bold">Internal Memory</span>
+                                            </div>
+                                            <FormTextarea 
+                                                name="personalInfo"
+                                                label=""
+                                                value={formData.aiSettings?.personalInfo || ''}
+                                                onChange={(e) => {
+                                                    setFormData((prev: any) => ({
+                                                        ...prev,
+                                                        aiSettings: { ...(prev.aiSettings || {}), personalInfo: e.target.value }
+                                                    }));
+                                                }}
+                                                onEnhance={() => handleEnhance('ai-personal', formData.aiSettings?.personalInfo || '', (val) => {
+                                                    setFormData((prev: any) => ({
+                                                        ...prev,
+                                                        aiSettings: { ...(prev.aiSettings || {}), personalInfo: val }
+                                                    }));
+                                                })}
+                                                isEnhancing={enhancingFields['ai-personal']}
+                                            />
+                                            <p className="text-xs text-gray-500 leading-relaxed">
+                                                Write down details you want the AI to know about you that are <strong>not</strong> on your main page (e.g., your hobbies, education history, favorite books, or fun facts). Visitors won't see this text directly, but the AI will use it to answer their questions.
+                                            </p>
+                                        </div>
+
                                         <div className="pt-6 border-t border-gray-800">
                                             <FormInput 
                                                 label="Custom Welcome Message"

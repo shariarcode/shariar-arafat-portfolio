@@ -82,6 +82,7 @@ export interface AiSettings {
     systemInstruction: string;
     welcomeMessage: string;
     quickReplies: string[];
+    personalInfo?: string;
 }
 
 export interface PortfolioData {

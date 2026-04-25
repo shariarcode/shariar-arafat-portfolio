@@ -15,6 +15,13 @@ interface PortfolioData {
     expertiseAreas: { name: string }[];
     skillsData: { technologies: string[] }[];
     projectsData: { title: string }[];
+    aiSettings?: {
+        enabled: boolean;
+        systemInstruction: string;
+        welcomeMessage: string;
+        quickReplies: string[];
+        personalInfo?: string;
+    };
 }
 
 // Simple in-memory rate limiting (Note: This resets on function redeploy/cold start)
@@ -84,6 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const projectsText = portfolioData.projectsData.map(p => p.title).join(', ');
 
         const customInstruction = portfolioData.aiSettings?.systemInstruction;
+        const personalInfo = portfolioData.aiSettings?.personalInfo;
         
         const systemInstruction = customInstruction || `You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational.
 
@@ -99,9 +107,22 @@ CONTEXT ABOUT SHARIAR ARAFAT:
 
 If asked something outside this context, politely say you don't have that information. Always be helpful and professional.`;
 
-        // If custom instruction exists, we should still append the context to help it answer facts
+        // Combine system instruction with automated context and personal knowledge base
+        const contextBlocks = [
+            `USE THIS CONTEXT TO ANSWER QUESTIONS:`,
+            `- Name: ${portfolioData.userName}`,
+            `- Skills: ${skillsText}`,
+            `- Projects: ${projectsText}`,
+            `- Contact: ${portfolioData.userEmail}`
+        ];
+
+        if (personalInfo) {
+            contextBlocks.push(`\nADDITIONAL PRIVATE KNOWLEDGE ABOUT SHARIAR:`);
+            contextBlocks.push(personalInfo);
+        }
+
         const finalInstruction = customInstruction 
-            ? `${customInstruction}\n\nUSE THIS CONTEXT TO ANSWER QUESTIONS:\n- Name: ${portfolioData.userName}\n- Skills: ${skillsText}\n- Projects: ${projectsText}\n- Contact: ${portfolioData.userEmail}`
+            ? `${customInstruction}\n\n${contextBlocks.join('\n')}`
             : systemInstruction;
 
         let validContents = history;
