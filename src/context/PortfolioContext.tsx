@@ -58,7 +58,7 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
         { id: 'hero', navLabel: 'Home', visible: true },
         { id: 'stats', navLabel: 'Stats', visible: true },
         { id: 'about', navLabel: 'About', visible: true },
-        { id: 'expertise', navLabel: 'Expertise', visible: true },
+        { id: 'expertise', navLabel: 'Expertise', visible: false },
         { id: 'services', navLabel: 'Services', visible: true },
         { id: 'timeline', navLabel: 'Timeline', visible: true },
         { id: 'skills', navLabel: 'Skills', visible: true },

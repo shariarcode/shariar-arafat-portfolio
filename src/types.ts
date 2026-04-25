@@ -120,6 +120,9 @@ export interface PortfolioData {
         services?: string;
         timeline?: string;
         resume?: string;
+        expertise?: string;
+        blog?: string;
+        testimonials?: string;
     };
     pricingPlans?: PricingPlan[];
     navLinks?: {
@@ -131,6 +134,8 @@ export interface PortfolioData {
         services?: boolean;
         timeline?: boolean;
         resume?: boolean;
+        expertise?: boolean;
+        testimonials?: boolean;
     };
     githubConfig?: {
         username?: string;

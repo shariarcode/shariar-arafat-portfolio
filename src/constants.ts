@@ -165,7 +165,13 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         skills: "Technical Skills",
         work: "My Projects",
         pricing: "Pricing Plans",
-        contact: "Get In Touch"
+        contact: "Get In Touch",
+        expertise: "My Expertise",
+        services: "Services I Offer",
+        timeline: "My Journey",
+        resume: "Resume",
+        blog: "Latest Articles",
+        testimonials: "Client Success Stories"
     },
     pricingPlans: [
         {

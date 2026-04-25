@@ -17,7 +17,7 @@ const Expertise: React.FC = () => {
                 <FadeIn direction="up">
                     <div className="text-center mb-12">
                         <h2 className="section-heading">
-                            {sectionTitles?.about || "My Expertise"}
+                            {sectionTitles?.expertise || "My Expertise"}
                         </h2>
                         <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
                             With a diverse skill set across multiple disciplines, I bring a unique perspective to every project.

@@ -1450,6 +1450,14 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             isEnhancing={enhancingFields['st-about']}
                                         />
                                         <FormInput 
+                                            label="Expertise Section Title" 
+                                            name="expertise" 
+                                            value={formData.sectionTitles?.expertise || ''} 
+                                            onChange={(e) => handleNestedChange('sectionTitles', e)} 
+                                            onEnhance={() => handleEnhance('st-expertise', formData.sectionTitles.expertise, (val) => setFormData((prev: any) => ({ ...prev, sectionTitles: { ...prev.sectionTitles, expertise: val } })))}
+                                            isEnhancing={enhancingFields['st-expertise']}
+                                        />
+                                        <FormInput 
                                             label="Services Section Title" 
                                             name="services" 
                                             value={formData.sectionTitles?.services || ''} 
@@ -1525,7 +1533,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                     
                                     <div className="space-y-4 border border-gray-600 p-5 rounded-xl bg-gray-900/50">
                                         <h4 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Navigation Links Visibility</h4>
-                                        {['about', 'services', 'timeline', 'resume', 'skills', 'work', 'blog', 'guestbook', 'contact'].map((navItem) => (
+                                        {['about', 'expertise', 'services', 'timeline', 'resume', 'skills', 'work', 'blog', 'guestbook', 'contact'].map((navItem) => (
                                             <div key={navItem} className="flex items-center gap-3">
                                                 <input 
                                                     type="checkbox" 
