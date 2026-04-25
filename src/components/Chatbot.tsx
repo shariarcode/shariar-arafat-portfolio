@@ -9,17 +9,28 @@ interface ChatbotProps {
 
 const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
     const { content } = usePortfolio();
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        { role: 'model', text: `Hello! I'm Shariar's AI assistant. How can I help you today?` }
-    ]);
+    const { aiSettings } = content;
+    
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    // Initialize with welcome message from settings
+    useEffect(() => {
+        if (aiSettings?.welcomeMessage) {
+            setMessages([{ role: 'model', text: aiSettings.welcomeMessage }]);
+        } else {
+            setMessages([{ role: 'model', text: "Hello! I'm Shariar's AI assistant. How can I help you today?" }]);
+        }
+    }, [aiSettings?.welcomeMessage]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    if (aiSettings?.enabled === false) return null;
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
