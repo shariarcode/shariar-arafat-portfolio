@@ -2,6 +2,7 @@
 import React from 'react';
 import type { CustomPage } from '../types';
 import FadeIn from './FadeIn';
+import SEO from './SEO';
 
 interface CustomPageRendererProps {
     page: CustomPage;
@@ -24,6 +25,11 @@ const CustomPageRenderer: React.FC<CustomPageRendererProps> = ({ page }) => {
 
     return (
         <div className="min-h-screen pt-32 pb-20 overflow-hidden relative">
+            <SEO 
+                title={page.title} 
+                description={`View the ${page.title} page.`} 
+                type="website"
+            />
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>

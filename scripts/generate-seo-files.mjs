@@ -8,7 +8,7 @@ const sitemapPath = resolve(root, 'public/sitemap.xml');
 
 const rawConstants = readFileSync(constantsPath, 'utf8');
 
-const siteUrl = (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://yourwebsite.com').replace(/\/+$/, '');
+const siteUrl = (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://shariararafat.com').replace(/\/+$/, '');
 const urlRegex = /url:\s*["'`](\/blog\/[^"'`]+)["'`]/g;
 const blogUrls = new Set();
 

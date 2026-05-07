@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon, ExternalLinkIcon, CodeIcon } from './Icons';
 import { ICON_OPTIONS } from '../constants';
 import FadeIn from './FadeIn';
+import SEO from './SEO';
 
 const ProjectDetailPage: React.FC = () => {
     const { content } = usePortfolio();
@@ -40,6 +41,12 @@ const ProjectDetailPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-dark-bg pt-20 pb-20">
+            <SEO 
+                title={project.title} 
+                description={project.description} 
+                image={project.imageUrl}
+                type="article"
+            />
             <div className="container mx-auto px-6">
                 {/* Back button */}
                 <FadeIn direction="up">
@@ -55,91 +62,147 @@ const ProjectDetailPage: React.FC = () => {
                 {/* Hero section */}
                 <FadeIn direction="up">
                     <div className="max-w-4xl mx-auto">
-                        <span className="text-sm font-bold text-primary uppercase tracking-widest">
-                            {project.category}
-                        </span>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mt-4 mb-6">
+                        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                            <span className="text-sm font-bold text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">
+                                {project.category}
+                            </span>
+                            
+                            <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                {project.role && <span><strong className="text-gray-900 dark:text-white">Role:</strong> {project.role}</span>}
+                                {project.duration && <span><strong className="text-gray-900 dark:text-white">Duration:</strong> {project.duration}</span>}
+                            </div>
+                        </div>
+                        
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-6">
                             {project.title}
                         </h1>
                         
-                        <div className="flex flex-wrap gap-4 mb-8">
-                            {project.services?.map((service, idx) => {
-                                const IconComponent = ICON_OPTIONS[service.iconName as keyof typeof ICON_OPTIONS] || CodeIcon;
-                                return (
-                                    <div 
-                                        key={idx}
-                                        className="flex items-center gap-2 bg-white dark:bg-dark-card px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700"
-                                    >
-                                        <IconComponent />
-                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {service.name}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                            {project.description}
+                        </p>
                     </div>
                 </FadeIn>
 
-                {/* Project image */}
+                {/* Main Project image */}
                 {project.imageUrl && (
                     <FadeIn direction="up" delay={0.1}>
-                        <div className="max-w-4xl mx-auto mb-12">
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                        <div className="max-w-5xl mx-auto mb-16">
+                            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-dark-card">
                                 <img 
                                     src={project.imageUrl} 
-                                    alt={project.title}
-                                    className="w-full h-auto"
+                                    alt={project.title} 
+                                    loading="lazy"
+                                    className="w-full h-auto object-cover" 
                                 />
                             </div>
                         </div>
                     </FadeIn>
                 )}
 
-                {/* Project description */}
-                <FadeIn direction="up" delay={0.2}>
-                    <div className="max-w-4xl mx-auto">
-                        <div className="bg-white dark:bg-dark-card rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About This Project</h2>
-                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
-                                {project.description}
-                            </p>
+                <div className="max-w-4xl mx-auto space-y-16">
+                    {/* The Challenge & The Solution */}
+                    {(project.challenge || project.solution) && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {project.challenge && (
+                                <FadeIn direction="up" delay={0.2}>
+                                    <div className="bg-white dark:bg-dark-card rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-800 h-full">
+                                        <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center mb-6">
+                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">The Challenge</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                            {project.challenge}
+                                        </p>
+                                    </div>
+                                </FadeIn>
+                            )}
+
+                            {project.solution && (
+                                <FadeIn direction="up" delay={0.3}>
+                                    <div className="bg-white dark:bg-dark-card rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-800 h-full">
+                                        <div className="w-12 h-12 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center mb-6">
+                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">The Solution</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                            {project.solution}
+                                        </p>
+                                    </div>
+                                </FadeIn>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Results / Impact */}
+                    {project.results && project.results.length > 0 && (
+                        <FadeIn direction="up" delay={0.2}>
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Key Results</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                    {project.results.map((result, idx) => (
+                                        <div key={idx} className="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-2xl p-6 text-center">
+                                            <div className="text-3xl font-black text-primary mb-2">{result.value}</div>
+                                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">{result.metric}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </FadeIn>
+                    )}
+
+                    {/* Gallery */}
+                    {project.gallery && project.gallery.length > 0 && (
+                        <FadeIn direction="up" delay={0.2}>
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Project Gallery</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    {project.gallery.map((img, idx) => (
+                                        <div key={idx} className="rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800">
+                                            <img src={img} alt={`${project.title} screenshot ${idx + 1}`} loading="lazy" className="w-full h-auto hover:scale-105 transition-transform duration-500" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </FadeIn>
+                    )}
+
+                    {/* Tech Stack & Live Link */}
+                    <FadeIn direction="up" delay={0.2}>
+                        <div className="bg-white dark:bg-dark-card rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Tech Stack & Tools</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {(project.techStack || project.services?.map(s => s.name))?.map((tech, idx) => (
+                                        <span 
+                                            key={idx}
+                                            className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300"
+                                        >
+                                            {tech}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
                             
                             {project.liveUrl && project.liveUrl !== '#' && (
-                                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                                <div className="flex-shrink-0">
                                     <a
                                         href={project.liveUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-purple-600 text-white font-semibold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300"
+                                        className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300 w-full justify-center md:w-auto"
                                     >
-                                        View Live Project
-                                        <ExternalLinkIcon />
+                                        Visit Live Site
+                                        <ExternalLinkIcon className="w-5 h-5" />
                                     </a>
                                 </div>
                             )}
                         </div>
-                    </div>
-                </FadeIn>
-
-                {/* Technologies used */}
-                <FadeIn direction="up" delay={0.3}>
-                    <div className="max-w-4xl mx-auto mt-8">
-                        <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl p-8 border border-primary/20">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Technologies & Services</h3>
-                            <div className="flex flex-wrap gap-3">
-                                {project.services?.map((service, idx) => (
-                                    <span 
-                                        key={idx}
-                                        className="px-4 py-2 bg-white dark:bg-dark-card rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
-                                    >
-                                        {service.name}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </FadeIn>
+                    </FadeIn>
+                </div>
             </div>
         </div>
     );

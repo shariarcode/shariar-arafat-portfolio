@@ -1,41 +1,50 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
 import Expertise from './components/Expertise';
 import Services from './components/Services';
-import Timeline from './components/Timeline';
-import Skills from './components/Skills';
-import Work from './components/Work';
-import Pricing from './components/Pricing';
-import Contact from './components/Contact';
 import Footer from './components/Footer';
-import Blog from './components/Blog';
-import BlogPostPage from './components/BlogPostPage';
-import ProjectDetailPage from './components/ProjectDetailPage';
-import NotFound from './components/NotFound';
-import AdminLogin from './components/AdminLogin';
-import EditorPanel from './components/EditorPanel';
-import ChatBubble from './components/ChatBubble';
-import Chatbot from './components/Chatbot';
-import Stats from './components/Stats';
-import Testimonials from './components/Testimonials';
-import GithubActivity from './components/GithubActivity';
-import CustomCursor from './components/CustomCursor';
-import CursorAnalysisOverlay from './components/CursorAnalysisOverlay';
-import Resume from './components/Resume';
-import Guestbook from './components/Guestbook';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
 import CommandPalette from './components/CommandPalette';
 import ReadingProgressBar from './components/ReadingProgressBar';
-import NewsletterModal from './components/NewsletterModal';
 import Skeleton from './components/Skeleton';
 import CookieConsent from './components/CookieConsent';
-import CustomPageRenderer from './components/CustomPageRenderer';
+import SEO from './components/SEO';
+import InstallPWA from './components/InstallPWA';
+
+// Lazy load non-critical / below-the-fold components
+const Timeline = lazy(() => import('./components/Timeline'));
+const Skills = lazy(() => import('./components/Skills'));
+const Work = lazy(() => import('./components/Work'));
+const Pricing = lazy(() => import('./components/Pricing'));
+const Contact = lazy(() => import('./components/Contact'));
+const Blog = lazy(() => import('./components/Blog'));
+const BlogPostPage = lazy(() => import('./components/BlogPostPage'));
+const ProjectDetailPage = lazy(() => import('./components/ProjectDetailPage'));
+const Education = lazy(() => import('./components/Education'));
+const Process = lazy(() => import('./components/Process'));
+const FAQ = lazy(() => import('./components/FAQ'));
+const Resources = lazy(() => import('./components/Resources'));
+const NotFound = lazy(() => import('./components/NotFound'));
+const AdminLogin = lazy(() => import('./components/AdminLogin'));
+const EditorPanel = lazy(() => import('./components/EditorPanel'));
+const ChatBubble = lazy(() => import('./components/ChatBubble'));
+const Chatbot = lazy(() => import('./components/Chatbot'));
+const Stats = lazy(() => import('./components/Stats'));
+const Testimonials = lazy(() => import('./components/Testimonials'));
+const GithubActivity = lazy(() => import('./components/GithubActivity'));
+const CustomCursor = lazy(() => import('./components/CustomCursor'));
+const CursorAnalysisOverlay = lazy(() => import('./components/CursorAnalysisOverlay'));
+const Resume = lazy(() => import('./components/Resume'));
+const Guestbook = lazy(() => import('./components/Guestbook'));
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+const NewsletterModal = lazy(() => import('./components/NewsletterModal'));
+const CustomPageRenderer = lazy(() => import('./components/CustomPageRenderer'));
 import { ArrowUpIcon } from './components/Icons';
 import type { PortfolioData } from './types';
-import { removeJsonLd, setSeoMeta } from './lib/seo';
+import { removeJsonLd, setSeoMeta, setJsonLd } from './lib/seo';
 import { usePortfolio } from './context/PortfolioContext';
 import { ToastProvider, useToast } from './components/Toast';
 
@@ -55,7 +64,8 @@ const AppInner: React.FC = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [showNewsletter, setShowNewsletter] = useState(false);
     
-    const currentPath = window.location.pathname;
+    const location = useLocation();
+    const currentPath = location.pathname;
     const isBlogRoute = currentPath.startsWith('/blog/');
     const isProjectRoute = currentPath.startsWith('/project/');
     const isCustomPageRoute = currentPath.startsWith('/p/');
@@ -71,6 +81,17 @@ const AppInner: React.FC = () => {
                 imageUrl: `${window.location.origin}/og-image.jpg`,
             });
             removeJsonLd('blog-post');
+            
+            // Add Person Schema
+            const personSchema = {
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": content.userName,
+                "url": canonicalUrl,
+                "jobTitle": content.heroHeading?.replace("Hi, I'm ", "").split(" - ")[0] || "Professional",
+                "sameAs": content.socialLinks ? Object.values(content.socialLinks).filter(Boolean) : []
+            };
+            setJsonLd('person-schema', personSchema);
         } else if (isCustomPageRoute) {
             const page = (content.customPages || []).find(p => p.slug === routeSlug);
             if (page) {
@@ -179,6 +200,10 @@ const AppInner: React.FC = () => {
         guestbook: Guestbook,
         contact: Contact,
         analytics: AnalyticsDashboard,
+        education: Education,
+        process: Process,
+        faq: FAQ,
+        resources: Resources,
     };
 
     let mainContent;
@@ -206,16 +231,26 @@ const AppInner: React.FC = () => {
 
     return (
         <div className="bg-slate-50 dark:bg-dark-bg transition-colors duration-300 font-sans relative overflow-x-hidden">
+            <SEO />
             <ReadingProgressBar />
             <CommandPalette />
-            <CustomCursor />
-            <CursorAnalysisOverlay />
+            <Suspense fallback={null}>
+                <CustomCursor />
+                <CursorAnalysisOverlay />
+            </Suspense>
             <Header />
             
-            {mainContent}
+            <Suspense fallback={
+                <div className="container mx-auto px-6 py-8 animate-pulse mt-20">
+                    <Skeleton className="h-[40vh] w-full rounded-3xl" />
+                </div>
+            }>
+                {mainContent}
+            </Suspense>
 
             <Footer onAdminClick={handleAdminClick} />
             <CookieConsent />
+            <InstallPWA />
             
             {showScrollTop && !isChatOpen && (
                  <button onClick={scrollToTop} className="fixed bottom-[max(2rem,env(safe-area-inset-bottom))] right-8 bg-primary hover:bg-primary-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50 min-w-[44px] min-h-[44px] flex items-center justify-center">
@@ -223,13 +258,13 @@ const AppInner: React.FC = () => {
                  </button>
             )}
 
-            {!isChatOpen && <ChatBubble onOpen={() => setIsChatOpen(true)} />}
-            {isChatOpen && <Chatbot onClose={() => setIsChatOpen(false)} />}
-
-            <NewsletterModal isOpen={showNewsletter} onClose={() => setShowNewsletter(false)} />
-
-            {showLogin && <AdminLogin onLogin={handleLogin} onClose={() => setShowLogin(false)} />}
-            {isAdmin && showEditor && <EditorPanel data={content} onSave={handleSaveChanges} onClose={() => setShowEditor(false)} />}
+            <Suspense fallback={null}>
+                {!isChatOpen && <ChatBubble onOpen={() => setIsChatOpen(true)} />}
+                {isChatOpen && <Chatbot onClose={() => setIsChatOpen(false)} />}
+                <NewsletterModal isOpen={showNewsletter} onClose={() => setShowNewsletter(false)} />
+                {showLogin && <AdminLogin onLogin={handleLogin} onClose={() => setShowLogin(false)} />}
+                {isAdmin && showEditor && <EditorPanel data={content} onSave={handleSaveChanges} onClose={() => setShowEditor(false)} />}
+            </Suspense>
         </div>
     );
 };

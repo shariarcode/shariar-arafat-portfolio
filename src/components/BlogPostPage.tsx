@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import type { BlogPost } from '../types';
 import { removeJsonLd, setJsonLd, setSeoMeta } from '../lib/seo';
 import { TwitterIcon, LinkedInIcon, FacebookIcon } from './Icons';
+import SEO from './SEO';
 
 interface BlogPostPageProps {
     post: BlogPost;
@@ -64,6 +65,11 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ post }) => {
 
     return (
         <div className="pt-24 pb-16 px-6">
+            <SEO 
+                title={post.title} 
+                description={post.excerpt} 
+                type="article"
+            />
             <article className="max-w-3xl mx-auto bg-white dark:bg-dark-card rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
                 <div className="p-8 md:p-12">
                     <a href="/" className="inline-flex items-center text-primary hover:text-primary-dark font-semibold transition-colors mb-8 group">

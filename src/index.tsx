@@ -1,10 +1,16 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Analytics } from '@vercel/analytics/react';
+import { BrowserRouter } from 'react-router-dom';
+import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 import { ToastProvider } from './components/Toast';
 import { PortfolioProvider } from './context/PortfolioContext';
+
+// Register PWA service worker
+registerSW({ immediate: true });
+
+import { HelmetProvider } from 'react-helmet-async';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -14,12 +20,16 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <PortfolioProvider>
-      <ToastProvider>
-        <App />
-        <Analytics />
-      </ToastProvider>
-    </PortfolioProvider>
+    <HelmetProvider>
+      <BrowserRouter>
+        <PortfolioProvider>
+          <ToastProvider>
+            <App />
+            <Analytics />
+          </ToastProvider>
+        </PortfolioProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   </React.StrictMode>
 );
 

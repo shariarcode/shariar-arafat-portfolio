@@ -11,49 +11,9 @@ interface EditorPanelProps {
     onClose: () => void;
 }
 
-const AIEnhanceButton: React.FC<{ onClick: () => void, isLoading: boolean, disabled?: boolean }> = ({ onClick, isLoading, disabled }) => (
-    <button 
-        onClick={(e) => { e.preventDefault(); onClick(); }}
-        disabled={disabled || isLoading}
-        title="Enhance with AI"
-        className="absolute right-2 top-8 sm:top-7 p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
-    >
-        {isLoading ? <LoadingSpinner className="w-4 h-4" /> : <SparklesIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-    </button>
-);
-
-const FormInput: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string, onEnhance?: () => void, isEnhancing?: boolean }> = ({ label, name, value, onChange, placeholder, onEnhance, isEnhancing }) => (
-    <div className="relative">
-        <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
-        <input 
-            type="text" 
-            name={name} 
-            value={value} 
-            onChange={onChange}
-            placeholder={placeholder}
-            className={`w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px] ${onEnhance ? 'pr-10' : ''}`}
-        />
-        {onEnhance && <AIEnhanceButton onClick={onEnhance} isLoading={!!isEnhancing} disabled={!value.trim()} />}
-    </div>
-);
-
-const FormTextarea: React.FC<{ label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, onEnhance?: () => void, isEnhancing?: boolean }> = ({ label, name, value, onChange, onEnhance, isEnhancing }) => (
-    <div className="relative">
-        <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
-        <textarea 
-            name={name}
-            value={value} 
-            onChange={onChange}
-            rows={3}
-            className={`w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px] ${onEnhance ? 'pr-10' : ''}`}
-        />
-        {onEnhance && <AIEnhanceButton onClick={onEnhance} isLoading={!!isEnhancing} disabled={!value.trim()} />}
-    </div>
-);
-
-const TrashIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-);
+import { FormInput, FormTextarea, TrashIcon } from './admin/AdminUI';
+import DashboardTab from './admin/DashboardTab';
+import SEOTab from './admin/SEOTab';
 
 const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     // Add default values for new fields if they don't exist in data
@@ -91,6 +51,11 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         serializableData.footerContent.services = Array.isArray(serializableData.footerContent.services) ? serializableData.footerContent.services.join(', ') : '';
 
         if (!Array.isArray(serializableData.stats)) serializableData.stats = [];
+        if (!Array.isArray(serializableData.education)) serializableData.education = [];
+        if (!Array.isArray(serializableData.certifications)) serializableData.certifications = [];
+        if (!Array.isArray(serializableData.processSteps)) serializableData.processSteps = [];
+        if (!Array.isArray(serializableData.faqs)) serializableData.faqs = [];
+        if (!Array.isArray(serializableData.resources)) serializableData.resources = [];
         if (!serializableData.githubConfig) serializableData.githubConfig = { username: "", sectionTitle: "GitHub Contributions", description: "Proof of continuous learning and building. I push code regularly.", showStats: true, showLanguages: true };
         if (!Array.isArray(serializableData.customPages)) serializableData.customPages = [];
         if (!serializableData.aiSettings) {
@@ -101,10 +66,21 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                 quickReplies: ["What are your top skills?", "Are you available for freelance?", "What projects have you built?"]
             };
         }
+        if (!serializableData.seoConfig) {
+            serializableData.seoConfig = {
+                siteTitle: "Shariar Arafat | Portfolio",
+                siteDescription: "Portfolio of Shariar Arafat, showcasing my projects, skills, and experience.",
+                ogImage: "",
+                twitterHandle: "@shariararafat",
+                canonicalUrl: "https://shariararafat.com",
+                keywords: "Shariar Arafat, Portfolio, Developer"
+            };
+        }
         return serializableData;
     });
 
-    const [activeTab, setActiveTab] = useState<'home' | 'pages' | 'about' | 'stats' | 'skills' | 'pricing' | 'work' | 'github' | 'blog' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook' | 'ai'>('home');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'seo' | 'home' | 'pages' | 'about' | 'education' | 'process' | 'stats' | 'skills' | 'pricing' | 'work' | 'github' | 'blog' | 'resources' | 'faq' | 'testimonials' | 'contact' | 'settings' | 'inbox' | 'guestbook' | 'ai'>('dashboard');
+    const [searchQuery, setSearchQuery] = useState('');
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [loadingInbox, setLoadingInbox] = useState(false);
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
@@ -267,27 +243,70 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         onSave(processedData as unknown as PortfolioData);
     };
 
-    const tabs = [
-        { id: 'home', label: '🏠 Home' },
-        { id: 'pages', label: '📄 Pages' },
-        { id: 'about', label: '👤 About' },
-        { id: 'stats', label: '📊 Stats' },
-        { id: 'skills', label: '🛠️ Skills' },
-        { id: 'pricing', label: '💰 Pricing' },
-        { id: 'work', label: '💼 Work' },
-        { id: 'github', label: '🐙 GitHub' },
-        { id: 'blog', label: '📝 Blog' },
-        { id: 'testimonials', label: '💬 Testimonials' },
-        { id: 'contact', label: '📬 Contact' },
-        { id: 'inbox', label: '📥 Inbox' },
-        { id: 'guestbook', label: '📖 Guestbook' },
-        { id: 'ai', label: '🤖 AI Assistant' },
-        { id: 'settings', label: '⚙️ Settings' }
-    ] as const;
+    const tabGroups = [
+        {
+            group: 'OVERVIEW',
+            tabs: [
+                { id: 'dashboard', label: '📈 Dashboard' }
+            ]
+        },
+        {
+            group: 'CONTENT',
+            tabs: [
+                { id: 'home', label: '🏠 Home' },
+                { id: 'about', label: '👤 About' },
+                { id: 'process', label: '🔄 Process' },
+                { id: 'stats', label: '📊 Stats' },
+                { id: 'skills', label: '🛠️ Skills' },
+                { id: 'work', label: '💼 Work' },
+                { id: 'education', label: '🎓 Education' },
+                { id: 'testimonials', label: '💬 Testimonials' },
+                { id: 'blog', label: '📝 Blog' },
+                { id: 'faq', label: '❓ FAQ' },
+                { id: 'pricing', label: '💰 Pricing' }
+            ]
+        },
+        {
+            group: 'COMMUNICATIONS',
+            tabs: [
+                { id: 'contact', label: '📬 Contact' },
+                { id: 'inbox', label: '📥 Inbox' },
+                { id: 'guestbook', label: '📖 Guestbook' }
+            ]
+        },
+        {
+            group: 'APPEARANCE',
+            tabs: [
+                { id: 'pages', label: '📄 Pages & Layout' },
+                { id: 'seo', label: '🔍 SEO Metadata' },
+                { id: 'settings', label: '⚙️ Settings' }
+            ]
+        },
+        {
+            group: 'TOOLS',
+            tabs: [
+                { id: 'ai', label: '🤖 AI Assistant' },
+                { id: 'github', label: '🐙 GitHub' },
+                { id: 'resources', label: '📦 Resources' }
+            ]
+        }
+    ];
+
+    const filteredTabGroups = React.useMemo(() => {
+        if (!searchQuery.trim()) return tabGroups;
+        const query = searchQuery.toLowerCase();
+        return tabGroups.map(group => ({
+            ...group,
+            tabs: group.tabs.filter(tab => 
+                tab.label.toLowerCase().includes(query) || 
+                tab.id.toLowerCase().includes(query)
+            )
+        })).filter(group => group.tabs.length > 0);
+    }, [searchQuery, tabGroups]);
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99] flex items-center justify-center p-0 sm:p-4 lg:p-8">
-            <div className="w-full h-full lg:max-w-6xl bg-dark-bg shadow-2xl z-[100] sm:rounded-2xl flex flex-col overflow-hidden border-0 sm:border border-gray-700">
+            <div className="w-full h-full lg:max-w-7xl bg-dark-bg shadow-2xl z-[100] sm:rounded-2xl flex flex-col overflow-hidden border-0 sm:border border-gray-700">
                 {/* Header */}
                 <div className="p-4 sm:p-6 flex justify-between items-center border-b border-gray-700 bg-gray-900">
                     <h2 className="text-xl sm:text-2xl font-bold text-white truncate mr-4">Full CMS Dashboard</h2>
@@ -296,20 +315,72 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                 
                 <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
                     {/* Sidebar Tabs - Scrollable horizontally on mobile, vertically on desktop */}
-                    <div className="flex lg:flex-col lg:w-48 bg-gray-900 border-b lg:border-b-0 lg:border-r border-gray-700 p-2 sm:p-4 gap-1 sm:gap-2 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth">
-                        {tabs.map(tab => (
-                            <button 
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-4 py-2 sm:py-3 text-sm sm:text-base text-center lg:text-left rounded-lg transition-colors font-medium whitespace-nowrap min-h-[44px] ${activeTab === tab.id ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-                            >
-                                {tab.label}
-                            </button>
+                    <div className="flex lg:flex-col lg:w-64 bg-gray-900 border-b lg:border-b-0 lg:border-r border-gray-700 p-2 sm:p-4 gap-4 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth">
+                        
+                        {/* Tab Search - Only on Desktop for now to save space on mobile */}
+                        <div className="hidden lg:block px-2 mb-2">
+                            <div className="relative">
+                                <input 
+                                    type="text" 
+                                    placeholder="Search tabs..." 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-gray-500"
+                                />
+                                {searchQuery && (
+                                    <button 
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                                    >
+                                        ×
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {filteredTabGroups.map((group, groupIndex) => (
+                            <div key={group.group} className="flex flex-row lg:flex-col gap-1 sm:gap-1.5 flex-shrink-0">
+                                <div className="hidden lg:block text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1 px-2 mt-2 first:mt-0">
+                                    {group.group}
+                                </div>
+                                {group.tabs.map(tab => (
+                                    <button 
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id as any)}
+                                        className={`px-4 py-2 sm:py-2.5 text-sm sm:text-base text-center lg:text-left rounded-lg transition-colors font-medium whitespace-nowrap min-h-[44px] sm:min-h-[40px] flex-shrink-0 flex items-center ${activeTab === tab.id ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
                         ))}
+
+                        {filteredTabGroups.length === 0 && (
+                            <div className="hidden lg:block text-center py-10 text-gray-600 text-sm italic">
+                                No tabs match "{searchQuery}"
+                            </div>
+                        )}
                     </div>
 
                     {/* Content Area */}
                     <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-dark-bg text-white">
+                        
+                        {/* DASHBOARD TAB */}
+                        {activeTab === 'dashboard' && (
+                            <DashboardTab 
+                                formData={formData} 
+                                setActiveTab={setActiveTab} 
+                                fetchInbox={fetchInbox} 
+                            />
+                        )}
+                        
+                        {/* SEO TAB */}
+                        {activeTab === 'seo' && (
+                            <SEOTab 
+                                formData={formData} 
+                                handleNestedChange={handleNestedChange} 
+                            />
+                        )}
                         
                         {/* PAGES TAB */}
                         {activeTab === 'pages' && (
@@ -726,6 +797,82 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             </div>
                                         ))}
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* EDUCATION TAB */}
+                        {activeTab === 'education' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Education & Certifications</h3>
+                                </div>
+                                
+                                <div className="space-y-4 pt-4 border-t border-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="text-xl font-bold text-gray-200">Education History</h4>
+                                        <button onClick={() => handleAddItem('education', { degree: "New Degree", institution: "Institution", year: "2024", details: "Details here" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Education</button>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {(formData.education || []).map((item: any, index: number) => (
+                                            <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                    <FormInput label="Degree / Major" name="degree" value={item.degree} onChange={(e) => handleArrayChange('education', index, e)} />
+                                                    <FormInput label="Institution" name="institution" value={item.institution} onChange={(e) => handleArrayChange('education', index, e)} />
+                                                    <FormInput label="Year / Duration" name="year" value={item.year} onChange={(e) => handleArrayChange('education', index, e)} />
+                                                </div>
+                                                <FormTextarea label="Details" name="details" value={item.details || ''} onChange={(e) => handleArrayChange('education', index, e)} />
+                                                <button onClick={() => handleDeleteItem('education', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="text-xl font-bold text-gray-200">Certifications</h4>
+                                        <button onClick={() => handleAddItem('certifications', { name: "New Certification", issuer: "Issuer", year: "2024", link: "" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Certification</button>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        {(formData.certifications || []).map((item: any, index: number) => (
+                                            <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                                <FormInput label="Certification Name" name="name" value={item.name} onChange={(e) => handleArrayChange('certifications', index, e)} />
+                                                <FormInput label="Issuer" name="issuer" value={item.issuer} onChange={(e) => handleArrayChange('certifications', index, e)} />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <FormInput label="Year" name="year" value={item.year} onChange={(e) => handleArrayChange('certifications', index, e)} />
+                                                    <FormInput label="Verification Link" name="link" value={item.link || ''} onChange={(e) => handleArrayChange('certifications', index, e)} />
+                                                </div>
+                                                <button onClick={() => handleDeleteItem('certifications', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PROCESS TAB */}
+                        {activeTab === 'process' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Working Process</h3>
+                                    <button onClick={() => handleAddItem('processSteps', { title: "New Step", description: "", icon: "DocumentIcon" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Step</button>
+                                </div>
+                                <div className="space-y-4">
+                                    {(formData.processSteps || []).map((step: any, index: number) => (
+                                        <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                <FormInput label="Step Title" name="title" value={step.title} onChange={(e) => handleArrayChange('processSteps', index, e)} />
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-400 mb-1">Icon Name</label>
+                                                    <select name="icon" value={step.icon || 'DocumentIcon'} onChange={(e) => handleArrayChange('processSteps', index, e)} className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm min-h-[44px]">
+                                                        {ICON_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <FormTextarea label="Step Description" name="description" value={step.description || ''} onChange={(e) => handleArrayChange('processSteps', index, e)} />
+                                            <button onClick={() => handleDeleteItem('processSteps', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
@@ -1265,6 +1412,48 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 isEnhancing={enhancingFields[`blog-content-${index}`]}
                                             />
                                             <button onClick={() => handleDeleteItem('blogPosts', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* RESOURCES TAB */}
+                        {activeTab === 'resources' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Free Resources</h3>
+                                    <button onClick={() => handleAddItem('resources', { title: "New Resource", description: "", link: "#", type: "PDF" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Resource</button>
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {(formData.resources || []).map((res: any, index: number) => (
+                                        <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                            <FormInput label="Resource Title" name="title" value={res.title} onChange={(e) => handleArrayChange('resources', index, e)} />
+                                            <FormTextarea label="Description" name="description" value={res.description || ''} onChange={(e) => handleArrayChange('resources', index, e)} />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <FormInput label="Link / Download URL" name="link" value={res.link || '#'} onChange={(e) => handleArrayChange('resources', index, e)} />
+                                                <FormInput label="File Type (e.g. PDF, ZIP, Figma)" name="type" value={res.type || ''} onChange={(e) => handleArrayChange('resources', index, e)} />
+                                            </div>
+                                            <button onClick={() => handleDeleteItem('resources', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* FAQ TAB */}
+                        {activeTab === 'faq' && (
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-primary">Frequently Asked Questions</h3>
+                                    <button onClick={() => handleAddItem('faqs', { question: "New Question?", answer: "Answer goes here." })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add FAQ</button>
+                                </div>
+                                <div className="space-y-4">
+                                    {(formData.faqs || []).map((faq: any, index: number) => (
+                                        <div key={index} className="space-y-4 border border-gray-600 p-5 rounded-xl relative group bg-gray-900/50">
+                                            <FormInput label="Question" name="question" value={faq.question} onChange={(e) => handleArrayChange('faqs', index, e)} />
+                                            <FormTextarea label="Answer" name="answer" value={faq.answer} onChange={(e) => handleArrayChange('faqs', index, e)} />
+                                            <button onClick={() => handleDeleteItem('faqs', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                         </div>
                                     ))}
                                 </div>

@@ -22,6 +22,45 @@ export interface Project {
     services: ProjectService[];
     imageUrl?: string;
     liveUrl?: string;
+    challenge?: string;
+    solution?: string;
+    results?: string[];
+    techStack?: string[];
+    gallery?: string[];
+    duration?: string;
+    role?: string;
+}
+
+export interface Education {
+    degree: string;
+    institution: string;
+    year: string;
+    description?: string;
+}
+
+export interface Certification {
+    name: string;
+    issuer: string;
+    year: string;
+    url?: string;
+}
+
+export interface ProcessStep {
+    title: string;
+    description: string;
+    iconName?: string;
+}
+
+export interface FaqItem {
+    question: string;
+    answer: string;
+}
+
+export interface ResourceItem {
+    title: string;
+    description: string;
+    fileUrl: string;
+    downloadCount?: number;
 }
 
 export interface ChatMessage {
@@ -102,6 +141,11 @@ export interface PortfolioData {
     testimonials?: Testimonial[];
     timeline?: TimelineEvent[];
     blogPosts?: BlogPost[];
+    education?: Education[];
+    certifications?: Certification[];
+    processSteps?: ProcessStep[];
+    faqs?: FaqItem[];
+    resources?: ResourceItem[];
     footerContent?: {
         description?: string;
         services?: string[];
@@ -156,6 +200,14 @@ export interface PortfolioData {
     bookingUrl?: string;
     stats?: Stat[];
     aiSettings?: AiSettings;
+    seoConfig?: {
+        siteTitle?: string;
+        siteDescription?: string;
+        ogImage?: string;
+        twitterHandle?: string;
+        canonicalUrl?: string;
+        keywords?: string;
+    };
 }
 
 export interface CustomPage {

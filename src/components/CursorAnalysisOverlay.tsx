@@ -7,9 +7,9 @@ const CursorAnalysisOverlay: React.FC = () => {
 
   if (!isVisible) {
     return (
-      <button 
+        <button 
         onClick={() => setIsVisible(true)}
-        className="fixed bottom-4 right-4 z-[10000] bg-primary text-white p-2 rounded-full shadow-lg text-xs opacity-50 hover:opacity-100 transition-opacity"
+        className="fixed bottom-4 left-4 z-[10000] bg-primary text-white p-2 rounded-full shadow-lg text-xs opacity-50 hover:opacity-100 transition-opacity"
       >
         📊 Analysis
       </button>

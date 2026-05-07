@@ -63,22 +63,48 @@ const GithubActivity: React.FC = () => {
                     {(githubConfig?.showStats !== false || githubConfig?.showLanguages !== false) && (
                         <div className="mt-8 flex flex-col md:flex-row gap-6 w-full max-w-4xl justify-center items-center md:items-stretch">
                             {githubConfig?.showStats !== false && (
-                                <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-md p-2 hover:-translate-y-1 transition-transform">
+                                <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-md p-2 hover:-translate-y-1 transition-transform"
+                                     style={{ display: 'flex' }}
+                                     onLoad={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        if (target.naturalWidth <= 1) {
+                                            target.parentElement!.style.display = 'none';
+                                        }
+                                     }}
+                                >
                                      <img 
                                         src={`https://github-readme-stats.vercel.app/api?username=${username}&show_icons=true&theme=transparent&hide_border=true&title_color=6F42C1&text_color=718096&icon_color=6F42C1`} 
                                         alt="GitHub Stats" 
                                         className="w-full h-full object-contain" 
                                         loading="lazy"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            if (target.parentElement) target.parentElement.style.display = 'none';
+                                        }}
                                      />
                                 </div>
                             )}
                             {githubConfig?.showLanguages !== false && (
-                                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-md p-2 hover:-translate-y-1 transition-transform w-[300px] shrink-0">
+                                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-md p-2 hover:-translate-y-1 transition-transform w-[300px] shrink-0"
+                                     style={{ display: 'flex' }}
+                                     onLoad={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        if (target.naturalWidth <= 1) {
+                                            target.parentElement!.style.display = 'none';
+                                        }
+                                     }}
+                                >
                                      <img 
                                         src={`https://github-readme-stats.vercel.app/api/top-langs/?username=${username}&layout=compact&theme=transparent&hide_border=true&title_color=6F42C1&text_color=718096`} 
                                         alt="Top Languages" 
                                         className="w-full h-full object-contain" 
                                         loading="lazy"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            if (target.parentElement) target.parentElement.style.display = 'none';
+                                        }}
                                      />
                                 </div>
                             )}

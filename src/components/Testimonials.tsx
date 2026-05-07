@@ -112,6 +112,7 @@ const Testimonials: React.FC = () => {
                                         <img
                                             src={testi.image}
                                             alt={testi.name}
+                                            loading="lazy"
                                             className="w-12 h-12 rounded-full object-cover border-2 border-primary/50"
                                         />
                                         <div>

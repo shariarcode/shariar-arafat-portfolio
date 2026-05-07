@@ -4,12 +4,16 @@ import { usePortfolio } from '../context/PortfolioContext';
 import SearchButton from './SearchButton';
 import LanguageSwitcher from './LanguageSwitcher';
 
+import { Link, useLocation } from 'react-router-dom';
+
 const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () => void; className?: string }> = ({ href, children, onClick, className = '' }) => {
     const [active, setActive] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
+        if (!href.startsWith('/#')) return;
         const check = () => {
-            const id = href.replace('#', '');
+            const id = href.replace('/#', '');
             const el = document.getElementById(id);
             if (el) {
                 const rect = el.getBoundingClientRect();
@@ -21,17 +25,26 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
         return () => window.removeEventListener('scroll', check);
     }, [href]);
 
+    const isHash = href.startsWith('/#');
+    const isSamePage = isHash && location.pathname === '/';
+
+    const baseClasses = `relative text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-all duration-300 font-medium text-sm group py-1 ${className}`;
+    const indicator = <span className={`absolute -bottom-1 left-0 h-0.5 rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${active ? 'w-full' : 'w-0 group-hover:w-full'}`} />;
+
+    if (isSamePage) {
+        return (
+            <a href={href} onClick={onClick} className={baseClasses}>
+                {children}
+                {indicator}
+            </a>
+        );
+    }
+
     return (
-        <a
-            href={href}
-            onClick={onClick}
-            className={`relative text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-all duration-300 font-medium text-sm group py-1 ${className}`}
-        >
+        <Link to={href} onClick={onClick} className={baseClasses}>
             {children}
-            <span
-                className={`absolute -bottom-1 left-0 h-0.5 rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${active ? 'w-full' : 'w-0 group-hover:w-full'}`}
-            />
-        </a>
+            {indicator}
+        </Link>
     );
 };
 
@@ -104,11 +117,11 @@ const Header: React.FC = () => {
                     <nav className="flex items-center justify-between gap-4">
                         {/* Logo */}
                         <div className="flex-shrink-0 mr-8">
-                            <a href="#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
+                            <Link to="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
                                 <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
                                     {initials}
                                 </span>
-                            </a>
+                            </Link>
                         </div>
 
                         {/* Desktop nav */}
@@ -129,14 +142,14 @@ const Header: React.FC = () => {
                                     {isMoreOpen && (
                                         <div className="absolute top-full right-0 mt-4 w-48 bg-white/95 dark:bg-dark-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden animate-fade-in py-2">
                                             {moreLinks.map(link => (
-                                                <a 
+                                                <Link 
                                                     key={link.id} 
-                                                    href={link.path}
+                                                    to={link.path}
                                                     onClick={() => setIsMoreOpen(false)}
                                                     className="block px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors"
                                                 >
                                                     {link.label}
-                                                </a>
+                                                </Link>
                                             ))}
                                         </div>
                                     )}

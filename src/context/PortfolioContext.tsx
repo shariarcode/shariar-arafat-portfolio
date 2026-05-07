@@ -58,19 +58,24 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
         { id: 'hero', navLabel: 'Home', visible: true },
         { id: 'stats', navLabel: 'Stats', visible: true },
         { id: 'about', navLabel: 'About', visible: true },
-        { id: 'expertise', navLabel: 'Expertise', visible: false },
-        { id: 'services', navLabel: 'Services', visible: true },
-        { id: 'timeline', navLabel: 'Timeline', visible: true },
+        { id: 'process', navLabel: 'Process', visible: true },
         { id: 'skills', navLabel: 'Skills', visible: true },
-        { id: 'resume', navLabel: 'Resume', visible: true },
-        { id: 'pricing', navLabel: 'Pricing', visible: true },
-        { id: 'github', navLabel: 'GitHub', visible: true },
         { id: 'work', navLabel: 'Work', visible: true },
-        { id: 'blog', navLabel: 'Blog', visible: true },
+        { id: 'education', navLabel: 'Education', visible: true },
         { id: 'testimonials', navLabel: 'Testimonials', visible: true },
-        { id: 'guestbook', navLabel: 'Guestbook', visible: true },
+        { id: 'blog', navLabel: 'Blog', visible: true },
+        { id: 'faq', navLabel: 'FAQ', visible: true },
+        { id: 'pricing', navLabel: 'Pricing', visible: true },
         { id: 'contact', navLabel: 'Contact', visible: true },
-        { id: 'analytics', navLabel: 'Analytics', visible: true }
+        // Remaining sections set to invisible by default, or placed at the end
+        { id: 'expertise', navLabel: 'Expertise', visible: false },
+        { id: 'services', navLabel: 'Services', visible: false },
+        { id: 'timeline', navLabel: 'Timeline', visible: false },
+        { id: 'resume', navLabel: 'Resume', visible: false },
+        { id: 'github', navLabel: 'GitHub', visible: false },
+        { id: 'resources', navLabel: 'Resources', visible: false },
+        { id: 'guestbook', navLabel: 'Guestbook', visible: false },
+        { id: 'analytics', navLabel: 'Analytics', visible: false }
     ];
 
     const merged: PortfolioData = {
@@ -196,6 +201,11 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
                     };
                 })
             : defaults.pricingPlans,
+        education: Array.isArray(s.education) ? s.education : defaults.education,
+        certifications: Array.isArray(s.certifications) ? s.certifications : defaults.certifications,
+        processSteps: Array.isArray(s.processSteps) ? s.processSteps : defaults.processSteps,
+        faqs: Array.isArray(s.faqs) ? s.faqs : defaults.faqs,
+        resources: Array.isArray(s.resources) ? s.resources : defaults.resources,
         bookingUrl: s.bookingUrl !== undefined ? s.bookingUrl : defaults.bookingUrl,
         stats: Array.isArray(s.stats)
             ? s.stats

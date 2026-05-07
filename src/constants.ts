@@ -87,19 +87,24 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     ],
     timeline: [
         {
-            year: "2020",
-            title: "The Beginning",
-            description: "Discovered a passion for programming and started learning foundational web technologies."
+            year: "2021",
+            title: "Started Web Development Journey",
+            description: "Discovered a passion for programming and started learning foundational web technologies like HTML, CSS, and basic JavaScript."
         },
         {
             year: "2022",
-            title: "Freelance Growth",
-            description: "Delivered client projects in design and front-end development while sharpening communication and delivery."
+            title: "First Freelance Projects",
+            description: "Started delivering basic websites and WordPress projects to local clients, sharpening communication and delivery skills."
         },
         {
-            year: "2024",
-            title: "Full-Stack Expansion",
-            description: "Focused on modern frameworks, TypeScript, and scalable backend architecture for production-ready apps."
+            year: "2023",
+            title: "Diving into Modern Frameworks",
+            description: "Focused on modern JavaScript frameworks like React, and began building more complex, interactive user interfaces."
+        },
+        {
+            year: "2024 - Present",
+            title: "Full-Stack & Next-Level Polish",
+            description: "Expanding into full-stack development with databases, advanced animations (Framer Motion), and scalable architecture."
         }
     ],
     blogPosts: [
@@ -153,12 +158,12 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
         location: USER_LOCATION,
     },
     socialLinks: {
-        linkedin: "#",
-        github: "#",
-        behance: "#",
-        instagram: "#",
-        website: "#",
-        dribbble: "#"
+        linkedin: "https://linkedin.com/in/shariar-arafat",
+        github: "https://github.com/shariar-arafat",
+        behance: "https://behance.net/shariar-arafat",
+        instagram: "https://instagram.com/shariar.arafat",
+        website: "https://shariararafat.com",
+        dribbble: "https://dribbble.com/shariar-arafat"
     },
     sectionTitles: {
         about: "About Me",
@@ -236,11 +241,72 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     },
     customPages: [],
     stats: [
-        { endValue: 5, label: "Years of Experience", suffix: "+" },
-        { endValue: 20, label: "Projects Completed", suffix: "+" },
-        { endValue: 15, label: "Happy Clients", suffix: "+" },
-        { endValue: 10, label: "Tech Mastered", suffix: "+" }
+        { endValue: 3, label: "Years of Experience", suffix: "+" },
+        { endValue: 15, label: "Projects Completed", suffix: "+" },
+        { endValue: 10, label: "Happy Clients", suffix: "+" },
+        { endValue: 12, label: "Tech Mastered", suffix: "+" }
     ],
+    education: [
+        {
+            degree: "Higher Secondary Certificate (HSC)",
+            institution: "Local College, Noakhali",
+            year: "2020 - 2022",
+            description: "Completed higher secondary education with a focus on science and mathematics."
+        },
+        {
+            degree: "Self-Taught & Bootcamps",
+            institution: "Online Learning Platforms",
+            year: "2022 - Present",
+            description: "Continuously learning web development, UI/UX design, and software engineering principles through extensive online coursework and practical projects."
+        }
+    ],
+    certifications: [
+        {
+            name: "Responsive Web Design Certification",
+            issuer: "freeCodeCamp",
+            year: "2022",
+            url: "https://www.freecodecamp.org/"
+        },
+        {
+            name: "JavaScript Algorithms and Data Structures",
+            issuer: "freeCodeCamp",
+            year: "2023",
+            url: "https://www.freecodecamp.org/"
+        }
+    ],
+    processSteps: [
+        {
+            title: "Discovery & Planning",
+            description: "Understanding your goals, target audience, and project requirements to create a solid foundation.",
+            iconName: "SearchIcon"
+        },
+        {
+            title: "Design & Prototyping",
+            description: "Creating wireframes and high-fidelity designs to visualize the final product before development.",
+            iconName: "DesignIcon"
+        },
+        {
+            title: "Development",
+            description: "Writing clean, efficient, and scalable code to bring the designs to life.",
+            iconName: "CodeIcon"
+        },
+        {
+            title: "Testing & Launch",
+            description: "Rigorous testing across devices and browsers before a smooth deployment to production.",
+            iconName: "LaunchIcon"
+        }
+    ],
+    faqs: [
+        {
+            question: "What is your typical turnaround time?",
+            answer: "For a standard website, it usually takes 2-4 weeks. Complex web applications may take 1-3 months depending on the features required."
+        },
+        {
+            question: "Do you offer post-launch support?",
+            answer: "Yes! All my projects include 30 days of free support. I also offer ongoing maintenance packages."
+        }
+    ],
+    resources: [],
     aiSettings: {
         enabled: true,
         systemInstruction: "You are a friendly, helpful AI assistant for Shariar Arafat's portfolio website. Answer questions about him using the provided context. Keep answers concise and conversational. If you don't know something, be honest.",
