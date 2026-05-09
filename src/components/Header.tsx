@@ -55,6 +55,7 @@ const Header: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMoreOpen, setIsMoreOpen] = useState(false);
     const moreDropdownRef = useRef<HTMLDivElement>(null);
+    const location = useLocation();
 
     const toggleDarkMode = () => setDarkMode(!darkMode);
 
@@ -117,11 +118,19 @@ const Header: React.FC = () => {
                     <nav className="flex items-center justify-between gap-4">
                         {/* Logo */}
                         <div className="flex-shrink-0 mr-8">
-                            <Link to="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
-                                <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
-                                    {initials}
-                                </span>
-                            </Link>
+                            {location.pathname === '/' ? (
+                                <a href="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
+                                        {initials}
+                                    </span>
+                                </a>
+                            ) : (
+                                <Link to="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
+                                        {initials}
+                                    </span>
+                                </Link>
+                            )}
                         </div>
 
                         {/* Desktop nav */}
@@ -141,16 +150,35 @@ const Header: React.FC = () => {
                                     
                                     {isMoreOpen && (
                                         <div className="absolute top-full right-0 mt-4 w-48 bg-white/95 dark:bg-dark-card/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden animate-fade-in py-2">
-                                            {moreLinks.map(link => (
-                                                <Link 
-                                                    key={link.id} 
-                                                    to={link.path}
-                                                    onClick={() => setIsMoreOpen(false)}
-                                                    className="block px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors"
-                                                >
-                                                    {link.label}
-                                                </Link>
-                                            ))}
+                                            {moreLinks.map(link => {
+                                                const isHash = link.path.startsWith('/#');
+                                                const isSamePage = isHash && location.pathname === '/';
+                                                const linkClasses = "block px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary transition-colors";
+                                                
+                                                if (isSamePage) {
+                                                    return (
+                                                        <a 
+                                                            key={link.id} 
+                                                            href={link.path}
+                                                            onClick={() => setIsMoreOpen(false)}
+                                                            className={linkClasses}
+                                                        >
+                                                            {link.label}
+                                                        </a>
+                                                    );
+                                                }
+                                                
+                                                return (
+                                                    <Link 
+                                                        key={link.id} 
+                                                        to={link.path}
+                                                        onClick={() => setIsMoreOpen(false)}
+                                                        className={linkClasses}
+                                                    >
+                                                        {link.label}
+                                                    </Link>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
