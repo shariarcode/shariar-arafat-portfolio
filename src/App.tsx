@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+// Trigger Vercel Build
 import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
