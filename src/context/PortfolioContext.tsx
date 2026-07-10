@@ -91,7 +91,16 @@ const mergeContentData = (saved: Partial<PortfolioData>, defaults: PortfolioData
         careerObjective: s.careerObjective || defaults.careerObjective,
         contactInfo: { ...defaults.contactInfo, ...(s.contactInfo || {}) },
         socialLinks: { ...defaults.socialLinks, ...(s.socialLinks || {}) },
-        sections: Array.isArray(s.sections) ? s.sections : defaultSections,
+        sections: (() => {
+            const savedSections = Array.isArray(s.sections) ? s.sections : defaultSections;
+            const mergedSections = [...savedSections];
+            defaultSections.forEach(defSec => {
+                if (!mergedSections.some(sec => sec.id === defSec.id)) {
+                    mergedSections.push(defSec);
+                }
+            });
+            return mergedSections;
+        })(),
         footerContent: {
             description: s.footerContent?.description || defaults.footerContent?.description,
             services: Array.isArray(s.footerContent?.services) ? s.footerContent?.services : defaults.footerContent?.services
