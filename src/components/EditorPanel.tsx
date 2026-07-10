@@ -86,6 +86,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     const [guestbookMessages, setGuestbookMessages] = useState<any[]>([]);
     const [loadingGuestbook, setLoadingGuestbook] = useState(false);
     const [enhancingFields, setEnhancingFields] = useState<Record<string, boolean>>({});
+    const [uploadingCertIndex, setUploadingCertIndex] = useState<number | null>(null);
     const { showToast } = useToast();
 
     const handleEnhance = async (fieldId: string, currentText: string, setter: (val: string) => void) => {
@@ -109,6 +110,68 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
             showToast(err.message || 'AI Enhancement failed', 'error');
         } finally {
             setEnhancingFields(prev => ({ ...prev, [fieldId]: false }));
+        }
+    };
+
+    const handleCertImageUpload = async (index: number, file: File) => {
+        if (!file) return;
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            showToast('Please upload a PNG, JPG, or WebP image.', 'error');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('Image must be under 5MB.', 'error');
+            return;
+        }
+
+        setUploadingCertIndex(index);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `cert_${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${fileExt}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('certificates')
+                .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            const { data: urlData } = supabase.storage
+                .from('certificates')
+                .getPublicUrl(fileName);
+
+            const publicUrl = urlData.publicUrl;
+
+            setFormData((prev: any) => {
+                const newCerts = [...(prev.certifications || [])];
+                newCerts[index] = { ...newCerts[index], imageUrl: publicUrl };
+                return { ...prev, certifications: newCerts };
+            });
+            showToast('Certificate image uploaded! 🎉', 'success');
+        } catch (err: any) {
+            console.error('Certificate upload error:', err);
+            showToast(err.message || 'Failed to upload certificate image.', 'error');
+        } finally {
+            setUploadingCertIndex(null);
+        }
+    };
+
+    const handleCertImageDelete = async (index: number, imageUrl: string) => {
+        try {
+            const urlParts = imageUrl.split('/certificates/');
+            if (urlParts.length > 1) {
+                const fileName = urlParts[urlParts.length - 1];
+                await supabase.storage.from('certificates').remove([fileName]);
+            }
+            setFormData((prev: any) => {
+                const newCerts = [...(prev.certifications || [])];
+                newCerts[index] = { ...newCerts[index], imageUrl: '' };
+                return { ...prev, certifications: newCerts };
+            });
+            showToast('Certificate image removed.', 'success');
+        } catch (err: any) {
+            console.error('Certificate delete error:', err);
+            showToast('Failed to remove image.', 'error');
         }
     };
 
@@ -831,7 +894,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                 <div className="space-y-4 pt-4 border-t border-gray-700">
                                     <div className="flex justify-between items-center">
                                         <h4 className="text-xl font-bold text-gray-200">Certifications</h4>
-                                        <button onClick={() => handleAddItem('certifications', { name: "New Certification", issuer: "Issuer", year: "2024", link: "" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Certification</button>
+                                        <button onClick={() => handleAddItem('certifications', { name: "New Certification", issuer: "Issuer", year: "2024", url: "", imageUrl: "" })} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">+ Add Certification</button>
                                     </div>
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                         {(formData.certifications || []).map((item: any, index: number) => (
@@ -840,8 +903,72 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 <FormInput label="Issuer" name="issuer" value={item.issuer} onChange={(e) => handleArrayChange('certifications', index, e)} />
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <FormInput label="Year" name="year" value={item.year} onChange={(e) => handleArrayChange('certifications', index, e)} />
-                                                    <FormInput label="Verification Link" name="link" value={item.link || ''} onChange={(e) => handleArrayChange('certifications', index, e)} />
+                                                    <FormInput label="Verification Link" name="url" value={item.url || ''} onChange={(e) => handleArrayChange('certifications', index, e)} />
                                                 </div>
+
+                                                {/* Certificate Image Upload */}
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-medium text-gray-400">Certificate Image</label>
+                                                    {item.imageUrl ? (
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="relative w-24 h-16 rounded-lg overflow-hidden border border-gray-600 bg-gray-800 flex-shrink-0">
+                                                                <img 
+                                                                    src={item.imageUrl} 
+                                                                    alt={item.name} 
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex flex-col gap-2 flex-1">
+                                                                <span className="text-xs text-green-400 flex items-center gap-1">
+                                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                                    Image uploaded
+                                                                </span>
+                                                                <button 
+                                                                    onClick={() => handleCertImageDelete(index, item.imageUrl)}
+                                                                    className="text-xs text-red-400 hover:text-red-300 transition-colors self-start flex items-center gap-1"
+                                                                >
+                                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                    Remove image
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="relative">
+                                                            <label 
+                                                                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-all text-sm ${
+                                                                    uploadingCertIndex === index 
+                                                                        ? 'border-primary/50 bg-primary/5 text-primary' 
+                                                                        : 'border-gray-600 hover:border-primary/40 hover:bg-gray-800/50 text-gray-400 hover:text-gray-300'
+                                                                }`}
+                                                            >
+                                                                {uploadingCertIndex === index ? (
+                                                                    <>
+                                                                        <LoadingSpinner className="w-4 h-4" />
+                                                                        <span>Uploading...</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                                        <span>Upload Certificate Image</span>
+                                                                        <span className="text-xs text-gray-500">(PNG, JPG, WebP · Max 5MB)</span>
+                                                                    </>
+                                                                )}
+                                                                <input 
+                                                                    type="file" 
+                                                                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                                                                    className="hidden"
+                                                                    disabled={uploadingCertIndex === index}
+                                                                    onChange={(e) => {
+                                                                        const file = e.target.files?.[0];
+                                                                        if (file) handleCertImageUpload(index, file);
+                                                                        e.target.value = '';
+                                                                    }}
+                                                                />
+                                                            </label>
+                                                        </div>
+                                                    )}
+                                                </div>
+
                                                 <button onClick={() => handleDeleteItem('certifications', index)} className="absolute top-3 right-3 text-red-500 hover:text-red-400 p-2 bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110"><TrashIcon/></button>
                                             </div>
                                         ))}

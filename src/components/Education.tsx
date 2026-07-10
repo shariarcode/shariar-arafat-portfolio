@@ -1,11 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { usePortfolio } from '../context/PortfolioContext';
 import { GraduationCapIcon, AwardIcon, ExternalLinkIcon } from './Icons';
 
 const Education: React.FC = () => {
     const { content } = usePortfolio();
     const { education = [], certifications = [] } = content;
+    const [lightboxImage, setLightboxImage] = useState<{ url: string; name: string } | null>(null);
 
     if (education.length === 0 && certifications.length === 0) return null;
 
@@ -112,20 +113,52 @@ const Education: React.FC = () => {
                                         <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-tight">
                                             {cert.name}
                                         </h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 flex-grow">
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 flex-grow">
                                             {cert.issuer}
                                         </p>
-                                        
-                                        {cert.url && cert.url !== '#' && (
-                                            <a 
-                                                href={cert.url} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-secondary transition-colors mt-auto"
+
+                                        {/* Certificate Image Thumbnail */}
+                                        {cert.imageUrl && (
+                                            <button
+                                                onClick={() => setLightboxImage({ url: cert.imageUrl!, name: cert.name })}
+                                                className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mb-4 group/img cursor-pointer"
                                             >
-                                                View Credential <ExternalLinkIcon className="w-4 h-4" />
-                                            </a>
+                                                <img 
+                                                    src={cert.imageUrl} 
+                                                    alt={`${cert.name} certificate`}
+                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105"
+                                                    loading="lazy"
+                                                />
+                                                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                                                    <span className="opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 text-white text-sm font-medium flex items-center gap-2 bg-black/60 px-4 py-2 rounded-full backdrop-blur-sm">
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                                                        View Certificate
+                                                    </span>
+                                                </div>
+                                            </button>
                                         )}
+                                        
+                                        <div className="flex items-center gap-3 mt-auto">
+                                            {cert.imageUrl && (
+                                                <button
+                                                    onClick={() => setLightboxImage({ url: cert.imageUrl!, name: cert.name })}
+                                                    className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:text-primary transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                    View Certificate
+                                                </button>
+                                            )}
+                                            {cert.url && cert.url !== '#' && (
+                                                <a 
+                                                    href={cert.url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-secondary transition-colors"
+                                                >
+                                                    View Credential <ExternalLinkIcon className="w-4 h-4" />
+                                                </a>
+                                            )}
+                                        </div>
                                     </motion.div>
                                 ))}
                             </div>
@@ -133,6 +166,50 @@ const Education: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Certificate Lightbox Modal */}
+            <AnimatePresence>
+                {lightboxImage && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+                        onClick={() => setLightboxImage(null)}
+                    >
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setLightboxImage(null)}
+                            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            aria-label="Close lightbox"
+                        >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {/* Certificate Name */}
+                        <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10">
+                            <h3 className="text-white font-semibold text-lg sm:text-xl bg-black/40 px-4 py-2 rounded-xl backdrop-blur-sm max-w-[60vw] truncate">
+                                {lightboxImage.name}
+                            </h3>
+                        </div>
+
+                        {/* Image */}
+                        <motion.img
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            src={lightboxImage.url}
+                            alt={`${lightboxImage.name} certificate`}
+                            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     );
 };

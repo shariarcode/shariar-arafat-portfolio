@@ -265,13 +265,15 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
             name: "Responsive Web Design Certification",
             issuer: "freeCodeCamp",
             year: "2022",
-            url: "https://www.freecodecamp.org/"
+            url: "https://www.freecodecamp.org/",
+            imageUrl: ""
         },
         {
             name: "JavaScript Algorithms and Data Structures",
             issuer: "freeCodeCamp",
             year: "2023",
-            url: "https://www.freecodecamp.org/"
+            url: "https://www.freecodecamp.org/",
+            imageUrl: ""
         }
     ],
     processSteps: [

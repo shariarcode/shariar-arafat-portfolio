@@ -43,6 +43,7 @@ export interface Certification {
     issuer: string;
     year: string;
     url?: string;
+    imageUrl?: string;
 }
 
 export interface ProcessStep {
