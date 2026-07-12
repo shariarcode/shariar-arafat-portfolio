@@ -3,6 +3,7 @@ import { SunIcon, MoonIcon, MenuIcon, CloseIcon, ChevronDownIcon } from './Icons
 import { usePortfolio } from '../context/PortfolioContext';
 import SearchButton from './SearchButton';
 import LanguageSwitcher from './LanguageSwitcher';
+import gsap from 'gsap';
 
 import { Link, useLocation } from 'react-router-dom';
 
@@ -33,7 +34,7 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
 
     if (isSamePage) {
         return (
-            <a href={href} onClick={onClick} className={baseClasses}>
+            <a href={href} onClick={onClick} className={baseClasses} data-magnetic>
                 {children}
                 {indicator}
             </a>
@@ -41,7 +42,7 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
     }
 
     return (
-        <Link to={href} onClick={onClick} className={baseClasses}>
+        <Link to={href} onClick={onClick} className={baseClasses} data-magnetic>
             {children}
             {indicator}
         </Link>
@@ -57,11 +58,53 @@ const Header: React.FC = () => {
     const moreDropdownRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
 
+    const headerRef = useRef<HTMLElement>(null);
+    const lastScrollY = useRef(0);
+
     const toggleDarkMode = () => setDarkMode(!darkMode);
+
+    const hasSectionContent = (id: string): boolean => {
+        switch (id) {
+            case 'process':
+                return Array.isArray(content.processSteps) && content.processSteps.length > 0;
+            case 'skills':
+                return Array.isArray(content.skillsData) && content.skillsData.length > 0;
+            case 'work':
+                return Array.isArray(content.projectsData) && content.projectsData.length > 0;
+            case 'blog':
+                return Array.isArray(content.blogPosts) && content.blogPosts.length > 0;
+            case 'testimonials':
+                return Array.isArray(content.testimonials) && content.testimonials.length > 0;
+            case 'faq':
+                return Array.isArray(content.faqs) && content.faqs.length > 0;
+            case 'pricing':
+                return Array.isArray(content.pricingPlans) && content.pricingPlans.length > 0;
+            case 'education':
+                return (Array.isArray(content.education) && content.education.length > 0) || 
+                       (Array.isArray(content.certifications) && content.certifications.length > 0);
+            case 'timeline':
+                return Array.isArray(content.timeline) && content.timeline.length > 0;
+            case 'resources':
+                return Array.isArray(content.resources) && content.resources.length > 0;
+            case 'github':
+                return !!content.githubConfig?.username && content.githubConfig.username !== '#';
+            case 'about':
+                return true;
+            default:
+                return true;
+        }
+    };
 
     const visibleNavLinks = [
         ...(content.sections || [])
-            .filter(section => section.visible && section.id !== 'hero' && section.id !== 'stats' && section.id !== 'expertise' && section.id !== 'analytics')
+            .filter(section => 
+                section.visible && 
+                section.id !== 'hero' && 
+                section.id !== 'stats' && 
+                section.id !== 'expertise' && 
+                section.id !== 'analytics' &&
+                hasSectionContent(section.id)
+            )
             .map(section => ({
                 id: section.id,
                 label: section.navLabel,
@@ -81,8 +124,21 @@ const Header: React.FC = () => {
     const moreLinks = visibleNavLinks.slice(mainLinksLimit);
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 10);
-        window.addEventListener('scroll', handleScroll);
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            setIsScrolled(currentScrollY > 10);
+            
+            if (currentScrollY > lastScrollY.current && currentScrollY > 85) {
+                // Scroll down: hide header
+                gsap.to(headerRef.current, { y: '-100%', duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+            } else {
+                // Scroll up: show header
+                gsap.to(headerRef.current, { y: '0%', duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
+            }
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
         
         const handleClickOutside = (event: MouseEvent) => {
             if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
@@ -109,15 +165,18 @@ const Header: React.FC = () => {
 
     return (
         <>
-            <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-                isScrolled
-                    ? 'bg-white/70 dark:bg-dark-bg/70 backdrop-blur-md py-3 border-b border-gray-200/30 dark:border-gray-800/30 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.1)]'
-                    : 'bg-transparent py-5'
-            }`}>
+            <header 
+                ref={headerRef}
+                className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+                    isScrolled
+                        ? 'bg-white/70 dark:bg-dark-bg/70 backdrop-blur-md py-3 border-b border-gray-200/30 dark:border-gray-800/30 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.1)]'
+                        : 'bg-transparent py-5'
+                }`}
+            >
                 <div className="container mx-auto px-6 lg:px-12">
                     <nav className="flex items-center justify-between gap-4">
                         {/* Logo */}
-                        <div className="flex-shrink-0 mr-8">
+                        <div className="flex-shrink-0 mr-8" data-magnetic>
                             {location.pathname === '/' ? (
                                 <a href="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
                                     <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
@@ -144,6 +203,7 @@ const Header: React.FC = () => {
                                     <button 
                                         onClick={() => setIsMoreOpen(!isMoreOpen)}
                                         className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isMoreOpen ? 'text-primary' : 'text-gray-600 dark:text-gray-300 hover:text-primary'}`}
+                                        data-magnetic
                                     >
                                         More <ChevronDownIcon className={`transition-transform duration-300 ${isMoreOpen ? 'rotate-180' : ''}`} />
                                     </button>
@@ -162,6 +222,7 @@ const Header: React.FC = () => {
                                                             href={link.path}
                                                             onClick={() => setIsMoreOpen(false)}
                                                             className={linkClasses}
+                                                            data-magnetic
                                                         >
                                                             {link.label}
                                                         </a>
@@ -174,6 +235,7 @@ const Header: React.FC = () => {
                                                         to={link.path}
                                                         onClick={() => setIsMoreOpen(false)}
                                                         className={linkClasses}
+                                                        data-magnetic
                                                     >
                                                         {link.label}
                                                     </Link>
@@ -187,8 +249,10 @@ const Header: React.FC = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-x-2 sm:gap-x-4">
-                            <div className="hidden sm:flex items-center gap-2">
+                            <div className="hidden sm:flex items-center gap-2" data-magnetic>
                                 <SearchButton />
+                            </div>
+                            <div className="hidden sm:flex items-center gap-2" data-magnetic>
                                 <LanguageSwitcher />
                             </div>
                             
@@ -198,6 +262,7 @@ const Header: React.FC = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-primary via-purple-600 to-secondary hover:shadow-[0_0_20px_rgba(111,66,193,0.4)] transition-all active:scale-95"
+                                    data-magnetic
                                 >
                                     {t.nav.resume}
                                 </a>
@@ -208,6 +273,7 @@ const Header: React.FC = () => {
                                     onClick={toggleDarkMode}
                                     className="p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:rotate-12"
                                     aria-label="Toggle theme"
+                                    data-magnetic
                                 >
                                     {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
                                 </button>
@@ -215,6 +281,7 @@ const Header: React.FC = () => {
                                     onClick={handleMenuToggle}
                                     className="lg:hidden p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                                     aria-label="Toggle menu"
+                                    data-magnetic
                                 >
                                     {isMenuOpen ? <CloseIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
                                 </button>
@@ -223,6 +290,7 @@ const Header: React.FC = () => {
                     </nav>
                 </div>
             </header>
+
 
             {/* Mobile Menu Overlay */}
             <div

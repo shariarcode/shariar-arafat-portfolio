@@ -1,27 +1,20 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { ArrowRightIcon, CodeIcon } from './Icons';
 import { ICON_OPTIONS } from '../constants';
-import FadeIn from './FadeIn';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// ─── Wave Divider (points upward into the Work section) ──────────
-const WaveTop: React.FC<{ fill: string }> = ({ fill }) => (
-    <div className="absolute top-0 left-0 w-full overflow-hidden leading-none" style={{ height: '60px' }}>
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-full">
-            <path d="M0,60 C360,0 1080,60 1440,10 L1440,0 L0,0 Z" fill={fill} />
-        </svg>
-    </div>
-);
+gsap.registerPlugin(ScrollTrigger);
 
-// ─── 3D Tilt Card ─────────────────────────────────────────────────
-interface TiltCardProps {
+// ─── Upgraded V2 Tilt Project Card ─────────────────────────────────
+interface ProjectCardProps {
     project: any;
 }
 
-const TiltCard: React.FC<TiltCardProps> = ({ project }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    const glareRef = useRef<HTMLDivElement>(null);
+    const imageRef = useRef<HTMLImageElement>(null);
     const projectSlug = project.title.toLowerCase().replace(/\s+/g, '-');
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -30,28 +23,52 @@ const TiltCard: React.FC<TiltCardProps> = ({ project }) => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+
+        // Mouse tracking glow position variables
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+
+        // Compute 3D rotation angles
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -8;
-        const rotateY = ((x - centerX) / centerX) * 8;
+        const rotateX = ((y - centerY) / centerY) * -6;
+        const rotateY = ((x - centerX) / centerX) * 6;
 
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(4px)`;
-        card.style.boxShadow = `${-rotateY * 2}px ${rotateX * 2}px 40px rgba(111,66,193,0.25)`;
+        gsap.to(card, {
+            transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(6px)`,
+            boxShadow: `${-rotateY * 2}px ${rotateX * 2}px 35px rgba(111, 66, 193, 0.22)`,
+            duration: 0.3,
+            ease: 'power2.out',
+            overwrite: 'auto'
+        });
 
-        if (glareRef.current) {
-            const glareX = (x / rect.width) * 100;
-            const glareY = (y / rect.height) * 100;
-            glareRef.current.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.12) 0%, transparent 60%)`;
-            glareRef.current.style.opacity = '1';
+        if (imageRef.current) {
+            gsap.to(imageRef.current, {
+                scale: 1.08,
+                duration: 0.4,
+                overwrite: 'auto'
+            });
         }
     }, []);
 
     const handleMouseLeave = useCallback(() => {
         const card = cardRef.current;
         if (!card) return;
-        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
-        card.style.boxShadow = '';
-        if (glareRef.current) glareRef.current.style.opacity = '0';
+        gsap.to(card, {
+            transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)',
+            boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)',
+            duration: 0.5,
+            ease: 'power2.out',
+            overwrite: 'auto'
+        });
+
+        if (imageRef.current) {
+            gsap.to(imageRef.current, {
+                scale: 1.0,
+                duration: 0.5,
+                overwrite: 'auto'
+            });
+        }
     }, []);
 
     return (
@@ -59,43 +76,50 @@ const TiltCard: React.FC<TiltCardProps> = ({ project }) => {
             ref={cardRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="bg-dark-card bg-opacity-70 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700 flex flex-col md:flex-row relative"
-            style={{ transition: 'transform 0.1s ease, box-shadow 0.1s ease' }}
+            className="bg-dark-card/85 backdrop-blur-md rounded-3xl overflow-hidden border border-gray-800 flex flex-col w-[310px] sm:w-[480px] lg:w-[600px] shrink-0 relative transition-colors duration-300"
+            style={{ 
+                transformStyle: 'preserve-3d',
+                willChange: 'transform'
+            }}
         >
-            {/* Glare overlay */}
-            <div
-                ref={glareRef}
-                className="absolute inset-0 z-10 pointer-events-none rounded-2xl transition-opacity duration-200"
-                style={{ opacity: 0 }}
-            />
+            {/* Visual glow layer */}
+            <div className="absolute -inset-px rounded-3xl opacity-0 hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-primary/10 via-transparent to-secondary/5 pointer-events-none" />
 
-            {project.imageUrl && (
-                <a href={`/project/${projectSlug}`} className="md:w-1/3 h-48 md:h-auto shrink-0 relative overflow-hidden bg-gray-800 block">
+            {/* Project Image Frame */}
+            <div className="h-44 sm:h-64 lg:h-72 w-full overflow-hidden bg-gray-900 relative">
+                {project.imageUrl ? (
                     <img
+                        ref={imageRef}
                         src={project.imageUrl}
                         alt={project.title}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-dark-card/80 md:block hidden" />
-                </a>
-            )}
-
-            <div className="p-8 flex-1 flex flex-col relative z-20">
-                <div className="flex justify-between items-start mb-2">
-                    <div>
-                        <span className="text-xs font-bold text-primary/90 uppercase tracking-widest mb-2 inline-block">{project.category}</span>
-                        <a href={`/project/${projectSlug}`} className="block">
-                            <h3 className="text-2xl font-bold text-white leading-tight hover:text-primary transition-colors">{project.title}</h3>
-                        </a>
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-purple-900/10 text-primary-light">
+                        <CodeIcon className="w-16 h-16 opacity-30" />
                     </div>
-                    <div className="flex gap-2">
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent opacity-80" />
+                <span className="absolute top-4 left-4 bg-primary/25 border border-primary/40 backdrop-blur-md text-primary-light text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
+                    {project.category}
+                </span>
+            </div>
+
+            {/* Description / Content Box */}
+            <div className="p-6 sm:p-8 flex flex-col flex-1 relative z-10" style={{ transform: 'translateZ(15px)' }}>
+                <div className="flex justify-between items-start gap-4 mb-4">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors duration-300 leading-tight">
+                        {project.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
                         <a
                             href={`/project/${projectSlug}`}
-                            className="shrink-0 flex items-center justify-center p-2 rounded-full bg-primary/20 hover:bg-primary text-primary hover:text-white transition-all transform hover:scale-110 border border-primary/30"
+                            className="w-9 h-9 rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 flex items-center justify-center transition-all duration-300"
                             title="View Details"
+                            data-magnetic
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
@@ -104,9 +128,10 @@ const TiltCard: React.FC<TiltCardProps> = ({ project }) => {
                                 href={project.liveUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="shrink-0 flex items-center justify-center p-2 rounded-full bg-primary/20 hover:bg-primary text-primary hover:text-white transition-all transform hover:scale-110 hover:rotate-12 border border-primary/30"
+                                className="w-9 h-9 rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 flex items-center justify-center transition-all duration-300"
+                                data-magnetic
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
                             </a>
@@ -114,15 +139,18 @@ const TiltCard: React.FC<TiltCardProps> = ({ project }) => {
                     </div>
                 </div>
 
-                <p className="text-gray-300 mb-6 line-clamp-3">{project.description}</p>
+                <p className="text-sm sm:text-base text-gray-300 mb-6 leading-relaxed flex-1 line-clamp-3">
+                    {project.description}
+                </p>
 
-                <div className="flex flex-wrap gap-4 mt-auto">
+                {/* Sub-services / tags */}
+                <div className="flex flex-wrap gap-2.5 mt-auto">
                     {project.services && project.services.map((service: any, idx: number) => {
                         const IconComponent = ICON_OPTIONS[service.iconName as keyof typeof ICON_OPTIONS] || CodeIcon;
                         return (
-                            <div key={idx} className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700/50">
-                                <div className="text-primary"><IconComponent /></div>
-                                <span className="text-xs font-medium text-gray-200">{service.name}</span>
+                            <div key={idx} className="flex items-center gap-1.5 bg-gray-800/40 px-3 py-1 rounded-full border border-gray-700/50">
+                                <div className="text-primary text-xs"><IconComponent /></div>
+                                <span className="text-[10px] font-bold text-gray-200 uppercase tracking-wider">{service.name}</span>
                             </div>
                         );
                     })}
@@ -132,99 +160,165 @@ const TiltCard: React.FC<TiltCardProps> = ({ project }) => {
     );
 };
 
-// ─── Main Work Section ────────────────────────────────────────────
+// ─── Main Projects Showcase Section ──────────────────────────────
 const Work: React.FC = () => {
     const { content } = usePortfolio();
     const [activeFilter, setActiveFilter] = useState('All');
+    const [isScrollable, setIsScrollable] = useState(false);
+
     const categories = ['All', ...Array.from(new Set(content.projectsData.map(p => p.category)))];
     const filteredProjects = activeFilter === 'All'
         ? content.projectsData
         : content.projectsData.filter(p => p.category === activeFilter);
 
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const checkScrollable = () => {
+            const width = window.innerWidth;
+            let cardWidth = 310;
+            let gap = 32;
+            let padding = 48;
+
+            if (width >= 1024) {
+                cardWidth = 600;
+                gap = 48;
+                padding = 192;
+            } else if (width >= 640) {
+                cardWidth = 480;
+            }
+
+            const totalWidth = filteredProjects.length * cardWidth + Math.max(0, filteredProjects.length - 1) * gap + padding;
+            setIsScrollable(totalWidth > width);
+        };
+
+        checkScrollable();
+        window.addEventListener('resize', checkScrollable);
+
+        const isMobile = window.innerWidth < 1024;
+        let cardWidth = 310;
+        let gap = 32;
+        let padding = 48;
+
+        if (window.innerWidth >= 1024) {
+            cardWidth = 600;
+            gap = 48;
+            padding = 192;
+        } else if (window.innerWidth >= 640) {
+            cardWidth = 480;
+        }
+
+        const totalWidth = filteredProjects.length * cardWidth + Math.max(0, filteredProjects.length - 1) * gap + padding;
+        const scrollDistance = totalWidth - window.innerWidth;
+
+        let pin: any;
+        if (!isMobile && scrollDistance > 0) {
+            pin = gsap.fromTo(scrollRef.current,
+                { x: 0 },
+                {
+                    x: -scrollDistance - 100,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: triggerRef.current,
+                        pin: true,
+                        scrub: 1.2,
+                        start: 'top top',
+                        end: () => `+=${scrollDistance}`,
+                        invalidateOnRefresh: true,
+                    }
+                }
+            );
+        }
+
+        return () => {
+            window.removeEventListener('resize', checkScrollable);
+            if (pin) pin.kill();
+            ScrollTrigger.getAll().forEach(t => {
+                if (t.trigger === triggerRef.current) t.kill();
+            });
+        };
+    }, [filteredProjects]);
+
     return (
-        <section id="work" className="py-24 bg-gray-900 text-white relative scroll-mt-20 overflow-hidden">
-            {/* Wave divider at top */}
-            <WaveTop fill="rgb(249 250 251)" />
-            <div className="dark:hidden"><WaveTop fill="rgb(249 250 251)" /></div>
-            <div className="hidden dark:block absolute top-0 left-0 w-full overflow-hidden leading-none" style={{ height: '60px' }}>
-                <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-full">
-                    <path d="M0,60 C360,0 1080,60 1440,10 L1440,0 L0,0 Z" fill="rgb(31 41 55)" />
+        <section ref={triggerRef} id="work" className="relative bg-gray-950 text-white scroll-mt-20 overflow-hidden">
+            {/* Diagonal Premium Top Divider */}
+            <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-10" style={{ height: '40px' }}>
+                <svg viewBox="0 0 1440 40" preserveAspectRatio="none" className="w-full h-full">
+                    <path d="M0,0 L1440,30 L1440,0 Z" fill="white" className="dark:hidden" />
+                    <path d="M0,0 L1440,30 L1440,0 Z" fill="#111827" className="hidden dark:block" />
                 </svg>
             </div>
 
-            {/* Background dot grid */}
-            <div className="absolute inset-0 -z-10 h-full w-full bg-dark-bg bg-[radial-gradient(#3a3a4a_1px,transparent_1px)] [background-size:18px_18px]" />
-            {/* Ambient glow */}
-            <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
+            {/* Ambient Lighting & Particles */}
+            <div className="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#3a3a4a_0.75px,transparent_0.75px)] [background-size:24px_24px] opacity-15" />
+            <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="container mx-auto px-6 relative z-10 pt-8">
-                <FadeIn direction="up">
-                    <div className="text-center mb-12">
-                        <span className="text-primary font-semibold text-sm uppercase tracking-widest">My Projects</span>
-                        <h2 className="text-4xl font-bold mt-2">{content.sectionTitles?.work || "Bringing Ideas to Life"}</h2>
-                        <p className="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">
-                            I create digital experiences that combine creativity with functionality.
+            {/* Content Container */}
+            <div className="lg:min-h-screen flex flex-col justify-center py-20 lg:py-0">
+                {/* Section Header */}
+                <div className="container mx-auto px-6 pt-12 lg:pt-0 max-w-7xl relative z-20">
+                    <div className={`text-center mb-10 lg:mb-6 ${isScrollable ? 'lg:text-left' : 'lg:text-center'}`}>
+                        <span className="text-primary font-bold text-xs uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">Portfolio</span>
+                        <h2 className="text-3xl md:text-5xl font-black mt-3 tracking-tight">
+                            {content.sectionTitles?.work || "Bringing Ideas to Life"}
+                        </h2>
+                        <p className={`mt-4 text-base text-gray-400 max-w-xl font-medium ${isScrollable ? 'lg:mx-0' : 'lg:mx-auto'}`}>
+                            A curated selection of client projects, community events, and digital creations.
                         </p>
                     </div>
-                </FadeIn>
 
-                {/* Filter tabs */}
-                <FadeIn direction="up" delay={0.1}>
-                    <div className="flex flex-wrap justify-center gap-3 mb-10">
+                    {/* Filter categories pills */}
+                    <div className={`flex flex-wrap justify-center gap-3 mb-8 ${isScrollable ? 'lg:justify-start' : 'lg:justify-center'}`}>
                         {categories.map((category, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setActiveFilter(category)}
-                                className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                                className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
                                     activeFilter === category
-                                        ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/30'
-                                        : 'bg-gray-800/80 backdrop-blur-sm text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'
+                                        ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25'
+                                        : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800'
                                 }`}
+                                data-magnetic
                             >
                                 {category}
                             </button>
                         ))}
                     </div>
-                </FadeIn>
+                </div>
 
-                {/* Project cards with 3D tilt */}
-                <motion.div layout className="max-w-4xl mx-auto space-y-8">
-                    <AnimatePresence>
-                        {filteredProjects.map((project) => (
-                            <motion.div
-                                layout
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                                transition={{ duration: 0.35 }}
-                                key={project.title}
-                            >
-                                <TiltCard project={project} />
-                            </motion.div>
+                {/* Horizontal Scroll Track Wrapper */}
+                <div className="w-full relative overflow-x-auto lg:overflow-x-hidden py-4 cursor-grab active:cursor-grabbing custom-scrollbar">
+                    <div
+                        ref={scrollRef}
+                        className={`flex flex-row gap-8 lg:gap-12 px-6 lg:px-24 ${
+                            isScrollable ? 'w-max justify-start' : 'w-full justify-center'
+                        }`}
+                    >
+                        {filteredProjects.map((project, index) => (
+                            <ProjectCard key={index} project={project} />
                         ))}
-                    </AnimatePresence>
-                </motion.div>
-
-                <FadeIn direction="up" delay={0.3}>
-                    <div className="text-center mt-14">
-                        <a
-                            href="#contact"
-                            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary to-purple-600 text-white font-semibold rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300"
-                        >
-                            Discuss Your Project <ArrowRightIcon />
-                        </a>
                     </div>
-                </FadeIn>
+                </div>
+
+                {/* Bottom Call-to-action */}
+                <div className={`container mx-auto px-6 mt-8 lg:mt-6 text-center relative z-20 max-w-7xl ${isScrollable ? 'lg:text-left' : 'lg:text-center'}`}>
+                    <a
+                        href="#contact"
+                        className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-gradient-to-r from-primary to-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-primary/25 hover:shadow-primary/45 transition-all duration-300"
+                        data-magnetic
+                    >
+                        Start a Project <ArrowRightIcon />
+                    </a>
+                </div>
             </div>
 
-            {/* Wave divider at bottom */}
-            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none" style={{ height: '60px' }}>
-                <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-full">
-                    <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="rgb(248 250 252)" />
-                </svg>
-                <svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-full hidden dark:block absolute inset-0">
-                    <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="rgb(17 24 39)" />
+            {/* Bottom visual divider */}
+            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10" style={{ height: '40px' }}>
+                <svg viewBox="0 0 1440 40" preserveAspectRatio="none" className="w-full h-full">
+                    <path d="M0,40 L1440,0 L1440,40 Z" fill="white" className="dark:hidden" />
+                    <path d="M0,40 L1440,0 L1440,40 Z" fill="#111827" className="hidden dark:block" />
                 </svg>
             </div>
         </section>

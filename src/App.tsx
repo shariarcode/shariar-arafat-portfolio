@@ -49,6 +49,9 @@ import { removeJsonLd, setSeoMeta, setJsonLd } from './lib/seo';
 import { usePortfolio } from './context/PortfolioContext';
 import { ToastProvider, useToast } from './components/Toast';
 
+import { SmoothScroll } from './components/SmoothScroll';
+import ScrollTrigger from 'gsap/ScrollTrigger';
+
 const AppInner: React.FC = () => {
     const { showToast } = useToast();
     const { 
@@ -71,6 +74,10 @@ const AppInner: React.FC = () => {
     const isProjectRoute = currentPath.startsWith('/project/');
     const isCustomPageRoute = currentPath.startsWith('/p/');
     const routeSlug = isBlogRoute || isProjectRoute || isCustomPageRoute ? currentPath.split('/').pop()?.replace(/\/+$/, '') : '';
+
+    useEffect(() => {
+        ScrollTrigger.refresh();
+    }, [location.pathname, content]);
 
     useEffect(() => {
         const canonicalUrl = `${window.location.origin}${currentPath}`;
@@ -272,8 +279,11 @@ const AppInner: React.FC = () => {
 
 const App: React.FC = () => (
     <ToastProvider>
-        <AppInner />
+        <SmoothScroll>
+            <AppInner />
+        </SmoothScroll>
     </ToastProvider>
 );
+
 
 export default App;

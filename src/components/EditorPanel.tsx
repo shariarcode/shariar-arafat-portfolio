@@ -89,6 +89,20 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
     const [uploadingCertIndex, setUploadingCertIndex] = useState<number | null>(null);
     const { showToast } = useToast();
 
+    // V2.0 Layout, Pagination, Search, and Validations State
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+    const [inboxSearch, setInboxSearch] = useState('');
+    const [inboxSort, setInboxSort] = useState<'asc' | 'desc'>('desc');
+    const [inboxPage, setInboxPage] = useState(1);
+    const inboxItemsPerPage = 5;
+
+    const [guestbookSearch, setGuestbookSearch] = useState('');
+    const [guestbookSort, setGuestbookSort] = useState<'asc' | 'desc'>('desc');
+    const [guestbookPage, setGuestbookPage] = useState(1);
+    const guestbookItemsPerPage = 5;
+
     const handleEnhance = async (fieldId: string, currentText: string, setter: (val: string) => void) => {
         if (!currentText.trim() || enhancingFields[fieldId]) return;
 
@@ -269,7 +283,137 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
         setFormData((prev: any) => ({ ...prev, [arrayName]: (prev as any)[arrayName].filter((_: any, i: number) => i !== index) }));
     };
 
+    // Filtered Inbox Messages (V2 Table Search/Sort/Pagination)
+    const processedInboxMessages = React.useMemo(() => {
+        let items = [...inboxMessages];
+        if (inboxSearch.trim()) {
+            const query = inboxSearch.toLowerCase();
+            items = items.filter(m => 
+                (m.name || '').toLowerCase().includes(query) ||
+                (m.email || '').toLowerCase().includes(query) ||
+                (m.subject || '').toLowerCase().includes(query) ||
+                (m.message || '').toLowerCase().includes(query)
+            );
+        }
+        items.sort((a, b) => {
+            const dateA = new Date(a.created_at).getTime();
+            const dateB = new Date(b.created_at).getTime();
+            return inboxSort === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+        return items;
+    }, [inboxMessages, inboxSearch, inboxSort]);
+
+    const paginatedInbox = React.useMemo(() => {
+        const start = (inboxPage - 1) * inboxItemsPerPage;
+        return processedInboxMessages.slice(start, start + inboxItemsPerPage);
+    }, [processedInboxMessages, inboxPage]);
+
+    const totalInboxPages = Math.max(1, Math.ceil(processedInboxMessages.length / inboxItemsPerPage));
+
+    React.useEffect(() => {
+        setInboxPage(1);
+    }, [inboxSearch, inboxSort]);
+
+    // Filtered Guestbook Messages (V2 Table Search/Sort/Pagination)
+    const processedGuestbookMessages = React.useMemo(() => {
+        let items = [...guestbookMessages];
+        if (guestbookSearch.trim()) {
+            const query = guestbookSearch.toLowerCase();
+            items = items.filter(m => 
+                (m.name || '').toLowerCase().includes(query) ||
+                (m.message || '').toLowerCase().includes(query)
+            );
+        }
+        items.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            return guestbookSort === 'desc' ? dateB - dateA : dateA - dateB;
+        });
+        return items;
+    }, [guestbookMessages, guestbookSearch, guestbookSort]);
+
+    const paginatedGuestbook = React.useMemo(() => {
+        const start = (guestbookPage - 1) * guestbookItemsPerPage;
+        return processedGuestbookMessages.slice(start, start + guestbookItemsPerPage);
+    }, [processedGuestbookMessages, guestbookPage]);
+
+    const totalGuestbookPages = Math.max(1, Math.ceil(processedGuestbookMessages.length / guestbookItemsPerPage));
+
+    React.useEffect(() => {
+        setGuestbookPage(1);
+    }, [guestbookSearch, guestbookSort]);
+
     const handleSave = () => {
+        // Client-side Validation Checks
+        const newErrors: Record<string, string> = {};
+        
+        if (formData.contactInfo?.email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.contactInfo.email)) {
+                newErrors['contactInfo.email'] = 'Please enter a valid email address';
+            }
+        }
+
+        const isValidUrl = (url: string) => {
+            if (!url) return true;
+            if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) return true;
+            try {
+                new URL(url);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        };
+
+        if (formData.resumeUrl && !isValidUrl(formData.resumeUrl)) {
+            newErrors['resumeUrl'] = 'Please enter a valid URL or local asset path';
+        }
+        if (formData.bookingUrl && !isValidUrl(formData.bookingUrl)) {
+            newErrors['bookingUrl'] = 'Please enter a valid URL';
+        }
+        if (formData.seoConfig?.ogImage && !isValidUrl(formData.seoConfig.ogImage)) {
+            newErrors['seoConfig.ogImage'] = 'Please enter a valid URL';
+        }
+        if (formData.seoConfig?.canonicalUrl && !isValidUrl(formData.seoConfig.canonicalUrl)) {
+            newErrors['seoConfig.canonicalUrl'] = 'Please enter a valid URL';
+        }
+
+        if (Array.isArray(formData.stats)) {
+            formData.stats.forEach((stat: any, idx: number) => {
+                if (stat.endValue !== undefined && stat.endValue !== null && stat.endValue !== '') {
+                    if (isNaN(Number(stat.endValue))) {
+                        newErrors[`stats.${idx}.endValue`] = 'End value must be a number';
+                    }
+                }
+            });
+        }
+
+        if (Array.isArray(formData.testimonials)) {
+            formData.testimonials.forEach((t: any, idx: number) => {
+                if (t.rating !== undefined && t.rating !== null && t.rating !== '') {
+                    const ratingNum = Number(t.rating);
+                    if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+                        newErrors[`testimonials.${idx}.rating`] = 'Rating must be a number between 1 and 5';
+                    }
+                }
+            });
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setFormErrors(newErrors);
+            showToast('Please fix the validation errors before saving.', 'warning');
+            
+            // Auto-navigate to correct tab
+            if (newErrors['contactInfo.email']) setActiveTab('contact');
+            else if (newErrors['resumeUrl'] || newErrors['bookingUrl']) setActiveTab('home');
+            else if (newErrors['seoConfig.ogImage'] || newErrors['seoConfig.canonicalUrl']) setActiveTab('seo');
+            else if (Object.keys(newErrors).some(k => k.startsWith('stats.'))) setActiveTab('stats');
+            else if (Object.keys(newErrors).some(k => k.startsWith('testimonials.'))) setActiveTab('testimonials');
+            return;
+        }
+
+        setFormErrors({});
+
         // Transform back the string arrays before saving
         const processedData = {
             ...formData,
@@ -369,31 +513,71 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99] flex items-center justify-center p-0 sm:p-4 lg:p-8">
-            <div className="w-full h-full lg:max-w-7xl bg-dark-bg shadow-2xl z-[100] sm:rounded-2xl flex flex-col overflow-hidden border-0 sm:border border-gray-700">
+            <div className="w-full h-full lg:max-w-7xl bg-zinc-950 text-zinc-100 shadow-2xl z-[100] sm:rounded-2xl flex flex-col overflow-hidden border-0 sm:border border-zinc-850">
                 {/* Header */}
-                <div className="p-4 sm:p-6 flex justify-between items-center border-b border-gray-700 bg-gray-900">
-                    <h2 className="text-xl sm:text-2xl font-bold text-white truncate mr-4">Full CMS Dashboard</h2>
-                    <button onClick={onClose} className="p-2 rounded-full text-gray-300 hover:bg-gray-700 transition-colors bg-gray-800 min-w-[44px] min-h-[44px] flex items-center justify-center"><CloseIcon /></button>
+                <div className="p-4 sm:p-6 flex justify-between items-center border-b border-zinc-850 bg-zinc-900/60 backdrop-blur-md">
+                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate mr-4">Full CMS Dashboard</h2>
+                    <button onClick={onClose} className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors bg-zinc-900 border border-zinc-800 min-w-[44px] min-h-[44px] flex items-center justify-center"><CloseIcon /></button>
                 </div>
                 
-                <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-                    {/* Sidebar Tabs - Scrollable horizontally on mobile, vertically on desktop */}
-                    <div className="flex lg:flex-col lg:w-64 bg-gray-900 border-b lg:border-b-0 lg:border-r border-gray-700 p-2 sm:p-4 gap-4 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth">
+                <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
+                    {/* Collapsible Mobile Menu Header (hidden on desktop) */}
+                    <div className="lg:hidden w-full bg-zinc-900 border-b border-zinc-800 p-3.5 flex flex-col gap-2 z-[98]">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Active Section</span>
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 rounded-xl text-xs font-bold transition-all text-white select-none active:scale-95"
+                            >
+                                <span>{tabGroups.flatMap(g => g.tabs).find(t => t.id === activeTab)?.label || 'Select Section'}</span>
+                                <svg xmlns="http://www.w3.org/2500/svg" className={`h-4 w-4 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
                         
-                        {/* Tab Search - Only on Desktop for now to save space on mobile */}
-                        <div className="hidden lg:block px-2 mb-2">
+                        {isMobileMenuOpen && (
+                            <div className="mt-3 bg-zinc-950 border border-zinc-800 rounded-2xl max-h-[300px] overflow-y-auto p-2.5 shadow-2xl divide-y divide-zinc-900/50 animate-fade-in">
+                                {tabGroups.map((group) => (
+                                    <div key={group.group} className="py-2.5 first:pt-1 last:pb-1">
+                                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-3 mb-1.5">{group.group}</div>
+                                        <div className="grid grid-cols-2 gap-1 px-1">
+                                            {group.tabs.map(tab => (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => {
+                                                        setActiveTab(tab.id as any);
+                                                        setIsMobileMenuOpen(false);
+                                                    }}
+                                                    className={`px-3 py-2 text-xs rounded-xl text-left font-bold transition-all truncate ${activeTab === tab.id ? 'bg-primary text-white' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'}`}
+                                                >
+                                                    {tab.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Desktop Sidebar Tabs */}
+                    <div className="hidden lg:flex lg:flex-col lg:w-64 bg-zinc-950 border-r border-zinc-855 p-4 gap-4 overflow-y-auto no-scrollbar scroll-smooth">
+                        
+                        {/* Tab Search */}
+                        <div className="px-2 mb-2">
                             <div className="relative">
                                 <input 
                                     type="text" 
                                     placeholder="Search tabs..." 
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder-gray-500"
+                                    className="w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 focus:bg-zinc-950 focus:ring-4 focus:ring-primary/20 focus:border-primary rounded-xl py-2.5 px-3.5 text-xs text-white focus:outline-none placeholder-zinc-500 transition-all font-medium"
                                 />
                                 {searchQuery && (
                                     <button 
                                         onClick={() => setSearchQuery('')}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-base"
                                     >
                                         ×
                                     </button>
@@ -401,32 +585,36 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                             </div>
                         </div>
 
-                        {filteredTabGroups.map((group, groupIndex) => (
-                            <div key={group.group} className="flex flex-row lg:flex-col gap-1 sm:gap-1.5 flex-shrink-0">
-                                <div className="hidden lg:block text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1 px-2 mt-2 first:mt-0">
-                                    {group.group}
+                        <div className="space-y-4">
+                            {filteredTabGroups.map((group) => (
+                                <div key={group.group} className="space-y-1">
+                                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 px-2.5">
+                                        {group.group}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        {group.tabs.map(tab => (
+                                            <button 
+                                                key={tab.id}
+                                                onClick={() => setActiveTab(tab.id as any)}
+                                                className={`w-full px-3.5 py-2.5 text-sm text-left rounded-xl transition-colors font-bold whitespace-nowrap min-h-[40px] flex items-center ${activeTab === tab.id ? 'bg-primary text-white shadow-lg shadow-primary/10' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'}`}
+                                            >
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                                {group.tabs.map(tab => (
-                                    <button 
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id as any)}
-                                        className={`px-4 py-2 sm:py-2.5 text-sm sm:text-base text-center lg:text-left rounded-lg transition-colors font-medium whitespace-nowrap min-h-[44px] sm:min-h-[40px] flex-shrink-0 flex items-center ${activeTab === tab.id ? 'bg-primary text-white shadow-md' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                        ))}
+                            ))}
+                        </div>
 
                         {filteredTabGroups.length === 0 && (
-                            <div className="hidden lg:block text-center py-10 text-gray-600 text-sm italic">
+                            <div className="text-center py-10 text-zinc-600 text-sm italic">
                                 No tabs match "{searchQuery}"
                             </div>
                         )}
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-dark-bg text-white">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-zinc-950 text-zinc-100">
                         
                         {/* DASHBOARD TAB */}
                         {activeTab === 'dashboard' && (
@@ -442,6 +630,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                             <SEOTab 
                                 formData={formData} 
                                 handleNestedChange={handleNestedChange} 
+                                formErrors={formErrors}
                             />
                         )}
                         
@@ -621,6 +810,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 placeholder="Paste a direct PDF link here..." 
                                                 onEnhance={() => handleEnhance('resumeUrl', formData.resumeUrl, (val) => setFormData((prev: any) => ({ ...prev, resumeUrl: val })))}
                                                 isEnhancing={enhancingFields['resumeUrl']}
+                                                error={formErrors['resumeUrl']}
                                             />
                                             <div className="mt-3 p-3 sm:p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg">
                                                 <p className="text-xs sm:text-sm text-blue-300 font-semibold mb-2">📄 How to get your PDF link:</p>
@@ -1024,12 +1214,15 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 <div className="relative">
                                                     <label className="block text-sm font-medium text-gray-400 mb-1">Number</label>
                                                     <input 
-                                                        type="number" 
+                                                        type="text" 
                                                         name="endValue" 
                                                         value={stat.endValue} 
                                                         onChange={(e) => handleArrayChange('stats', index, e)} 
-                                                        className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary text-sm sm:text-base min-h-[44px]"
+                                                        className={`w-full px-3.5 py-2.5 bg-zinc-900 border ${formErrors[`stats.${index}.endValue`] ? 'border-red-500 focus:ring-red-500/20' : 'border-zinc-800 focus:ring-primary/20 focus:border-primary'} rounded-xl text-white focus:outline-none focus:ring-4 transition-all text-sm min-h-[44px]`}
                                                     />
+                                                    {formErrors[`stats.${index}.endValue`] && (
+                                                        <span className="block text-xs font-semibold text-red-400 mt-1">{formErrors[`stats.${index}.endValue`]}</span>
+                                                    )}
                                                 </div>
                                                 <div className="relative">
                                                     <label className="block text-sm font-medium text-gray-400 mb-1">Suffix</label>
@@ -1649,7 +1842,16 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                                 />
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-400 mb-1">Rating (1-5)</label>
-                                                    <input type="number" min={1} max={5} name="rating" value={testimonial.rating || 5} onChange={(e) => handleArrayChange('testimonials', index, e)} className="w-full px-3 py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all" />
+                                                    <input 
+                                                        type="text" 
+                                                        name="rating" 
+                                                        value={testimonial.rating || 5} 
+                                                        onChange={(e) => handleArrayChange('testimonials', index, e)} 
+                                                        className={`w-full px-3.5 py-2.5 bg-zinc-900 border ${formErrors[`testimonials.${index}.rating`] ? 'border-red-500 focus:ring-red-500/20' : 'border-zinc-800 focus:ring-primary/20 focus:border-primary'} rounded-xl text-white focus:outline-none focus:ring-4 transition-all text-sm min-h-[44px]`}
+                                                    />
+                                                    {formErrors[`testimonials.${index}.rating`] && (
+                                                        <span className="block text-xs font-semibold text-red-400 mt-1">{formErrors[`testimonials.${index}.rating`]}</span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <FormTextarea 
@@ -1685,6 +1887,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             onChange={(e) => handleNestedChange('contactInfo', e)} 
                                             onEnhance={() => handleEnhance('contact-email', formData.contactInfo.email, (val) => setFormData((prev: any) => ({ ...prev, contactInfo: { ...prev.contactInfo, email: val } })))}
                                             isEnhancing={enhancingFields['contact-email']}
+                                            error={formErrors['contactInfo.email']}
                                         />
                                         <FormInput 
                                             label="Phone Number" 
@@ -2048,6 +2251,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                                             placeholder="https://calendly.com/your-username" 
                                             onEnhance={() => handleEnhance('booking-url', formData.bookingUrl, (val) => setFormData((prev: any) => ({ ...prev, bookingUrl: val })))}
                                             isEnhancing={enhancingFields['booking-url']}
+                                            error={formErrors['bookingUrl']}
                                         />
                                         <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
                                             <p className="text-xs text-blue-400">
@@ -2080,32 +2284,106 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                         
                         {/* INBOX TAB */}
                         {activeTab === 'inbox' && (
-                            <div className="space-y-8 animate-fade-in">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-2xl font-bold text-primary">Contact Submissions</h3>
-                                    <button onClick={fetchInbox} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">Refresh</button>
+                            <div className="space-y-6 animate-fade-in text-zinc-100">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+                                    <div>
+                                        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">Contact Submissions</h3>
+                                        <p className="text-xs text-zinc-400 mt-1">Review contact inquiries routed from the website contact forms.</p>
+                                    </div>
+                                    <button 
+                                        onClick={fetchInbox} 
+                                        disabled={loadingInbox}
+                                        className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-bold text-white transition-all select-none active:scale-95 disabled:opacity-50"
+                                    >
+                                        {loadingInbox ? <LoadingSpinner className="w-3.5 h-3.5" /> : '🔄'} Refresh
+                                    </button>
                                 </div>
+
+                                {/* Filters Row */}
+                                <div className="flex flex-col sm:flex-row gap-3.5 items-center justify-between bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800">
+                                    <div className="relative w-full sm:max-w-xs">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search submissions..." 
+                                            value={inboxSearch}
+                                            onChange={(e) => setInboxSearch(e.target.value)}
+                                            className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-750 focus:ring-4 focus:ring-primary/20 focus:border-primary rounded-xl py-2 px-3.5 pl-9 text-xs text-white focus:outline-none placeholder-zinc-500 transition-all font-medium"
+                                        />
+                                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">🔍</span>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                                        <span className="text-xs text-zinc-400 font-medium">Sort Order:</span>
+                                        <button 
+                                            onClick={() => setInboxSort(prev => prev === 'desc' ? 'asc' : 'desc')}
+                                            className="px-3.5 py-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-colors"
+                                        >
+                                            {inboxSort === 'desc' ? 'Newest First' : 'Oldest First'}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 {loadingInbox ? (
-                                    <div className="text-gray-400 text-center py-10">Loading messages...</div>
-                                ) : inboxMessages.length === 0 ? (
-                                    <div className="text-gray-500 text-center py-10 bg-gray-900 rounded-xl border border-gray-700">No messages yet.</div>
-                                ) : (
                                     <div className="space-y-4">
-                                        {inboxMessages.map((msg, i) => (
-                                            <div key={i} className="bg-gray-900 border border-gray-700 p-5 rounded-xl">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-200">{msg.name}</h4>
-                                                        <a href={`mailto:${msg.email}`} className="text-sm text-primary hover:underline">{msg.email}</a>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">{new Date(msg.created_at).toLocaleString()}</span>
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="animate-pulse bg-zinc-900 border border-zinc-800/80 p-5 rounded-2xl space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="h-4 w-32 bg-zinc-850 rounded-md" />
+                                                    <div className="h-3.5 w-24 bg-zinc-850 rounded-md" />
                                                 </div>
-                                                <div className="mt-4 pt-4 border-t border-gray-800">
-                                                    <p className="text-sm font-semibold text-gray-400 mb-1">Subject: {msg.subject}</p>
-                                                    <p className="text-gray-300 whitespace-pre-wrap">{msg.message}</p>
-                                                </div>
+                                                <div className="h-3 w-full bg-zinc-850 rounded-md" />
+                                                <div className="h-3 w-3/4 bg-zinc-850 rounded-md" />
                                             </div>
                                         ))}
+                                    </div>
+                                ) : processedInboxMessages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center text-center py-12 px-6 border border-dashed border-zinc-850 rounded-2xl bg-zinc-900/10">
+                                        <span className="text-3xl mb-3 font-bold">📬</span>
+                                        <h4 className="text-sm font-bold text-white uppercase tracking-wider">{inboxSearch ? "No Search Results" : "Inbox is Empty"}</h4>
+                                        <p className="text-xs text-zinc-500 mt-1 max-w-sm leading-relaxed">{inboxSearch ? `Try tweaking your keywords or clear search to list all messages.` : "You don't have any contact form submissions yet."}</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="space-y-3.5">
+                                            {paginatedInbox.map((msg, i) => (
+                                                <div key={i} className="bg-zinc-900/20 border border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-zinc-700 transition-all duration-200">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/40 pb-3 mb-3.5">
+                                                        <div>
+                                                            <h4 className="font-bold text-white text-sm">{msg.name}</h4>
+                                                            <a href={`mailto:${msg.email}`} className="text-xs text-primary font-semibold hover:underline block sm:inline mt-0.5">{msg.email}</a>
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{new Date(msg.created_at).toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Subject: <span className="text-zinc-200 lowercase font-medium capitalize font-sans">{msg.subject}</span></p>
+                                                        <p className="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed bg-zinc-950/40 p-3 rounded-xl border border-zinc-855">{msg.message}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Pagination Footer */}
+                                        <div className="flex items-center justify-between bg-zinc-900/30 px-4 py-3 rounded-2xl border border-zinc-800 mt-6">
+                                            <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider">
+                                                Showing {Math.min(processedInboxMessages.length, (inboxPage - 1) * inboxItemsPerPage + 1)}-{Math.min(processedInboxMessages.length, inboxPage * inboxItemsPerPage)} of {processedInboxMessages.length}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => setInboxPage(prev => Math.max(1, prev - 1))}
+                                                    disabled={inboxPage === 1}
+                                                    className="px-3.5 py-1.5 bg-zinc-950 hover:bg-zinc-900 disabled:opacity-40 disabled:hover:bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-all select-none active:scale-95"
+                                                >
+                                                    Previous
+                                                </button>
+                                                <button
+                                                    onClick={() => setInboxPage(prev => Math.min(totalInboxPages, prev + 1))}
+                                                    disabled={inboxPage === totalInboxPages}
+                                                    className="px-3.5 py-1.5 bg-zinc-950 hover:bg-zinc-900 disabled:opacity-40 disabled:hover:bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-all select-none active:scale-95"
+                                                >
+                                                    Next
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -2113,37 +2391,109 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                         
                         {/* GUESTBOOK TAB */}
                         {activeTab === 'guestbook' && (
-                            <div className="space-y-8 animate-fade-in">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-2xl font-bold text-primary">Guestbook Entries</h3>
-                                    <button onClick={fetchGuestbook} className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm border border-gray-600">Refresh</button>
+                            <div className="space-y-6 animate-fade-in text-zinc-100">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+                                    <div>
+                                        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">Guestbook Entries</h3>
+                                        <p className="text-xs text-zinc-400 mt-1">Manage public comments left by visitors on your Guestbook board.</p>
+                                    </div>
+                                    <button 
+                                        onClick={fetchGuestbook} 
+                                        disabled={loadingGuestbook}
+                                        className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-bold text-white transition-all select-none active:scale-95 disabled:opacity-50"
+                                    >
+                                        {loadingGuestbook ? <LoadingSpinner className="w-3.5 h-3.5" /> : '🔄'} Refresh
+                                    </button>
                                 </div>
-                                <p className="text-sm text-gray-400 mb-4">
-                                    Manage visitor messages from the guestbook section. These entries are stored locally in the browser.
-                                </p>
+
+                                {/* Filters Row */}
+                                <div className="flex flex-col sm:flex-row gap-3.5 items-center justify-between bg-zinc-900/30 p-4 rounded-2xl border border-zinc-800">
+                                    <div className="relative w-full sm:max-w-xs">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search comments..." 
+                                            value={guestbookSearch}
+                                            onChange={(e) => setGuestbookSearch(e.target.value)}
+                                            className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-750 focus:ring-4 focus:ring-primary/20 focus:border-primary rounded-xl py-2 px-3.5 pl-9 text-xs text-white focus:outline-none placeholder-zinc-500 transition-all font-medium"
+                                        />
+                                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">🔍</span>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                                        <span className="text-xs text-zinc-400 font-medium">Sort Order:</span>
+                                        <button 
+                                            onClick={() => setGuestbookSort(prev => prev === 'desc' ? 'asc' : 'desc')}
+                                            className="px-3.5 py-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-colors"
+                                        >
+                                            {guestbookSort === 'desc' ? 'Newest First' : 'Oldest First'}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 {loadingGuestbook ? (
-                                    <div className="text-gray-400 text-center py-10">Loading...</div>
-                                ) : guestbookMessages.length === 0 ? (
-                                    <div className="text-gray-500 text-center py-10 bg-gray-900 rounded-xl border border-gray-700">No guestbook entries yet.</div>
-                                ) : (
                                     <div className="space-y-4">
-                                        {guestbookMessages.map((msg, i) => (
-                                            <div key={i} className="bg-gray-900 border border-gray-700 p-5 rounded-xl">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-200">{msg.name}</h4>
-                                                        <span className="text-xs text-gray-500">{msg.date}</span>
-                                                    </div>
-                                                    <button 
-                                                        onClick={() => deleteGuestbookEntry(i)} 
-                                                        className="text-red-500 hover:text-red-400 p-2 rounded-full hover:bg-gray-800"
-                                                    >
-                                                        <TrashIcon />
-                                                    </button>
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="animate-pulse bg-zinc-900 border border-zinc-800/80 p-5 rounded-2xl space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="h-4 w-32 bg-zinc-850 rounded-md" />
+                                                    <div className="h-3.5 w-24 bg-zinc-850 rounded-md" />
                                                 </div>
-                                                <p className="text-gray-300 whitespace-pre-wrap">{msg.message}</p>
+                                                <div className="h-3 w-full bg-zinc-850 rounded-md" />
+                                                <div className="h-3 w-3/4 bg-zinc-850 rounded-md" />
                                             </div>
                                         ))}
+                                    </div>
+                                ) : processedGuestbookMessages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center text-center py-12 px-6 border border-dashed border-zinc-855 rounded-2xl bg-zinc-900/10">
+                                        <span className="text-3xl mb-3 font-bold">📖</span>
+                                        <h4 className="text-sm font-bold text-white uppercase tracking-wider">{guestbookSearch ? "No Search Results" : "No Entries Yet"}</h4>
+                                        <p className="text-xs text-zinc-500 mt-1 max-w-sm leading-relaxed">{guestbookSearch ? "Try searching for a different user or phrase." : "Your Guestbook board has no comments yet."}</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="space-y-3.5">
+                                            {paginatedGuestbook.map((msg, i) => (
+                                                <div key={i} className="bg-zinc-900/20 border border-zinc-800 p-5 rounded-2xl shadow-sm hover:border-zinc-700 transition-all duration-200">
+                                                    <div className="flex items-center justify-between border-b border-zinc-800/40 pb-3 mb-3.5">
+                                                        <div>
+                                                            <h4 className="font-bold text-white text-sm">{msg.name}</h4>
+                                                            <span className="text-[10px] text-zinc-500 font-semibold">{msg.date}</span>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => deleteGuestbookEntry(i)} 
+                                                            className="text-red-500 hover:text-red-400 p-2 rounded-xl hover:bg-zinc-800/50 transition-colors border border-transparent hover:border-zinc-850"
+                                                            title="Delete Entry"
+                                                        >
+                                                            <TrashIcon />
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-zinc-300 text-sm whitespace-pre-wrap leading-relaxed bg-zinc-950/40 p-3 rounded-xl border border-zinc-855">{msg.message}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Pagination Footer */}
+                                        <div className="flex items-center justify-between bg-zinc-900/30 px-4 py-3 rounded-2xl border border-zinc-800 mt-6">
+                                            <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider">
+                                                Showing {Math.min(processedGuestbookMessages.length, (guestbookPage - 1) * guestbookItemsPerPage + 1)}-{Math.min(processedGuestbookMessages.length, guestbookPage * guestbookItemsPerPage)} of {processedGuestbookMessages.length}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => setGuestbookPage(prev => Math.max(1, prev - 1))}
+                                                    disabled={guestbookPage === 1}
+                                                    className="px-3.5 py-1.5 bg-zinc-950 hover:bg-zinc-900 disabled:opacity-40 disabled:hover:bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-all select-none active:scale-95"
+                                                >
+                                                    Previous
+                                                </button>
+                                                <button
+                                                    onClick={() => setGuestbookPage(prev => Math.min(totalGuestbookPages, prev + 1))}
+                                                    disabled={guestbookPage === totalGuestbookPages}
+                                                    className="px-3.5 py-1.5 bg-zinc-950 hover:bg-zinc-900 disabled:opacity-40 disabled:hover:bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-all select-none active:scale-95"
+                                                >
+                                                    Next
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -2153,9 +2503,9 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ data, onSave, onClose }) => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 border-t border-gray-700 bg-gray-900 flex justify-end gap-4 mt-auto">
-                    <button onClick={onClose} className="px-6 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
-                    <button onClick={handleSave} className="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-lg hover:bg-primary-dark transition-all transform hover:-translate-y-0.5 active:translate-y-0">Save All Changes</button>
+                <div className="p-5 border-t border-zinc-850 bg-zinc-900/60 backdrop-blur-md flex justify-end gap-4 mt-auto">
+                    <button onClick={onClose} className="px-6 py-2.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-white font-bold rounded-xl transition-all select-none active:scale-95">Cancel</button>
+                    <button onClick={handleSave} className="px-8 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all select-none active:scale-95 transform hover:-translate-y-0.5 active:translate-y-0">Save All Changes</button>
                 </div>
             </div>
         </div>

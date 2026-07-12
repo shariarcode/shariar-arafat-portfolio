@@ -1,42 +1,50 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useInView } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
+import { usePortfolio } from '../context/PortfolioContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface StatsProps {}
 
-import { usePortfolio } from '../context/PortfolioContext';
-
-const StatItem: React.FC<{ endValue: number; label: string; duration?: number; suffix?: string }> = ({ endValue, label, duration = 2, suffix = "+" }) => {
-    const [count, setCount] = useState(0);
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-50px" });
+const StatItem: React.FC<{ endValue: number; label: string; suffix?: string }> = ({ endValue, label, suffix = "+" }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const numberRef = useRef<HTMLSpanElement>(null);
 
     useEffect(() => {
-        if (!isInView) return;
+        const numberEl = numberRef.current;
+        if (!numberEl) return;
 
-        let startTime: number | null = null;
-        const animate = (timestamp: number) => {
-            if (!startTime) startTime = timestamp;
-            const progress = timestamp - startTime;
-            const percentage = Math.min(progress / (duration * 1000), 1);
-            
-            // ease out cubic function
-            const easeOutProgress = 1 - Math.pow(1 - percentage, 3);
-            setCount(Math.floor(easeOutProgress * endValue));
-
-            if (percentage < 1) {
-                requestAnimationFrame(animate);
+        const counter = { value: 0 };
+        const anim = gsap.to(counter, {
+            value: endValue,
+            duration: 1.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: 'top 90%',
+                toggleActions: 'play none none reverse'
+            },
+            onUpdate: () => {
+                numberEl.textContent = String(Math.floor(counter.value));
             }
-        };
+        });
 
-        requestAnimationFrame(animate);
-    }, [isInView, endValue, duration]);
+        return () => {
+            anim.kill();
+        };
+    }, [endValue]);
 
     return (
-        <div ref={ref} className="flex flex-col items-center p-6 bg-white dark:bg-dark-card rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 w-full sm:w-48 transform hover:-translate-y-1 transition-transform duration-300">
+        <div 
+            ref={containerRef} 
+            className="flex flex-col items-center p-6 bg-white dark:bg-dark-card rounded-2xl shadow-lg border border-gray-100/50 dark:border-gray-800/80 w-full sm:w-48 transform hover:-translate-y-1.5 transition-all duration-300"
+            data-magnetic
+        >
             <h3 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mb-2">
-                {count}{suffix}
+                <span ref={numberRef}>0</span>{suffix}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 font-medium text-center">{label}</p>
+            <p className="text-gray-600 dark:text-gray-400 font-semibold text-center text-sm">{label}</p>
         </div>
     );
 };
@@ -48,7 +56,7 @@ const Stats: React.FC<StatsProps> = () => {
     if (stats.length === 0) return null;
 
     return (
-        <section id="stats" className="py-12 bg-slate-50 dark:bg-dark-bg relative z-20 -mt-10">
+        <section id="stats" className="py-12 bg-slate-50 dark:bg-dark-bg relative z-20 -mt-10 transition-colors duration-300">
             <div className="container mx-auto px-6">
                 <div className="flex flex-wrap justify-center gap-6">
                     {stats.map((stat, index) => (
@@ -66,3 +74,4 @@ const Stats: React.FC<StatsProps> = () => {
 };
 
 export default Stats;
+

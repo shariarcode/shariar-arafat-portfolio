@@ -6,7 +6,7 @@ export const AIEnhanceButton: React.FC<{ onClick: () => void, isLoading: boolean
         onClick={(e) => { e.preventDefault(); onClick(); }}
         disabled={disabled || isLoading}
         title="Enhance with AI"
-        className="absolute right-2 top-8 sm:top-7 p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+        className="absolute right-2.5 top-8.5 sm:top-7.5 p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
     >
         {isLoading ? <LoadingSpinner className="w-4 h-4" /> : <SparklesIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />}
     </button>
@@ -19,19 +19,26 @@ export const FormInput: React.FC<{
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, 
     placeholder?: string, 
     onEnhance?: () => void, 
-    isEnhancing?: boolean 
-}> = ({ label, name, value, onChange, placeholder, onEnhance, isEnhancing }) => (
+    isEnhancing?: boolean,
+    required?: boolean,
+    error?: string,
+    type?: string
+}> = ({ label, name, value, onChange, placeholder, onEnhance, isEnhancing, required, error, type = 'text' }) => (
     <div className="relative">
-        <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
+        <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">
+            {label} {required && <span className="text-red-500 font-sans">*</span>}
+        </label>
         <input 
-            type="text" 
+            type={type}
             name={name} 
             value={value} 
             onChange={onChange}
             placeholder={placeholder}
-            className={`w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px] ${onEnhance ? 'pr-10' : ''}`}
+            required={required}
+            className={`w-full px-3.5 py-3 sm:py-2.5 bg-zinc-900/50 hover:bg-zinc-900 border ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-zinc-800 focus:border-primary focus:ring-primary/20'} rounded-xl text-white placeholder-zinc-500 focus:bg-zinc-950 focus:outline-none focus:ring-4 transition-all text-sm min-h-[44px] ${onEnhance ? 'pr-11' : ''}`}
         />
         {onEnhance && <AIEnhanceButton onClick={onEnhance} isLoading={!!isEnhancing} disabled={!value.trim()} />}
+        {error && <span className="block text-xs font-semibold text-red-400 mt-1.5">{error}</span>}
     </div>
 );
 
@@ -42,18 +49,24 @@ export const FormTextarea: React.FC<{
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, 
     onEnhance?: () => void, 
     isEnhancing?: boolean,
-    rows?: number
-}> = ({ label, name, value, onChange, onEnhance, isEnhancing, rows = 3 }) => (
+    rows?: number,
+    required?: boolean,
+    error?: string
+}> = ({ label, name, value, onChange, onEnhance, isEnhancing, rows = 3, required, error }) => (
     <div className="relative">
-        <label className="block text-sm font-medium text-gray-400 mb-1.5 sm:mb-1">{label}</label>
+        <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">
+            {label} {required && <span className="text-red-500 font-sans">*</span>}
+        </label>
         <textarea 
             name={name}
             value={value} 
             onChange={onChange}
             rows={rows}
-            className={`w-full px-3 py-3 sm:py-2 bg-gray-800 rounded-md text-white border border-gray-600 focus:ring-primary focus:border-primary transition-all text-sm sm:text-base min-h-[44px] ${onEnhance ? 'pr-10' : ''}`}
+            required={required}
+            className={`w-full px-3.5 py-3 sm:py-2.5 bg-zinc-900/50 hover:bg-zinc-900 border ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-zinc-800 focus:border-primary focus:ring-primary/20'} rounded-xl text-white placeholder-zinc-500 focus:bg-zinc-950 focus:outline-none focus:ring-4 transition-all text-sm min-h-[44px] ${onEnhance ? 'pr-11' : ''}`}
         />
         {onEnhance && <AIEnhanceButton onClick={onEnhance} isLoading={!!isEnhancing} disabled={!value.trim()} />}
+        {error && <span className="block text-xs font-semibold text-red-400 mt-1.5">{error}</span>}
     </div>
 );
 
@@ -64,8 +77,8 @@ export const TrashIcon: React.FC = () => (
 );
 
 export const TabHeader: React.FC<{ title: string, description?: string }> = ({ title, description }) => (
-    <div className="mb-6 sm:mb-8">
-        <h3 className="text-xl sm:text-2xl font-bold text-primary mb-2">{title}</h3>
-        {description && <p className="text-sm text-gray-400">{description}</p>}
+    <div className="mb-6 sm:mb-8 pb-4 border-b border-zinc-800/80">
+        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">{title}</h3>
+        {description && <p className="text-sm text-zinc-400 mt-1.5 leading-relaxed font-medium">{description}</p>}
     </div>
 );
