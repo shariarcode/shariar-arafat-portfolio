@@ -13,7 +13,6 @@ import ReadingProgressBar from './components/ReadingProgressBar';
 import Skeleton from './components/Skeleton';
 import CookieConsent from './components/CookieConsent';
 import SEO from './components/SEO';
-import InstallPWA from './components/InstallPWA';
 
 // Lazy load non-critical / below-the-fold components
 const Timeline = lazy(() => import('./components/Timeline'));
@@ -258,10 +257,9 @@ const AppInner: React.FC = () => {
 
             <Footer onAdminClick={handleAdminClick} />
             <CookieConsent />
-            <InstallPWA />
             
             {showScrollTop && !isChatOpen && (
-                 <button onClick={scrollToTop} className="fixed bottom-[max(2rem,env(safe-area-inset-bottom))] right-8 bg-primary hover:bg-primary-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                 <button onClick={scrollToTop} className="fixed bottom-[max(2rem,env(safe-area-inset-bottom))] left-8 bg-primary hover:bg-primary-dark text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50 min-w-[44px] min-h-[44px] flex items-center justify-center">
                     <ArrowUpIcon />
                  </button>
             )}

@@ -31,11 +31,11 @@ const Footer: React.FC<{ onAdminClick: () => void }> = ({ onAdminClick }) => {
     ].filter(s => s.href && s.href !== '#' && s.href !== '');
 
     return (
-        <footer className="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-gray-700 relative pt-20 pb-12 overflow-hidden">
+        <footer className="bg-white dark:bg-[#14181f] border-t border-gray-200 dark:border-white/10 relative pt-20 pb-12 overflow-hidden">
             <WaveTop />
 
             {/* Ambient glow */}
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(111,66,193,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(111,66,193,0.12),rgba(255,255,255,0))] pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(0,223,143,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(0,223,143,0.12),rgba(255,255,255,0))] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-center md:text-left mb-12">

@@ -22,41 +22,45 @@
     pointer-events: none;
 }
 
-/* Light mode blobs */
+/* Aurora Blobs (Dark Theme) */
 .aurora-blob-1 {
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(111, 66, 193, 0.18) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 223, 143, 0.35) 0%, transparent 70%);
     top: -15%;
     left: -10%;
     animation: aurora-drift-1 18s ease-in-out infinite alternate;
+    opacity: 0.4;
 }
 
 .aurora-blob-2 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(248, 113, 113, 0.14) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 179, 115, 0.28) 0%, transparent 70%);
     top: 20%;
     right: -5%;
     animation: aurora-drift-2 22s ease-in-out infinite alternate;
+    opacity: 0.35;
 }
 
 .aurora-blob-3 {
     width: 420px;
     height: 420px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 223, 143, 0.3) 0%, transparent 70%);
     bottom: 5%;
     left: 30%;
     animation: aurora-drift-3 15s ease-in-out infinite alternate;
+    opacity: 0.35;
 }
 
 .aurora-blob-4 {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(52, 211, 153, 0.10) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 179, 115, 0.2) 0%, transparent 70%);
     top: 50%;
     left: 50%;
     animation: aurora-drift-4 20s ease-in-out infinite alternate;
+    opacity: 0.3;
 }
 
 /* Noise overlay for texture */
@@ -66,24 +70,6 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
     opacity: 0.4;
     pointer-events: none;
-}
-
-/* Dark mode — deeper color for blobs */
-.dark .aurora-blob-1 {
-    opacity: 0.4;
-    background: radial-gradient(circle, rgba(111, 66, 193, 0.35) 0%, transparent 70%);
-}
-.dark .aurora-blob-2 {
-    opacity: 0.35;
-    background: radial-gradient(circle, rgba(248, 113, 113, 0.28) 0%, transparent 70%);
-}
-.dark .aurora-blob-3 {
-    opacity: 0.35;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-}
-.dark .aurora-blob-4 {
-    opacity: 0.3;
-    background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
 }
 
 @keyframes aurora-drift-1 {
@@ -109,28 +95,17 @@
 
 /* ── Glassmorphism Cards ─────────────────────── */
 .glass-card {
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(20, 24, 31, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 4px 24px rgba(111, 66, 193, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
     transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
 }
 
 .glass-card:hover {
-    box-shadow: 0 8px 40px rgba(111, 66, 193, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-    border-color: rgba(111, 66, 193, 0.2);
-}
-
-.dark .glass-card {
-    background: rgba(31, 41, 55, 0.7);
-    border-color: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.dark .glass-card:hover {
-    box-shadow: 0 8px 40px rgba(111, 66, 193, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
-    border-color: rgba(111, 66, 193, 0.3);
+    box-shadow: 0 8px 40px rgba(0, 223, 143, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
+    border-color: rgba(0, 223, 143, 0.3);
 }
 
 /* ── Section Heading style ───────────────────── */
@@ -141,35 +116,9 @@
     color: transparent;
     background-clip: text;
     -webkit-background-clip: text;
-    background-image: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    background-image: linear-gradient(135deg, #f9fafb 0%, #d1d5db 100%);
     position: relative;
     display: inline-block;
-}
-
-.section-heading::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%) scaleX(0);
-    width: 60%;
-    height: 3px;
-    border-radius: 2px;
-    background: linear-gradient(to right, #6F42C1, #F87171);
-    transform-origin: center;
-    animation: heading-line-in 0.8s ease-out forwards;
-    animation-play-state: paused;
-}
-
-.section-heading.in-view::after,
-.in-view .section-heading::after {
-    animation-play-state: running;
-    transform: translateX(-50%) scaleX(1);
-    transition: transform 0.6s ease-out 0.3s;
-}
-
-.dark .section-heading {
-    background-image: linear-gradient(135deg, #f9fafb 0%, #d1d5db 100%);
 }
 
 @keyframes heading-line-in {
@@ -185,7 +134,7 @@
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(111, 66, 193, 0.4);
+    background: rgba(0, 223, 143, 0.4);
     border-radius: 2px;
 }
 
@@ -229,7 +178,7 @@
 /* ── Blink cursor ────────────────────────────── */
 @keyframes blink {
     from, to { border-color: transparent; }
-    50%       { border-color: #6F42C1; }
+    50%       { border-color: #00df8f; }
 }
 .animate-blink {
     animation: blink 1s step-end infinite;
@@ -294,7 +243,7 @@ html.lenis body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(111, 66, 193, 0.08), transparent 40%);
+    background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 223, 143, 0.08), transparent 40%);
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
@@ -311,13 +260,13 @@ html.lenis body {
 
 /* ── Selection color ─────────────────────────── */
 ::selection {
-    background: rgba(111, 66, 193, 0.2);
+    background: rgba(0, 223, 143, 0.2);
     color: inherit;
 }
 
 /* ── Focus ring ──────────────────────────────── */
 *:focus-visible {
-    outline: 2px solid #6F42C1;
+    outline: 2px solid #00df8f;
     outline-offset: 3px;
     border-radius: 4px;
 }
@@ -330,4 +279,13 @@ html.lenis body {
 .animate-fade-in {
     animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ── CSS Grid Background ────────────────────── */
+.grid-bg {
+    background-size: 50px 50px;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
 

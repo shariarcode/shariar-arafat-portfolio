@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SearchIcon, MoonIcon, SunIcon, GlobeIcon, LayoutIcon, FileTextIcon, UserIcon, MailIcon, BriefcaseIcon } from './Icons';
+import { SearchIcon, MoonIcon, SunIcon, LayoutIcon, FileTextIcon, UserIcon, MailIcon, BriefcaseIcon } from './Icons';
 import { usePortfolio } from '../context/PortfolioContext';
 
 const CommandPalette: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { content, t, darkMode, setDarkMode, setLanguage } = usePortfolio();
+  const { content, t } = usePortfolio();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const sections = [
@@ -18,11 +18,7 @@ const CommandPalette: React.FC = () => {
     { id: 'contact', title: t.nav.contact, icon: <MailIcon className="w-4 h-4" />, action: () => window.location.href = '#contact' },
   ];
 
-  const actions = [
-    { id: 'theme', title: darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode', icon: darkMode ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />, action: () => setDarkMode(!darkMode) },
-    { id: 'lang-en', title: 'Switch to English', icon: <GlobeIcon className="w-4 h-4" />, action: () => setLanguage('en') },
-    { id: 'lang-bn', title: 'Switch to Bengali', icon: <GlobeIcon className="w-4 h-4" />, action: () => setLanguage('bn') },
-  ];
+
 
   const blogPosts = (content.blogPosts || []).map(post => ({
     id: `blog-${post.slug}`,
@@ -31,7 +27,7 @@ const CommandPalette: React.FC = () => {
     action: () => window.location.href = `/blog/${post.slug}`
   }));
 
-  const filteredItems = [...sections, ...actions, ...blogPosts].filter(item =>
+  const filteredItems = [...sections, ...blogPosts].filter(item =>
     item.title.toLowerCase().includes(query.toLowerCase())
   );
 

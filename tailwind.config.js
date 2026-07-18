@@ -7,15 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#6F42C1',
-        'primary-light': '#8A5DDE',
-        'primary-dark': '#5A349A',
-        secondary: '#F87171',
-        'dark-bg': '#111827',
-        'dark-card': '#1F2937',
+        primary: '#00df8f',
+        'primary-light': '#33ebd2',
+        'primary-dark': '#00b373',
+        secondary: '#00b373',
+        'dark-bg': '#0d1116',
+        'dark-surface': '#14181f',
+        'dark-card': '#161b22',
+        'dark-border': 'rgba(255,255,255,0.08)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
+        space: ['Space Grotesk', 'sans-serif'],
       },
       animation: {
         blink: 'blink 1s step-end infinite',

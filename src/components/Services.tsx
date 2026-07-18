@@ -24,11 +24,11 @@ const Services: React.FC = () => {
         : services;
 
     return (
-        <section id="services" className="py-20 bg-slate-50 dark:bg-dark-bg">
+        <section id="services" className="py-20 bg-slate-50 dark:bg-[#0d1116] border-y border-gray-200/50 dark:border-white/10 grid-bg">
             <div className="container mx-auto px-6">
                 <FadeIn>
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white font-space">
                             {t.sections.services || 'Services'}
                         </h2>
                         <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
@@ -40,12 +40,12 @@ const Services: React.FC = () => {
                 <div className="flex flex-wrap justify-center gap-8">
                     {displayServices.map((service, index) => (
                         <FadeIn key={index} delay={index * 0.1} className="w-full md:w-[calc(33.333%-1.5rem)] max-w-sm">
-                            <div className="group h-full flex flex-col bg-white dark:bg-dark-card rounded-2xl p-8 shadow-lg border border-gray-100 dark:border-gray-800 hover:border-primary/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                            <div className="group h-full flex flex-col bg-white dark:bg-[#14181f] rounded-2xl p-8 shadow-lg border border-gray-100 dark:border-white/10 hover:border-primary/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                                 <div className="flex-grow">
                                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-6 group-hover:from-primary/30 group-hover:to-secondary/30 transition-all">
                                         <service.IconComponent className="w-7 h-7 text-primary" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 font-space">
                                         {service.name}
                                     </h3>
                                     <p className="text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
@@ -55,7 +55,7 @@ const Services: React.FC = () => {
                                 <div className="mt-auto">
                                     <a 
                                         href="#contact" 
-                                        className="inline-flex items-center gap-1 text-primary font-bold text-sm group-hover:gap-2 transition-all"
+                                        className="inline-flex items-center gap-1 text-primary font-bold text-sm group-hover:gap-2 transition-all font-space"
                                     >
                                         {t.common?.getStarted || 'Get Started'} <ChevronRightIcon className="w-4 h-4" />
                                     </a>

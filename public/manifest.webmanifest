@@ -3,8 +3,8 @@
   "short_name": "Shariar Portfolio",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#6F42C1",
+  "background_color": "#0d1116",
+  "theme_color": "#00DF8F",
   "description": "Portfolio of Shariar Arafat showcasing projects, skills, and professional experience.",
   "icons": [
     {

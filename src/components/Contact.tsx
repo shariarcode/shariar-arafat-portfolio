@@ -122,15 +122,15 @@ const Contact: React.FC = () => {
     };
 
     return (
-        <section ref={containerRef} id="contact" className="py-24 bg-slate-50 dark:bg-dark-bg scroll-mt-20 relative overflow-hidden transition-colors duration-300">
+        <section ref={containerRef} id="contact" className="py-24 bg-[#0d1116] border-t border-white/10 scroll-mt-20 relative overflow-hidden transition-colors duration-300 grid-bg">
             {/* Ambient glows */}
             <div className="absolute top-1/4 right-0 w-80 h-80 bg-primary/5 rounded-full blur-[110px] pointer-events-none" />
             <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-[130px] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="contact-reveal-header text-center mb-16">
-                    <span className="text-primary font-bold text-xs uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full">Get In Touch</span>
-                    <h2 className="text-3xl md:text-5xl font-extrabold mt-4 text-gray-900 dark:text-white tracking-tight">{sectionTitles?.contact || t.contact.title}</h2>
+                    <span className="text-primary font-bold text-xs uppercase tracking-widest bg-primary/10 border border-primary/20 px-3 py-1 rounded-full font-space">Get In Touch</span>
+                    <h2 className="text-3xl md:text-5xl font-extrabold mt-4 text-gray-905 dark:text-white tracking-tight font-space">{sectionTitles?.contact || t.contact.title}</h2>
                     <p className="mt-4 text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto font-medium">
                         {t.contact.subtitle}
                     </p>
@@ -157,7 +157,7 @@ const Contact: React.FC = () => {
                     </div>
                 )}
 
-                <div className="contact-pane max-w-5xl mx-auto flex flex-col lg:flex-row gap-12 bg-white/70 dark:bg-dark-card/75 backdrop-blur-md p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-800/80">
+                <div className="contact-pane max-w-5xl mx-auto flex flex-col lg:flex-row gap-12 bg-[#14181f]/85 backdrop-blur-md p-6 sm:p-10 rounded-3xl shadow-2xl border border-white/10">
                     {/* Left Pane (Details/Profiles) */}
                     <div className="lg:w-2/5 space-y-6">
                         <div className="space-y-4">
@@ -165,7 +165,7 @@ const Contact: React.FC = () => {
                             <InfoCard icon={<PhoneIcon />} title="Phone" value={contactInfo.phone} />
                             <InfoCard icon={<LocationIcon />} title="Location" value={contactInfo.location} />
                         </div>
-                        <div className="pt-6 border-t border-gray-200/50 dark:border-gray-800">
+                        <div className="pt-6 border-t border-white/10">
                              <h4 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider mb-4 px-2">Professional Profiles</h4>
                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                                 {socialLinks.linkedin && socialLinks.linkedin !== '#' && socialLinks.linkedin !== '' && <SocialProfile icon={<LinkedInIcon />} name="LinkedIn" href={socialLinks.linkedin} />}
@@ -192,7 +192,7 @@ const Contact: React.FC = () => {
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="name" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{t.contact.name}</label>
+                                    <label htmlFor="name" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 font-space">{t.contact.name}</label>
                                     <input 
                                         type="text" 
                                         id="name" 
@@ -200,12 +200,12 @@ const Contact: React.FC = () => {
                                         value={formData.name} 
                                         onChange={handleChange} 
                                         required 
-                                        className="w-full px-4 py-3 border border-gray-200/50 dark:border-gray-800 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm" 
+                                        className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d1116] text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm font-space" 
                                         placeholder={t.contact.name}
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="email" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{t.contact.email}</label>
+                                    <label htmlFor="email" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 font-space">{t.contact.email}</label>
                                     <input 
                                         type="email" 
                                         id="email" 
@@ -213,13 +213,13 @@ const Contact: React.FC = () => {
                                         value={formData.email} 
                                         onChange={handleChange} 
                                         required 
-                                        className="w-full px-4 py-3 border border-gray-200/50 dark:border-gray-800 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm" 
+                                        className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d1116] text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm font-space" 
                                         placeholder={t.contact.email}
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="subject" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Subject</label>
+                                <label htmlFor="subject" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 font-space">Subject</label>
                                 <input 
                                     type="text" 
                                     id="subject" 
@@ -227,12 +227,12 @@ const Contact: React.FC = () => {
                                     value={formData.subject} 
                                     onChange={handleChange} 
                                     required 
-                                    className="w-full px-4 py-3 border border-gray-200/50 dark:border-gray-800 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm" 
+                                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d1116] text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm font-space" 
                                     placeholder="Subject"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="message" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{t.contact.message}</label>
+                                <label htmlFor="message" className="block text-xs font-bold text-gray-400 dark:text-gray-505 uppercase tracking-widest mb-2 font-space">{t.contact.message}</label>
                                 <textarea 
                                     id="message" 
                                     name="message" 
@@ -240,7 +240,7 @@ const Contact: React.FC = () => {
                                     value={formData.message} 
                                     onChange={handleChange} 
                                     required 
-                                    className="w-full px-4 py-3 border border-gray-200/50 dark:border-gray-800 rounded-xl bg-slate-50 dark:bg-gray-800/40 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm resize-none" 
+                                    className="w-full px-4 py-3 border border-white/10 rounded-xl bg-[#0d1116] text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary transition-all font-medium text-sm resize-none font-space" 
                                     placeholder={t.contact.message}
                                 />
                             </div>
@@ -248,7 +248,7 @@ const Contact: React.FC = () => {
                                 <button 
                                     type="submit" 
                                     disabled={status === 'loading'} 
-                                    className="w-full px-6 py-4 text-white font-bold rounded-xl shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-purple-600 hover:shadow-primary/35 hover:scale-[1.01] active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 uppercase tracking-wider text-xs"
+                                    className="w-full px-6 py-4 text-white font-bold rounded-xl shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-secondary hover:shadow-primary/35 hover:scale-[1.01] active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 uppercase tracking-wider text-xs font-space"
                                     data-magnetic
                                 >
                                     {status === 'loading' ? (

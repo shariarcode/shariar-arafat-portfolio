@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SunIcon, MoonIcon, MenuIcon, CloseIcon, ChevronDownIcon } from './Icons';
 import { usePortfolio } from '../context/PortfolioContext';
 import SearchButton from './SearchButton';
-import LanguageSwitcher from './LanguageSwitcher';
+
 import gsap from 'gsap';
+import { motion } from 'framer-motion';
 
 import { Link, useLocation } from 'react-router-dom';
 
@@ -18,7 +19,7 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
             const el = document.getElementById(id);
             if (el) {
                 const rect = el.getBoundingClientRect();
-                setActive(rect.top <= 100 && rect.bottom >= 100);
+                setActive(rect.top <= 120 && rect.bottom >= 120);
             }
         };
         window.addEventListener('scroll', check, { passive: true });
@@ -29,28 +30,38 @@ const NavLink: React.FC<{ href: string; children: React.ReactNode; onClick?: () 
     const isHash = href.startsWith('/#');
     const isSamePage = isHash && location.pathname === '/';
 
-    const baseClasses = `relative text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-all duration-300 font-medium text-sm group py-1 ${className}`;
-    const indicator = <span className={`absolute -bottom-1 left-0 h-0.5 rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${active ? 'w-full' : 'w-0 group-hover:w-full'}`} />;
+    const baseClasses = `relative text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-all duration-300 font-medium text-sm group py-1.5 px-3 rounded-lg ${className}`;
+
+    const content = (
+        <>
+            <span className="relative z-10">{children}</span>
+            {active && (
+                <motion.span
+                    layoutId="activeNavIndicator"
+                    className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/5 border-b-2 border-primary rounded-lg -z-0"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+            )}
+        </>
+    );
 
     if (isSamePage) {
         return (
             <a href={href} onClick={onClick} className={baseClasses} data-magnetic>
-                {children}
-                {indicator}
+                {content}
             </a>
         );
     }
 
     return (
         <Link to={href} onClick={onClick} className={baseClasses} data-magnetic>
-            {children}
-            {indicator}
+            {content}
         </Link>
     );
 };
 
 const Header: React.FC = () => {
-    const { content, darkMode, setDarkMode, t } = usePortfolio();
+    const { content, t } = usePortfolio();
     const { userName, resumeUrl } = content;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -61,7 +72,7 @@ const Header: React.FC = () => {
     const headerRef = useRef<HTMLElement>(null);
     const lastScrollY = useRef(0);
 
-    const toggleDarkMode = () => setDarkMode(!darkMode);
+
 
     const hasSectionContent = (id: string): boolean => {
         switch (id) {
@@ -169,7 +180,7 @@ const Header: React.FC = () => {
                 ref={headerRef}
                 className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
                     isScrolled
-                        ? 'bg-white/70 dark:bg-dark-bg/70 backdrop-blur-md py-3 border-b border-gray-200/30 dark:border-gray-800/30 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.1)]'
+                        ? 'bg-white/75 dark:bg-[#0d1116]/65 backdrop-blur-xl py-3 border-b border-gray-200/30 dark:border-white/10 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.1)]'
                         : 'bg-transparent py-5'
                 }`}
             >
@@ -178,14 +189,14 @@ const Header: React.FC = () => {
                         {/* Logo */}
                         <div className="flex-shrink-0 mr-8" data-magnetic>
                             {location.pathname === '/' ? (
-                                <a href="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
+                                <a href="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block font-space">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary group-hover:opacity-80 transition-opacity">
                                         {initials}
                                     </span>
                                 </a>
                             ) : (
-                                <Link to="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block">
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-purple-500 to-secondary group-hover:opacity-80 transition-opacity">
+                                <Link to="/#hero" className="text-2xl font-black tracking-tighter group transition-transform active:scale-95 block font-space">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary group-hover:opacity-80 transition-opacity">
                                         {initials}
                                     </span>
                                 </Link>
@@ -252,16 +263,14 @@ const Header: React.FC = () => {
                             <div className="hidden sm:flex items-center gap-2" data-magnetic>
                                 <SearchButton />
                             </div>
-                            <div className="hidden sm:flex items-center gap-2" data-magnetic>
-                                <LanguageSwitcher />
-                            </div>
+
                             
                             {resumeUrl && (
                                 <a
                                     href={resumeUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-primary via-purple-600 to-secondary hover:shadow-[0_0_20px_rgba(111,66,193,0.4)] transition-all active:scale-95"
+                                    className="hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-primary to-secondary hover:shadow-[0_0_20px_rgba(0,223,143,0.4)] transition-all active:scale-95 font-space"
                                     data-magnetic
                                 >
                                     {t.nav.resume}
@@ -269,14 +278,6 @@ const Header: React.FC = () => {
                             )}
 
                             <div className="flex items-center gap-1">
-                                <button
-                                    onClick={toggleDarkMode}
-                                    className="p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all active:rotate-12"
-                                    aria-label="Toggle theme"
-                                    data-magnetic
-                                >
-                                    {darkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-                                </button>
                                 <button
                                     onClick={handleMenuToggle}
                                     className="lg:hidden p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
@@ -313,9 +314,8 @@ const Header: React.FC = () => {
                                 {link.label}
                             </NavLink>
                         ))}
-                        <div className="grid grid-cols-2 gap-4 pt-8">
+                        <div className="pt-8 flex justify-center">
                             <SearchButton />
-                            <LanguageSwitcher />
                         </div>
                         {resumeUrl && (
                             <a

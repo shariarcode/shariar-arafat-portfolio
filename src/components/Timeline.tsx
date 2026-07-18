@@ -74,13 +74,13 @@ const Timeline: React.FC = () => {
     if (!timeline || timeline.length === 0) return null;
 
     return (
-        <section ref={containerRef} id="timeline" className="py-24 bg-slate-50 dark:bg-dark-bg transition-colors duration-300 relative scroll-mt-20 overflow-hidden">
+        <section ref={containerRef} id="timeline" className="py-24 bg-slate-50 dark:bg-[#0d1116] border-y border-gray-200/50 dark:border-white/10 transition-colors duration-300 relative scroll-mt-20 overflow-hidden grid-bg">
             {/* Subtle glow */}
             <div className="absolute top-1/3 right-0 w-80 h-80 bg-primary/5 rounded-full blur-[110px] pointer-events-none" />
 
             <div className="container mx-auto px-6">
                 <div className="timeline-header text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight font-space">
                         {t.sections.timeline || 'My Journey'}
                     </h2>
                     <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto font-medium">
@@ -90,10 +90,10 @@ const Timeline: React.FC = () => {
 
                 <div className="timeline-events-container relative max-w-5xl mx-auto">
                     {/* Background line tracker (static faint line) */}
-                    <div className="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 h-full w-1 bg-gray-200 dark:bg-gray-800 rounded-full opacity-60" />
+                    <div className="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 h-full w-1 bg-gray-200 dark:bg-white/5 rounded-full opacity-60" />
                     
                     {/* Progressive draw line (animated) */}
-                    <div className="timeline-draw-line absolute left-4 md:left-1/2 transform md:-translate-x-1/2 h-full w-1 bg-gradient-to-b from-primary via-purple-500 to-secondary rounded-full will-change-transform" />
+                    <div className="timeline-draw-line absolute left-4 md:left-1/2 transform md:-translate-x-1/2 h-full w-1 bg-gradient-to-b from-primary to-secondary rounded-full will-change-transform" />
 
                     <div className="space-y-12 md:space-y-0 relative z-15">
                         {timeline.map((event, index) => (
@@ -104,13 +104,13 @@ const Timeline: React.FC = () => {
                                 {/* Left Column */}
                                 <div className="pl-12 md:pl-0 md:pr-12 flex items-center md:justify-end self-stretch order-3 md:order-1">
                                     {index % 2 === 0 ? (
-                                        <div className="timeline-card bg-white dark:bg-dark-card rounded-2xl p-6 shadow-xl border border-gray-100/50 dark:border-gray-800/80 hover:border-primary/30 transition-all duration-300 relative group w-full">
-                                            <div className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 bg-white dark:bg-dark-card border-r border-t border-gray-100/50 dark:border-gray-800/80 rotate-45 hidden md:block" />
+                                        <div className="timeline-card bg-white dark:bg-[#14181f] rounded-2xl p-6 shadow-xl border border-gray-100/50 dark:border-white/10 hover:border-primary/30 transition-all duration-300 relative group w-full">
+                                            <div className="absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 bg-white dark:bg-[#14181f] border-r border-t border-gray-100/50 dark:border-white/10 rotate-45 hidden md:block" />
                                             
-                                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary dark:text-primary-light text-xs font-bold rounded-full mb-3 uppercase tracking-wider">
+                                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary dark:text-primary-light text-xs font-bold rounded-full mb-3 uppercase tracking-wider font-space">
                                                 {event.year}
                                             </span>
-                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors font-space">
                                                 {event.title}
                                             </h3>
                                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
@@ -124,21 +124,21 @@ const Timeline: React.FC = () => {
 
                                 {/* Center Dot */}
                                 <div className="absolute left-0 md:relative md:left-auto md:transform-none md:pr-0 pl-1 md:pl-0 flex items-center justify-center self-stretch order-1 md:order-2 z-20">
-                                    <div className="timeline-dot w-8 h-8 md:w-11 md:h-11 bg-gradient-to-r from-primary to-secondary rounded-full shadow-lg flex items-center justify-center border-4 border-white dark:border-dark-bg transform transition-transform hover:scale-110 duration-300" data-magnetic>
-                                        <span className="text-white font-bold text-[9px] md:text-xs">{event.year.slice(-2)}</span>
+                                    <div className="timeline-dot w-8 h-8 md:w-11 md:h-11 bg-gradient-to-r from-primary to-secondary rounded-full shadow-lg flex items-center justify-center border-4 border-white dark:border-[#0d1116] transform transition-transform hover:scale-110 duration-300" data-magnetic>
+                                        <span className="text-white font-bold text-[9px] md:text-xs font-space">{event.year.slice(-2)}</span>
                                     </div>
                                 </div>
 
                                 {/* Right Column */}
                                 <div className="pl-12 flex items-center justify-start self-stretch order-3">
                                     {index % 2 !== 0 ? (
-                                        <div className="timeline-card bg-white dark:bg-dark-card rounded-2xl p-6 shadow-xl border border-gray-100/50 dark:border-gray-800/80 hover:border-primary/30 transition-all duration-300 relative group w-full">
-                                            <div className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 bg-white dark:bg-dark-card border-l border-b border-gray-100/50 dark:border-gray-800/80 rotate-45 hidden md:block" />
+                                        <div className="timeline-card bg-white dark:bg-[#14181f] rounded-2xl p-6 shadow-xl border border-gray-100/50 dark:border-white/10 hover:border-primary/30 transition-all duration-300 relative group w-full">
+                                            <div className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 bg-white dark:bg-[#14181f] border-l border-b border-gray-100/50 dark:border-white/10 rotate-45 hidden md:block" />
                                             
-                                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary dark:text-primary-light text-xs font-bold rounded-full mb-3 uppercase tracking-wider">
+                                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary dark:text-primary-light text-xs font-bold rounded-full mb-3 uppercase tracking-wider font-space">
                                                 {event.year}
                                             </span>
-                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors font-space">
                                                 {event.title}
                                             </h3>
                                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">

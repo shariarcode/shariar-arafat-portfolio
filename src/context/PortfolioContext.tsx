@@ -9,12 +9,8 @@ interface PortfolioContextType {
     content: PortfolioData;
     loading: boolean;
     isAdmin: boolean;
-    darkMode: boolean;
-    language: Language;
-    setDarkMode: (dark: boolean) => void;
     setIsAdmin: (admin: boolean, persist?: boolean) => void;
     setContent: (data: PortfolioData) => void;
-    setLanguage: (lang: Language) => void;
     t: Translations;
     refreshContent: () => Promise<void>;
     saveContent: (newData: PortfolioData) => Promise<boolean>;
@@ -265,24 +261,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
     const [isAdmin, setIsAdminState] = useState(() => {
         return localStorage.getItem('isAdmin') === 'true' || sessionStorage.getItem('isAdmin') === 'true';
     });
-    const [darkMode, setDarkMode] = useState(() => {
-        const saved = localStorage.getItem('darkMode');
-        if (saved !== null) return saved === 'true';
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    });
-    const [language, setLanguageState] = useState<Language>(() => {
-        const saved = localStorage.getItem('language');
-        if (saved === 'en' || saved === 'bn') return saved;
-        const browserLang = navigator.language.slice(0, 2);
-        return browserLang === 'bn' ? 'bn' : 'en';
-    });
 
-    const t = translations[language];
-
-    const setLanguage = (lang: Language) => {
-        setLanguageState(lang);
-        localStorage.setItem('language', lang);
-    };
+    const t = translations['en'];
 
     const setIsAdmin = (admin: boolean, persist: boolean = false) => {
         setIsAdminState(admin);
@@ -350,14 +330,12 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
         fetchContent();
     }, []);
 
+    // Ensure dark class is active and delete any legacy storage preferences
     useEffect(() => {
-        localStorage.setItem('darkMode', String(darkMode));
-        if (darkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [darkMode]);
+        localStorage.removeItem('darkMode');
+        localStorage.removeItem('language');
+        document.documentElement.classList.add('dark');
+    }, []);
 
 
 
@@ -366,12 +344,8 @@ export const PortfolioProvider: React.FC<{ children: ReactNode }> = ({ children 
             content, 
             loading, 
             isAdmin, 
-            darkMode, 
-            language,
-            setDarkMode, 
             setIsAdmin, 
             setContent,
-            setLanguage,
             t,
             refreshContent: fetchContent,
             saveContent
