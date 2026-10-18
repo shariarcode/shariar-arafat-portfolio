@@ -1,80 +1,76 @@
 <div align="center">
 
-  # 🚀 Project Title
+  # 👨‍💻 Developer Portfolio & Projects
 
   <p align="center">
-    A short, compelling 1–2 sentence description of what your project does and the primary problem it solves.
+    <strong>A showcase of modern web applications, full-stack projects, and interactive AI solutions.</strong>
   </p>
 
-  <!-- Badges Section -->
+  <!-- Status / Tech Badges -->
   <p align="center">
-    <a href="https://github.com/your-username/your-repo-name/graphs/contributors">
-      <img src="https://img.shields.io/github/contributors/your-username/your-repo-name.svg?style=for-the-badge" alt="Contributors" />
-    </a>
-    <a href="https://github.com/your-username/your-repo-name/network/members">
-      <img src="https://img.shields.io/github/forks/your-username/your-repo-name.svg?style=for-the-badge" alt="Forks" />
-    </a>
-    <a href="https://github.com/your-username/your-repo-name/stargazers">
-      <img src="https://img.shields.io/github/stars/your-username/your-repo-name.svg?style=for-the-badge" alt="Stargazers" />
-    </a>
-    <a href="https://github.com/your-username/your-repo-name/blob/main/LICENSE">
-      <img src="https://img.shields.io/github/license/your-username/your-repo-name.svg?style=for-the-badge" alt="License" />
-    </a>
+    <img src="https://img.shields.io/badge/Status-Active_Development-brightgreen?style=for-the-badge" alt="Status" />
+    <img src="https://img.shields.io/badge/Stack-Next.js_|_React_|_TypeScript-blue?style=for-the-badge" alt="Stack" />
+    <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License" />
   </p>
 
-  <!-- Quick Links / Actions -->
+  <!-- Quick Action Links -->
   <p align="center">
-    <a href="https://your-demo-url.com"><strong>Explore Live Demo »</strong></a>
+    <a href="https://your-portfolio-domain.com"><strong>🌐 Visit Live Portfolio Site »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/your-username/your-repo-name/issues">Report Bug</a>
+    <a href="mailto:your.email@example.com">Get in Touch</a>
     ·
-    <a href="https://github.com/your-username/your-repo-name/issues">Request Feature</a>
+    <a href="https://github.com/your-username">GitHub Profile</a>
   </p>
 
 </div>
 
 ---
 
-## 📌 Banner / Preview
+## 🖼️ Preview & Highlights
 
-
-
----
-
-## ✨ Key Features
-
-- **⚡ Feature One:** Real-time data sync with high availability.
-- **🤖 Feature Two:** AI-powered query execution and response generation.
-- **🛡️ Feature Three:** Built-in authentication and role-based access controls.
-- **🎨 Feature Four:** Fully responsive UI with dark/light mode support.
+![Portfolio Banner](https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6)
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Key Features
 
-### **Frontend & Frameworks**
+- **🚀 Live App Demos:** Instant access to hosted web applications and tools.
+- **⚡ High Performance:** Optimized with server-side rendering, lazy loading, and modern web architectures.
+- **🎨 Modern UI/UX:** Clean, responsive interfaces with dark mode support built using Tailwind CSS.
+- **🤖 Integrated AI Solutions:** Practical integrations featuring Large Language Models and custom APIs.
+
+---
+
+## 🛠️ Tech Stack & Skills
+
+### **Frontend Frameworks & Styling**
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-### **Backend & Database**
+### **Backend, Database & Deployment**
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=3ECF8E)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Featured Projects
 
-Follow these steps to set up the project locally on your machine.
+| Project Name | Stack | Description | Links |
+| :--- | :--- | :--- | :--- |
+| **AI Studio App** | Next.js, Gemini API, Tailwind | An interactive AI application for intelligent chat and content generation. | [Live Demo](https://ai.studio) · [Code](https://github.com/your-username/app-repo) |
+| **Travel Platform** | React, Supabase, Next.js | A dynamic travel app featuring database backend integration and location services. | [Live Demo](https://your-demo.com) · [Code](https://github.com/your-username/travel-repo) |
 
-### **Prerequisites**
+---
 
-Ensure you have the following installed:
-* **Node.js** (v18.0.0 or higher)
-* **npm** or **yarn** / **pnpm**
+## 🛠️ Local Development & Setup
 
+Follow these steps to run this portfolio locally:
+
+### **1. Clone the Repository**
 ```bash
-node -v
-npm -v
+git clone [https://github.com/your-username/portfolio-repo.git](https://github.com/your-username/portfolio-repo.git)
+cd portfolio-repo
